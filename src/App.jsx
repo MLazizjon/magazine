@@ -2,15 +2,19 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+// Sahifalarni import qilish
 import Login from "./pages/login/Login";
 import Register from "./pages/registrer/Register";
-import Home from "./pages/home/Home";
+import UserDash from "./pages/user/userDash/UserDash"; // Siz aytgan User sahifasi
+import AdminDashboard from "./pages/admin/admindash/AdminDash"; // Siz aytgan Admin sahifasi
+
+// Himoyalangan marshrut komponenti
 import ProtectedRoute from "./components/protectedRoute/ProtectedRoute";
 
 function App() {
   return (
     <>
-      {/* 🔥 TOAST CONTAINER (SHART!) */}
+      {/* Bildirishnomalar uchun xabarnoma oynasi */}
       <ToastContainer
         position="top-right"
         autoClose={2000}
@@ -22,24 +26,55 @@ function App() {
       />
 
       <Routes>
-        {/* default → login */}
+        {/* Sayt ochilganda to'g'ridan-to'g'ri login sahifasiga yuboradi */}
         <Route path="/" element={<Navigate to="/login" />} />
 
+        {/* Hamma kira oladigan ochiq sahifalar */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* 🔥 HOME PROTECTED */}
+        {/* 🔥 USER DASHBOARD: Faqat 'user' (Mijoz) roliga ega bo'lganlar kira oladi */}
         <Route
-          path="/home"
+          path="/user-dashboard"
           element={
-            <ProtectedRoute>
-              <Home />
+            <ProtectedRoute allowedRoles={["user"]}>
+              <UserDash />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 🔥 ADMIN DASHBOARD: Faqat 'admin' roliga ega bo'lganlar kira oladi */}
+        <Route
+          path="/admin-dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Agar foydalanuvchi login qilib bo'lgan bo'lsa va shunchaki '/home' yoki xato URL yozsa, 
+            uni roliga qarab tegishli panelga qayta yo'naltirish mantig'i: */}
+        <Route
+          path="*"
+          element={
+            <ProtectedRoute allowedRoles={["user", "admin"]}>
+              <RoleBasedRedirect />
             </ProtectedRoute>
           }
         />
       </Routes>
     </>
   );
+}
+
+// 💡 Yordamchi komponent: Agar adashib boshqa sahifaga o'tsa, roliga qarab avtomat panellariga otib yuboradi
+function RoleBasedRedirect() {
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (user?.role === "admin") {
+    return <Navigate to="/admin-dashboard" replace />;
+  }
+  return <Navigate to="/user-dashboard" replace />;
 }
 
 export default App;

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { supabase } from "../../supabase/client";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-
 import "./login.css";
 
 export default function Login() {
@@ -11,20 +10,36 @@ export default function Login() {
   const navigate = useNavigate();
 
   const login = async () => {
-    // 🔥 1. INPUT VALIDATION
+    // 1. Bo'sh maydonlarni tekshirish
     if (!phone || !password) {
       toast.error("Telefon va parolni kiriting!");
       return;
     }
 
+    // 🔥 2. TELEFON VALIDATION (Kirishda ham tekshiramiz)
+    if (!phone.startsWith("+998")) {
+      toast.error("Telefon raqami +998 bilan boshlanishi shart!");
+      return;
+    }
+    if (phone.length !== 13) {
+      toast.error("Telefon raqami 13 ta belgi bo‘lishi shart!");
+      return;
+    }
+
+    // 🔥 3. PAROL VALIDATION
+    if (password.length < 4) {
+      toast.error("Parol xato! Kamida 4 ta belgi bo‘lishi kerak.");
+      return;
+    }
+
+    // Supabase orqali tekshirish
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("phone", phone)
       .eq("password", password)
-      .maybeSingle(); // 🔥 single o‘rniga better
+      .maybeSingle();
 
-    // 🔥 2. WRONG CREDENTIALS
     if (error) {
       toast.error("Server xatolik!");
       return;
@@ -35,12 +50,16 @@ export default function Login() {
       return;
     }
 
-    // 🔥 3. SUCCESS
+    // Muvaffaqiyatli kirish
     localStorage.setItem("user", JSON.stringify(data));
-
     toast.success("Xush kelibsiz!");
 
-    navigate("/home");
+    // Rolga qarab yo'naltirish
+    if (data.role === "admin") {
+      navigate("/admin-dashboard");
+    } else {
+      navigate("/user-dashboard");
+    }
   };
 
   return (
@@ -48,7 +67,7 @@ export default function Login() {
       <h2>Login</h2>
 
       <input
-        placeholder="Telefon"
+        placeholder="Telefon (+998XXXXXXXXX)"
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
       />

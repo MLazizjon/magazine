@@ -1,52 +1,108 @@
-.register-container {
-  height: 100vh;
+/* auth.css yoki login.css */
+
+/* Butun sahifani markazlashtirish va chiroyli fon berish */
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
   display: flex;
-  justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #9333ea, #f97316);
-  font-family: Arial;
+  justify-content: center;
 }
 
-.register-box {
-  width: 360px;
-  background: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+/* Login konteyneri */
+.auth {
+  width: 100%;
+  max-width: 380px;
+  padding: 40px 30px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05), 0 20px 48px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
+  transition: transform 0.3s ease;
+}
+
+/* Sarlavha */
+.auth h2 {
+  margin: 0 0 10px 0;
+  color: #1e293b;
+  font-size: 28px;
+  font-weight: 700;
   text-align: center;
 }
 
-.register-box h2 {
-  margin-bottom: 15px;
-}
-
-.register-box input {
+/* Inputlar uslubi */
+.auth input {
   width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background-color: #f8fafc;
+  font-size: 15px;
+  color: #334155;
   outline: none;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
 }
 
-.register-box button {
+/* Inputga fokus bo'lgandagi holat */
+.auth input:focus {
+  border-color: #2563eb;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+/* Input xira (placeholder) matni */
+.auth input::placeholder {
+  color: #94a3b8;
+}
+
+/* Tugma uslubi */
+.auth button {
   width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  background: #9333ea;
+  padding: 14px;
+  background: #2563eb;
   color: white;
   border: none;
-  border-radius: 8px;
   cursor: pointer;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
-.register-box button:hover {
-  background: #6b21a8;
+/* Tugmaga sichqoncha kelganda */
+.auth button:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
 }
 
-.register-box p {
-  margin-top: 12px;
+/* Tugma bosilganda */
+.auth button:active {
+  transform: translateY(1px);
+}
+
+/* Ro'yxatdan o'tish havolasi */
+.register-link {
+  margin-top: 5px;
+  color: #64748b;
   font-size: 14px;
-  color: #9333ea;
   cursor: pointer;
+  text-align: center;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+/* Havolaga sichqoncha kelganda */
+.register-link:hover {
+  color: #2563eb;
+  text-decoration: none; /* Tagiga chizish o'rniga rang o'zgarishi zamonaviyroq */
 }

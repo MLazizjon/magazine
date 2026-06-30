@@ -27,31 +27,68 @@ import {
 
 import "./userDash.css";
 
-// Namunaviy grafik ma'lumotlari (kelajakda Supabase-dan keladi)
-const chartData = [
-  { name: "Dush", bonus: 5000 },
-  { name: "Sesh", bonus: 12000 },
-  { name: "Chor", bonus: 7000 },
-  { name: "Pay", bonus: 15000 },
-  { name: "Jum", bonus: 9000 },
-  { name: "Shan", bonus: 25000 },
-  { name: "Yak", bonus: 20000 },
+const initialChartData = [
+  { name: "Dush", bonus: 0 },
+  { name: "Sesh", bonus: 0 },
+  { name: "Chor", bonus: 0 },
+  { name: "Pay", bonus: 0 },
+  { name: "Jum", bonus: 0 },
+  { name: "Shan", bonus: 0 },
+  { name: "Yak", bonus: 0 },
 ];
 
 export default function UserDash() {
   const [currentUser, setCurrentUser] = useState(null);
   const [activeTab, setActiveTab] = useState("home");
   const [bonusCode, setBonusCode] = useState("");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Mobil menyu holati
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const [currentBonus, setCurrentBonus] = useState(0);
+  const [codeCount, setCodeCount] = useState(0);
+  const [dynamicChartData, setDynamicChartData] = useState(initialChartData);
 
   const navigate = useNavigate();
 
+  // 👤 1. Sahifa yuklanganda xotiradagi bor ma'lumotni o'qish (ochib-kirganda o'chib ketmaydi)
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
+      const user = JSON.parse(storedUser);
+      setCurrentUser(user);
+
+      // Xotirada avval saqlangan qiymatlar bo'lsa, ularni olamiz
+      const savedBonus = localStorage.getItem(`bonus_${user.phone}`);
+      const savedCount = localStorage.getItem(`count_${user.phone}`);
+      const savedChart = localStorage.getItem(`chart_${user.phone}`);
+
+      // Agar xotirada ma'lumot bo'lsa o'qiydi, yo'q bo'lsa 0 ligicha qoladi
+      if (savedBonus) setCurrentBonus(parseInt(savedBonus));
+      if (savedCount) setCodeCount(parseInt(savedCount));
+      if (savedChart) setDynamicChartData(JSON.parse(savedChart));
+    } else {
+      navigate("/login");
     }
-  }, []);
+  }, []); // Bo'sh massiv - faqat 1 marta sahifa yuklanganda ishlaydi
+
+  // 💾 2. Qiymatlar o'zgarganda ularni LocalStorage-ga yozish
+  useEffect(() => {
+    if (currentUser?.phone) {
+      localStorage.setItem(`bonus_${currentUser.phone}`, currentBonus);
+    }
+  }, [currentBonus, currentUser]);
+
+  useEffect(() => {
+    if (currentUser?.phone) {
+      localStorage.setItem(`count_${currentUser.phone}`, codeCount);
+    }
+  }, [codeCount, currentUser]);
+
+  useEffect(() => {
+    if (currentUser?.phone) {
+      localStorage.setItem(`chart_${currentUser.phone}`, JSON.stringify(dynamicChartData));
+    }
+  }, [dynamicChartData, currentUser]);
+
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -64,15 +101,30 @@ export default function UserDash() {
       toast.error("Iltimos, kodni kiriting!");
       return;
     }
-    if (bonusCode === "xato") { 
+    
+    if (bonusCode.trim().toLowerCase() === "xato") { 
       toast.error("Kod xato yoki oldin kiritilgan!");
     } else {
-      toast.success("Kod muvaffaqiyatli yuborildi!");
+      const bonusAmount = 1000; // Har bir kodga 1000 so'm
+
+      setCurrentBonus((prev) => prev + bonusAmount); 
+      setCodeCount((prev) => prev + 1);
+
+      setDynamicChartData((prevData) => {
+        return prevData.map((item) => {
+          if (item.name === "Yak") {
+            return { ...item, bonus: item.bonus + bonusAmount };
+          }
+          return item;
+        });
+      });
+
+      toast.success("Kod muvaffaqiyatli yuborildi va saqlandi!");
       setBonusCode("");
+      setActiveTab("home");
     }
   };
 
-  // Mobil menyudan biror bo'lim tanlansa, menyuni avtomat yopish
   const handleTabChange = (tabName) => {
     setActiveTab(tabName);
     setIsMobileMenuOpen(false);
@@ -80,34 +132,20 @@ export default function UserDash() {
 
   return (
     <div className="dash-container">
-      
-      {/* 📱 MOBIL UCHUN BURCHAKDAGI TOOLBAR TUGMASI */}
       <button className="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
         {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
       </button>
 
-      {/* 🔹 CHAP MENYU (SIDEBAR) - Mobil va Kompyuterga moslashuvchan */}
       <aside className={`dash-sidebar ${isMobileMenuOpen ? "mobile-open" : ""}`}>
-        <div className="sidebar-logo">
-          <h2>Mijoz Paneli</h2>
-        </div>
+        <div className="sidebar-logo"></div>
         <nav className="sidebar-menu">
-          <button 
-            className={`menu-item ${activeTab === "home" ? "active" : ""}`} 
-            onClick={() => handleTabChange("home")}
-          >
+          <button className={`menu-item ${activeTab === "home" ? "active" : ""}`} onClick={() => handleTabChange("home")}>
             <FaChartBar className="icon" /> Home / Statistika
           </button>
-          <button 
-            className={`menu-item ${activeTab === "code" ? "active" : ""}`} 
-            onClick={() => handleTabChange("code")}
-          >
+          <button className={`menu-item ${activeTab === "code" ? "active" : ""}`} onClick={() => handleTabChange("code")}>
             <FaKey className="icon" /> Kodni kiritish
           </button>
-          <button 
-            className={`menu-item ${activeTab === "settings" ? "active" : ""}`} 
-            onClick={() => handleTabChange("settings")}
-          >
+          <button className={`menu-item ${activeTab === "settings" ? "active" : ""}`} onClick={() => handleTabChange("settings")}>
             <FaCogs className="icon" /> Sozlamalar
           </button>
         </nav>
@@ -118,7 +156,6 @@ export default function UserDash() {
         </div>
       </aside>
 
-      {/* 🔹 ASOSIY INTERFEYS */}
       <main className="dash-main">
         <header className="dash-header">
           <div className="welcome-text">
@@ -131,30 +168,26 @@ export default function UserDash() {
         </header>
 
         <section className="dash-content">
-          
-          {/* 🟡 1-BO'LIM: HOME & STATISTIKA */}
           {activeTab === "home" && (
             <div className="tab-section fade-in">
               <h3>Statistika</h3>
+              <br />
               <div className="stats-grid">
                 <div className="stat-card">
-                  <h4>Joriy Bonuslar</h4>
-                  <p className="stat-number">25,000 UZS</p>
-                  <span className="stat-desc">Yechib olish mumkin</span>
+                  <h4>Yig`ilgan ballar</h4>
+                  <p className="stat-number">{currentBonus.toLocaleString()}</p>
                 </div>
                 <div className="stat-card">
                   <h4>Kiritilgan kodlar</h4>
-                  <p className="stat-number">12 ta</p>
-                  <span className="stat-desc">Haftalik faollik</span>
+                  <p className="stat-number">{codeCount} ta</p>
                 </div>
               </div>
 
-              {/* 🌟 GRAFIK QISMI (KUTUBXONADAN) */}
               <div className="chart-section">
-                <h4>Haftalik bonuslar grafigi (UZS)</h4>
+                <h4>Haftalik bonuslar grafigi</h4>
                 <div style={{ width: "100%", height: 250 }}>
                   <ResponsiveContainer>
-                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <AreaChart data={dynamicChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <defs>
                         <linearGradient id="colorBonus" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#eab308" stopOpacity={0.4}/>
@@ -179,12 +212,13 @@ export default function UserDash() {
             </div>
           )}
 
-          {/* 🔵 2-BO'LIM: KODNI KIRITISH */}
           {activeTab === "code" && (
             <div className="tab-section fade-in">
               <h3>Kodni kiritish</h3>
+              <br />
               <div className="code-box">
                 <p>Kodni quyidagi maydonga kiriting:</p>
+                <br />
                 <input 
                   type="text" 
                   placeholder="Masalan: B78X99" 
@@ -197,10 +231,10 @@ export default function UserDash() {
             </div>
           )}
 
-          {/* ⚪ 3-BO'LIM: SOZLAMALAR */}
           {activeTab === "settings" && (
             <div className="tab-section fade-in">
               <h3>Sozlamalar</h3>
+              <br />
               <div className="settings-list">
                 <div className="settings-card">
                   <h4>Usta ma'lumotlari</h4>
@@ -220,7 +254,6 @@ export default function UserDash() {
               </div>
             </div>
           )}
-
         </section>
       </main>
     </div>

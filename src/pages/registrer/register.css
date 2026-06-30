@@ -1,17 +1,5 @@
 /* auth.css yoki login.css */
 
-/* Butun sahifani markazlashtirish va chiroyli fon berish */
-body {
-  margin: 0;
-  padding: 0;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* Login konteyneri */
 .auth {
   width: 100%;

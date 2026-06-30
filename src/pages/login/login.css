@@ -1,7 +1,7 @@
 /* auth.css yoki login.css */
 
 /* Butun sahifani markazlashtirish va chiroyli fon berish */
-body {
+/* body {
   margin: 0;
   padding: 0;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -10,7 +10,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-}
+} */
 
 /* Login konteyneri */
 .auth {

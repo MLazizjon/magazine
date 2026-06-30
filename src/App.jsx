@@ -43,7 +43,7 @@ function App() {
           }
         />
 
-        {/* 🔥 ADMIN DASHBOARD: Faqat 'admin' roliga ega bo'lganlar kira oladi */}
+       
         <Route
           path="/admin-dashboard"
           element={
@@ -53,8 +53,7 @@ function App() {
           }
         />
 
-        {/* Agar foydalanuvchi login qilib bo'lgan bo'lsa va shunchaki '/home' yoki xato URL yozsa, 
-            uni roliga qarab tegishli panelga qayta yo'naltirish mantig'i: */}
+        
         <Route
           path="*"
           element={

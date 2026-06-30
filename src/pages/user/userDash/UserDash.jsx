@@ -66,18 +66,19 @@ export default function UserDash() {
     } else {
       navigate("/login");
     }
-  }, []);
+    // ✅ GitHub warning bergan joyga 'navigate' funksiyasining o'zi qo'shildi
+  }, [navigate]); 
 
   // 💾 2. Qiymatlar o'zgarganda ularni LocalStorage-ga yozish
   useEffect(() => {
     if (currentUser?.phone) {
-      localStorage.setItem(`bonus_${currentUser.phone}`, currentBonus);
+      localStorage.setItem(`bonus_${currentUser.phone}`, currentBonus.toString());
     }
   }, [currentBonus, currentUser]);
 
   useEffect(() => {
     if (currentUser?.phone) {
-      localStorage.setItem(`count_${currentUser.phone}`, codeCount);
+      localStorage.setItem(`count_${currentUser.phone}`, codeCount.toString());
     }
   }, [codeCount, currentUser]);
 
@@ -103,7 +104,6 @@ export default function UserDash() {
     if (bonusCode.trim().toLowerCase() === "xato") { 
       toast.error("Kod xato yoki oldin kiritilgan!");
     } else {
-      // 🎯 HAR BIR KOD KIRITILGANDA CHINAKAMIGA 1 BALL QO'SHILADI
       const bonusAmount = 1; 
 
       setCurrentBonus((prev) => prev + bonusAmount); 
@@ -174,7 +174,6 @@ export default function UserDash() {
               <div className="stats-grid">
                 <div className="stat-card">
                   <h4>Yig`ilgan ballar</h4>
-                  {/* .toLocaleString() raqamlarni chiroyli formatlaydi */}
                   <p className="stat-number">{currentBonus.toLocaleString()} ball</p> 
                 </div>
                 <div className="stat-card">

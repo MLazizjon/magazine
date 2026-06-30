@@ -16,6 +16,7 @@ function App() {
     <>
       {/* Bildirishnomalar uchun xabarnoma oynasi */}
       <ToastContainer
+
         position="top-right"
         autoClose={2000}
         hideProgressBar={false}
@@ -23,6 +24,8 @@ function App() {
         closeOnClick
         pauseOnHover
         draggable
+        style={{top: '20px', left:'20px', right: '20px'}}
+        
       />
 
       <Routes>

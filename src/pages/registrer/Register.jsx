@@ -100,7 +100,12 @@ export default function Register() {
   // Placeholder va selectning default holatidagi rangini bir xil qilish uchun stil
   const selectStyle = {
     ...inputStyle,
-    color: region ? "inherit" : "#9ca3af" // Agar viloyat tanlanmagan bo'lsa, placeholder rangi (gray-400) bo'ladi
+    color: region ? "inherit" : "#9ca3af", // Agar viloyat tanlanmagan bo'lsa, placeholder rangi (gray-400) bo'ladi
+    background: 'white',
+    border: '1.5px solid #e2e8f0',
+    padding: '15px ',
+    borderRadius: '10px',
+    
   };
 
   return (

@@ -1,260 +1,498 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
-// 🌟 Ikonkalarni import qilish
+import { supabase } from "../../../supabase/client";
 import { 
-  FaChartBar, 
-  FaKey, 
-  FaCogs, 
-  FaSignOutAlt, 
+  FaBell, 
   FaUserCircle, 
-  FaBars, 
-  FaTimes, 
-  FaHistory 
+  FaExclamationTriangle, 
+  FaChevronRight, 
+  FaGlobe, 
+  FaQrcode, 
+  FaQuestionCircle, 
+  FaSignOutAlt, 
+  FaChevronLeft,
+  FaGift // 🎁 Magazin uchun yangi ikona
 } from "react-icons/fa";
 
-// 🌟 Grafik (Chart) uchun Recharts import qilish
-import { 
-  ResponsiveContainer, 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip 
-} from "recharts";
+import Sidebar from "../sidebar/Sidebar";
+import HomeTab from "../home/Home";
+import CodeTab from "../kodkirish/KodKiritish";
+import SettingsTab from "../setting/Setting";
+import UserMagazin from "../magazine/Magazine"; // 👈 YANGI MAGAZIN KOMPONENTI
 
 import "./userDash.css";
-
-const initialChartData = [
-  { name: "Dush", bonus: 0 },
-  { name: "Sesh", bonus: 0 },
-  { name: "Chor", bonus: 0 },
-  { name: "Pay", bonus: 0 },
-  { name: "Jum", bonus: 0 },
-  { name: "Shan", bonus: 0 },
-  { name: "Yak", bonus: 0 },
-];
 
 export default function UserDash() {
   const [currentUser, setCurrentUser] = useState(null);
   const [activeTab, setActiveTab] = useState("home");
   const [bonusCode, setBonusCode] = useState("");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const [currentBonus, setCurrentBonus] = useState(0);
-  const [codeCount, setCodeCount] = useState(0);
-  const [dynamicChartData, setDynamicChartData] = useState(initialChartData);
+  // 📅 FILTRLAR STATE'LARI
+  const [year, setYear] = useState("2026");
+  const [month, setMonth] = useState("Iyul");
+  const [statType, setStatType] = useState("hafta");
+
+  // 📈 STATISTIKA STATE'LARI
+  const [currentBonus, setCurrentBonus] = useState(0);      
+  const [codeCount, setCodeCount] = useState(0);          
+  const [pendingCount, setPendingCount] = useState(0);     
+  const [totalUsedCount, setTotalUsedCount] = useState(0);  
+  const [userRank, setUserRank] = useState(1);              
+  const [dynamicChartData, setDynamicChartData] = useState([]);
+  const [activeCampaign, setActiveCampaign] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editRegion, setEditRegion] = useState("");
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const navigate = useNavigate();
+  const monthsUz = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentyabr", "Oktyabr", "Noyabr", "Dekabr"];
 
-  // 👤 1. Sahifa yuklanganda xotiradagi bor ma'lumotni o'qish
+  // ⚡ AMALDAGI AKSANING MUDDATINI TEKSHIRISH
+  const checkActiveCampaign = useCallback(async () => {
+    try {
+      const nowISO = new Date().toISOString();
+      const { data, error } = await supabase
+        .from("campaigns")
+        .select("*")
+        .lte("start_date", nowISO)
+        .gte("end_date", nowISO)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (!error && data && data.length > 0) {
+        setActiveCampaign(data[0]);
+      } else {
+        setActiveCampaign(null);
+      }
+    } catch (err) {
+      console.error("Aksiyani tekshirishda xatolik:", err);
+    }
+  }, []);
+
+  // 🔄 MA'LUMOTLARNI DINAMIK FILTRLAB YUKLASH FUNKSIYASI
+  const fetchUserData = useCallback(async (user, currentYear = year, currentMonth = month, currentStatType = statType) => {
+    try {
+      if (!user?.id) return;
+
+      const { data: profile, error: profError } = await supabase
+        .from("profiles")
+        .select("full_name, phone, region, bonus, is_active")
+        .eq("id", user.id)
+        .single();
+
+      if (profError) throw profError;
+
+      if (profile.is_active === false) {
+        toast.error("Sizning profilingiz faol emas! Admin bilan bog'laning.");
+        localStorage.removeItem("user");
+        navigate("/login");
+        return;
+      }
+
+      setEditName(profile.full_name || "");
+      setEditRegion(profile.region || "");
+
+      const updatedLocalUser = { ...user, ...profile };
+      localStorage.setItem("user", JSON.stringify(updatedLocalUser));
+      setCurrentUser(updatedLocalUser);
+
+      const { data: allProfiles } = await supabase
+        .from("profiles")
+        .select("id, bonus")
+        .order("bonus", { ascending: false });
+
+      if (allProfiles) {
+        const myRank = allProfiles.findIndex(p => p.id === user.id) + 1;
+        setUserRank(myRank || 1);
+      }
+
+      const monthIndex = monthsUz.indexOf(currentMonth);
+      const formattedMonth = String(monthIndex + 1).padStart(2, '0');
+      const startDate = `${currentYear}-${formattedMonth}-01T00:00:00.000Z`;
+
+      const nextMonthIndex = monthIndex === 11 ? 0 : monthIndex + 1;
+      const nextMonthYear = monthIndex === 11 ? parseInt(currentYear) + 1 : currentYear;
+      const formattedNextMonth = String(nextMonthIndex + 1).padStart(2, '0');
+      const endDate = `${nextMonthYear}-${formattedNextMonth}-01T00:00:00.000Z`;
+
+      const { data: usedCodes, error: codesError } = await supabase
+        .from("used_codes")
+        .select("created_at, status")
+        .eq("user_id", user.id)
+        .gte("created_at", startDate)
+        .lt("created_at", endDate);
+
+      if (!codesError && usedCodes) {
+        const approvedCodes = usedCodes.filter(c => c.status === "approved");
+        const pendingCodes = usedCodes.filter(c => c.status === "pending");
+
+        setCodeCount(approvedCodes.length); 
+        setPendingCount(pendingCodes.length); 
+        setTotalUsedCount(usedCodes.length); 
+        setCurrentBonus(profile.bonus || 0); // 👈 Umumiy real balansni chiqarish uchun o'zgartirildi
+
+        let generatedStats = [];
+        const joriyVaqt = new Date();
+
+        if (currentStatType === "kun") {
+          const last7Days = Array.from({ length: 7 }).map((_, i) => {
+            const d = new Date();
+            d.setDate(d.getDate() - (6 - i));
+            return d;
+          });
+
+          generatedStats = last7Days.map(date => {
+            const dayStr = date.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' });
+            const dayVal = approvedCodes.filter(c => new Date(c.created_at).toDateString() === date.toDateString()).length;
+            return { label: dayStr, realVal: dayVal, value: 0, active: joriyVaqt.toDateString() === date.toDateString() };
+          });
+
+        } else if (currentStatType === "hafta") {
+          const daysMap = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 0: 0 };
+          approvedCodes.forEach(c => {
+            const day = new Date(c.created_at).getDay(); 
+            daysMap[day] += 1;
+          });
+
+          const labels = ["Du", "Se", "Ch", "Pa", "Ju", "Sha", "Ya"];
+          const JS_DAYS_ORDER = [1, 2, 3, 4, 5, 6, 0];
+          generatedStats = JS_DAYS_ORDER.map((dayKey, idx) => ({
+            label: labels[idx],
+            realVal: daysMap[dayKey],
+            value: 0,
+            active: joriyVaqt.getFullYear() === parseInt(currentYear) && joriyVaqt.getMonth() === monthIndex && joriyVaqt.getDay() === dayKey
+          }));
+
+        } else if (currentStatType === "oy") {
+          const weeksMap = { H1: 0, H2: 0, H3: 0, H4: 0 };
+          approvedCodes.forEach(c => {
+            const dayOfMonth = new Date(c.created_at).getDate();
+            if (dayOfMonth <= 7) weeksMap.H1 += 1;
+            else if (dayOfMonth <= 14) weeksMap.H2 += 1;
+            else if (dayOfMonth <= 21) weeksMap.H3 += 1;
+            else weeksMap.H4 += 1;
+          });
+
+          const joriyKun = joriyVaqt.getDate();
+          const isCurrentMonth = joriyVaqt.getFullYear() === parseInt(currentYear) && joriyVaqt.getMonth() === monthIndex;
+
+          generatedStats = [
+            { label: "1-Hafta", realVal: weeksMap.H1, active: isCurrentMonth && joriyKun <= 7 },
+            { label: "2-Hafta", realVal: weeksMap.H2, active: isCurrentMonth && joriyKun > 7 && joriyKun <= 14 },
+            { label: "3-Hafta", realVal: weeksMap.H3, active: isCurrentMonth && joriyKun > 14 && joriyKun <= 21 },
+            { label: "4-Hafta", realVal: weeksMap.H4, active: isCurrentMonth && joriyKun > 21 },
+          ];
+        }
+
+        const maxVal = Math.max(...generatedStats.map(s => s.realVal), 1);
+        const finalStats = generatedStats.map(s => ({
+          ...s,
+          value: Math.min(Math.round((s.realVal / maxVal) * 100), 100)
+        }));
+
+        setDynamicChartData(finalStats);
+      } else {
+        setCodeCount(0);
+        setPendingCount(0);
+        setTotalUsedCount(0);
+        setCurrentBonus(profile.bonus || 0);
+        const emptyLabels = currentStatType === "oy" ? ["1-Hafta", "2-Hafta", "3-Hafta", "4-Hafta"] : ["Du", "Se", "Ch", "Pa", "Ju", "Sha", "Ya"];
+        setDynamicChartData(emptyLabels.map(l => ({ label: l, value: 0, realVal: 0, active: false })));
+      }
+    } catch (err) {
+      console.error("Ma'lumot yuklashda xatolik:", err);
+    }
+  }, [year, month, statType, navigate]);
+
+  // 🗓️ FILTRLAR O'ZGARGANIDA TRIGGER BO'LUVCHI EFFECT
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       const user = JSON.parse(storedUser);
-      setCurrentUser(user);
+      fetchUserData(user, year, month, statType);
+    }
+  }, [year, month, statType, fetchUserData]);
 
-      const savedBonus = localStorage.getItem(`bonus_${user.phone}`);
-      const savedCount = localStorage.getItem(`count_${user.phone}`);
-      const savedChart = localStorage.getItem(`chart_${user.phone}`);
-
-      if (savedBonus) setCurrentBonus(parseInt(savedBonus));
-      if (savedCount) setCodeCount(parseInt(savedCount));
-      if (savedChart) setDynamicChartData(JSON.parse(savedChart));
-    } else {
+  // 🔔 BIRINCHI SAHIFA YUKLANGANDA VA REAL-TIME SUBSCRIPTION
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
       navigate("/login");
+      return;
     }
-    // ✅ GitHub warning bergan joyga 'navigate' funksiyasining o'zi qo'shildi
-  }, [navigate]); 
+    const user = JSON.parse(storedUser);
+    setCurrentUser(user);
+    fetchUserData(user, year, month, statType);
+    checkActiveCampaign();
 
-  // 💾 2. Qiymatlar o'zgarganda ularni LocalStorage-ga yozish
-  useEffect(() => {
-    if (currentUser?.phone) {
-      localStorage.setItem(`bonus_${currentUser.phone}`, currentBonus.toString());
-    }
-  }, [currentBonus, currentUser]);
+    const realtimeSubscription = supabase
+      .channel(`user-dash-realtime-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "used_codes", filter: `user_id=eq.${user.id}` },
+        () => { fetchUserData(user, year, month, statType); }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${user.id}` },
+        () => { fetchUserData(user, year, month, statType); }
+      )
+      .subscribe();
 
-  useEffect(() => {
-    if (currentUser?.phone) {
-      localStorage.setItem(`count_${currentUser.phone}`, codeCount.toString());
-    }
-  }, [codeCount, currentUser]);
+    return () => {
+      supabase.removeChannel(realtimeSubscription);
+    };
+  }, [navigate, checkActiveCampaign]);
 
-  useEffect(() => {
-    if (currentUser?.phone) {
-      localStorage.setItem(`chart_${currentUser.phone}`, JSON.stringify(dynamicChartData));
-    }
-  }, [dynamicChartData, currentUser]);
-
-
-  const handleLogout = () => {
+  const confirmLogout = () => {
     localStorage.removeItem("user");
     toast.info("Tizimdan chiqdingiz");
     navigate("/login");
   };
 
-  const handleSendCode = () => {
-    if (!bonusCode) {
+  const handleSendCode = async () => {
+    if (loading) return;
+    const trimmedCode = bonusCode.trim().toUpperCase();
+    if (!trimmedCode) {
       toast.error("Iltimos, kodni kiriting!");
       return;
     }
-    
-    if (bonusCode.trim().toLowerCase() === "xato") { 
-      toast.error("Kod xato yoki oldin kiritilgan!");
-    } else {
-      const bonusAmount = 1; 
+    setLoading(true);
+    try {
+      const { data: promoCode, error: promoError } = await supabase
+        .from("promo_codes")
+        .select("*")
+        .eq("code", trimmedCode)
+        .single();
 
-      setCurrentBonus((prev) => prev + bonusAmount); 
-      setCodeCount((prev) => prev + 1);
+      if (promoError || !promoCode) {
+        toast.error("Bunday promo-kod tizimda mavjud emas! ❌");
+        return;
+      }
+      if (!promoCode.is_active) {
+        toast.error("Bu kod allaqachon ishlatilgan yoki tasdiqlash kutilmoqda! ⚠️");
+        return;
+      }
 
-      setDynamicChartData((prevData) => {
-        return prevData.map((item) => {
-          if (item.name === "Yak") {
-            return { ...item, bonus: item.bonus + bonusAmount };
-          }
-          return item;
-        });
-      });
+      const { error: insertError } = await supabase
+        .from("used_codes")
+        .insert([{ 
+          user_id: currentUser.id, 
+          code_id: promoCode.id,
+          status: "pending" 
+        }]);
 
-      toast.success("Kod muvaffaqiyatli yuborildi va saqlandi!");
+      if (insertError) throw insertError;
+
+      await supabase.from("promo_codes").update({ is_active: false }).eq("id", promoCode.id);
+
+      toast.info("Kod muvaffaqiyatli yuborildi! Admin tasdiqlashini kuting. ⏳");
       setBonusCode("");
       setActiveTab("home");
+      fetchUserData(currentUser, year, month, statType);
+    } catch (err) {
+      toast.error("Xatolik yuz berdi: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleTabChange = (tabName) => {
-    setActiveTab(tabName);
-    setIsMobileMenuOpen(false);
+  const handleSaveProfile = async () => {
+    if (!editName.trim()) {
+      toast.error("Ism maydoni bo'sh bo'lishi mumkin emas!");
+      return;
+    }
+    setSaveLoading(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ full_name: editName.trim(), region: editRegion.trim() })
+        .eq("id", currentUser.id);
+
+      if (error) throw error;
+      toast.success("Ma'lumotlar muvaffaqiyatli yangilandi! 💾");
+      setIsEditing(false);
+      fetchUserData(currentUser, year, month, statType);
+    } catch (err) {
+      toast.error("Saqlashda xatolik: " + err.message);
+    } finally {
+      setSaveLoading(false);
+    }
   };
 
   return (
     <div className="dash-container">
-      <button className="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-        {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
-      </button>
-
-      <aside className={`dash-sidebar ${isMobileMenuOpen ? "mobile-open" : ""}`}>
-        <div className="sidebar-logo"></div>
-        <nav className="sidebar-menu">
-          <button className={`menu-item ${activeTab === "home" ? "active" : ""}`} onClick={() => handleTabChange("home")}>
-            <FaChartBar className="icon" /> Home / Statistika
-          </button>
-          <button className={`menu-item ${activeTab === "code" ? "active" : ""}`} onClick={() => handleTabChange("code")}>
-            <FaKey className="icon" /> Kodni kiritish
-          </button>
-          <button className={`menu-item ${activeTab === "settings" ? "active" : ""}`} onClick={() => handleTabChange("settings")}>
-            <FaCogs className="icon" /> Sozlamalar
-          </button>
-        </nav>
-        <div className="sidebar-footer">
-          <button className="logout-btn" onClick={handleLogout}>
-            <FaSignOutAlt className="icon" /> Chiqish
-          </button>
+      
+      {/* MOBIL TOP HEADER */}
+      <header className="mobile-top-header">
+        <button className="mobile-profile-btn" onClick={() => setIsDrawerOpen(true)} title="Profil paneli">
+          <FaUserCircle size={28} />
+        </button>
+        <div className="mobile-header-center" onClick={() => setActiveTab("home")}>
+          <span className="mobile-header-label">Mening joriy ballim</span>
+          <span className="mobile-header-value">
+            {currentUser?.bonus || 0} <span className="arrow-detail">›</span>
+          </span>
         </div>
-      </aside>
+        <button className="mobile-notif-btn" title="Bildirishnomalar">
+          <FaBell size={22} />
+        </button>
+      </header>
 
+      {/* SIDEBAR & BOTTOM NAVIGATION BAR */}
+      <Sidebar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        setShowLogoutModal={setShowLogoutModal} 
+        currentUser={currentUser}
+      />
+
+      {/* DINAMIK TAB ALMAShUVI */}
       <main className="dash-main">
-        <header className="dash-header">
-          <div className="welcome-text">
-            Usta: <span className="user-name-span">{currentUser?.full_name}</span>
-          </div>
-          <div className="user-profile">
-            <span className="role-badge">{currentUser?.role}</span>
-            <FaUserCircle className="profile-avatar-icon" />
-          </div>
-        </header>
-
         <section className="dash-content">
           {activeTab === "home" && (
-            <div className="tab-section fade-in">
-              <h3>Statistika</h3>
-              <br />
-              <div className="stats-grid">
-                <div className="stat-card">
-                  <h4>Yig`ilgan ballar</h4>
-                  <p className="stat-number">{currentBonus.toLocaleString()} ball</p> 
-                </div>
-                <div className="stat-card">
-                  <h4>Kiritilgan kodlar</h4>
-                  <p className="stat-number">{codeCount} ta</p>
-                </div>
-              </div>
-
-              <div className="chart-section">
-                <h4>Haftalik bonuslar grafigi</h4>
-                <div style={{ width: "100%", height: 250 }}>
-                  <ResponsiveContainer>
-                    <AreaChart data={dynamicChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="colorBonus" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#eab308" stopOpacity={0.4}/>
-                          <stop offset="95%" stopColor="#eab308" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0"/>
-                      <XAxis dataKey="name" stroke="#64748b" fontSize={12}/>
-                      <YAxis stroke="#64748b" fontSize={12}/>
-                      <Tooltip />
-                      <Area type="monotone" dataKey="bonus" stroke="#eab308" strokeWidth={2} fillOpacity={1} fill="url(#colorBonus)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              <div className="history-section">
-                <button className="action-btn" onClick={() => toast.info("Tarix tez kunda ochiladi...")}>
-                  <FaHistory className="icon-inline" /> Bonuslar tarixini ko‘rish
-                </button>
-              </div>
-            </div>
+            <HomeTab 
+              activeCampaign={activeCampaign} 
+              currentBonus={currentUser?.bonus || 0} 
+              rank={userRank} 
+              confirmedCount={codeCount} 
+              pendingCount={pendingCount} 
+              totalUsedCount={totalUsedCount} 
+              region={currentUser?.region || "Samarqand"} 
+              dynamicChartData={dynamicChartData} 
+              setActiveTab={setActiveTab} 
+              year={year}
+              setYear={setYear}
+              month={month}
+              setMonth={setMonth}
+              statType={statType}
+              setStatType={setStatType}
+              monthsUz={monthsUz}
+            />
           )}
 
           {activeTab === "code" && (
-            <div className="tab-section fade-in">
-              <h3>Kodni kiritish</h3>
-              <br />
-              <div className="code-box">
-                <p>Kodni quyidagi maydonga kiriting:</p>
-                <br />
-                <input 
-                  type="text" 
-                  placeholder="Masalan: B78X99" 
-                  value={bonusCode}
-                  onChange={(e) => setBonusCode(e.target.value)}
-                  className="code-input"
-                />
-                <button className="send-code-btn" onClick={handleSendCode}>Kodni tasdiqlash</button>
-              </div>
-            </div>
+            <CodeTab 
+              bonusCode={bonusCode} 
+              setBonusCode={setBonusCode} 
+              handleSendCode={handleSendCode} 
+              loading={loading} 
+            />
+          )}
+
+          {/* 🎁 MAGAZIN (SOVG'ALAR DO'KONI) TABI SHU YERDA */}
+          {activeTab === "magazin" && (
+            <UserMagazin 
+              currentUser={currentUser} 
+              fetchUserData={() => fetchUserData(currentUser, year, month, statType)} 
+            />
           )}
 
           {activeTab === "settings" && (
-            <div className="tab-section fade-in">
-              <h3>Sozlamalar</h3>
-              <br />
-              <div className="settings-list">
-                <div className="settings-card">
-                  <h4>Usta ma'lumotlari</h4>
-                  <p><b>Ism:</b> {currentUser?.full_name}</p>
-                  <p><b>Telefon:</b> {currentUser?.phone}</p>
-                  <p><b>Viloyat:</b> {currentUser?.region}</p>
-                </div>
-                
-                <div className="settings-actions">
-                  <button className="settings-btn" onClick={() => toast.warn("Tez kunda...")}>
-                    Loginni o‘zgartirish
-                  </button>
-                  <button className="settings-btn logout-danger" onClick={handleLogout}>
-                    ❌ Tizimdan chiqish
-                  </button>
-                </div>
-              </div>
-            </div>
+            <SettingsTab 
+              isEditing={isEditing} 
+              setIsEditing={setIsEditing} 
+              editName={editName} 
+              setEditName={setEditName} 
+              editRegion={editRegion} 
+              setEditRegion={setEditRegion} 
+              currentUser={currentUser} 
+              saveLoading={saveLoading} 
+              handleSaveProfile={handleSaveProfile} 
+              fetchUserData={() => fetchUserData(currentUser, year, month, statType)} 
+              setShowLogoutModal={setShowLogoutModal} 
+              onBack={() => {
+                setIsDrawerOpen(true);
+                setActiveTab("home");
+              }}
+            />
           )}
         </section>
       </main>
+
+      {/* MOBIL PROFILE DRAWER MENU */}
+      {isDrawerOpen && (
+        <div className="mobile-profile-drawer-backdrop" onClick={() => setIsDrawerOpen(false)}>
+          <div className="mobile-profile-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="profile-drawer-header">
+              <button className="drawer-back-btn" onClick={() => setIsDrawerOpen(false)}>
+                <FaChevronLeft size={16} />
+              </button>
+              <h2>Profil</h2>
+              <div style={{ width: 36 }}></div>
+            </div>
+
+            <div className="drawer-menu-list">
+              <button className="drawer-item" onClick={() => { setActiveTab("settings"); setIsDrawerOpen(false); }}>
+                <div className="d-item-left">
+                  <div className="d-icon-box"><FaUserCircle /></div>
+                  <span>Sozlamalar</span>
+                </div>
+                <FaChevronRight className="d-chevron" />
+              </button>
+
+              <button className="drawer-item">
+                <div className="d-item-left">
+                  <div className="d-icon-box"><FaGlobe /></div>
+                  <span>Til</span>
+                </div>
+                <div className="d-item-right">
+                  <span className="d-lang-val">Uz</span>
+                  <FaChevronRight className="d-chevron" />
+                </div>
+              </button>
+
+              {/* 🎁 MAGAZIN TUGMASI MOBIL DRAWYERGA BIRIKTIRILDI */}
+              <button className="drawer-item" onClick={() => { setActiveTab("magazin"); setIsDrawerOpen(false); }}>
+                <div className="d-item-left">
+                  <div className="d-icon-box"><FaGift /></div>
+                  <span>Sovg'alar do'koni (Magazin)</span>
+                </div>
+                <FaChevronRight className="d-chevron" />
+              </button>
+
+              <button className="drawer-item">
+                <div className="d-item-left">
+                  <div className="d-icon-box"><FaQuestionCircle /></div>
+                  <span>F.A.Q</span>
+                </div>
+                <FaChevronRight className="d-chevron" />
+              </button>
+
+              <button className="drawer-item d-logout-style" onClick={() => { setIsDrawerOpen(false); setShowLogoutModal(true); }}>
+                <div className="d-item-left">
+                  <div className="d-icon-box"><FaSignOutAlt /></div>
+                  <span>Chiqish</span>
+                </div>
+                <FaChevronRight className="d-chevron" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* LOGOUT MODAL BOX */}
+      {showLogoutModal && (
+        <div className="logout-modal-backdrop" onClick={() => setShowLogoutModal(false)}>
+          <div className="logout-modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="logout-modal-icon">
+              <FaExclamationTriangle size={28} />
+            </div>
+            <h3>Tizimdan chiqish</h3>
+            <p>Haqiqatan ham shaxsiy kabinetingizdan chiqmoqchimisiz?</p>
+            <div className="logout-modal-actions">
+              <button className="modal-confirm-btn" onClick={confirmLogout}>Ha, chiqish</button>
+              <button className="modal-cancel-btn" onClick={() => setShowLogoutModal(false)}>Bekor qilish</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

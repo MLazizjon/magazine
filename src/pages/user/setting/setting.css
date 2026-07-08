@@ -1,0 +1,208 @@
+/* ==========================================================================
+    📱 МОЙ ПРОФИЛЬ - SAHIFASI DIZAYNI (image_c256a0.png asosida)
+   ========================================================================== */
+   .mobile-profile-settings-page {
+    background-color: #ffffff;
+    min-height: 100vh;
+    padding: 16px;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    max-width: 500px; /* Mobil qurilmalar o'lchami */
+    margin: 0 auto;
+  }
+  
+  /* 📋 YUQORI HEADER */
+  .profile-settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0 24px 0;
+  }
+  
+  .settings-back-circle-btn {
+    width: 40px;
+    height: 40px;
+    background-color: #f1f5f9; /* Yumshoq och kulrang doira */
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #334155;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .settings-back-circle-btn:hover {
+    background-color: #e2e8f0;
+  }
+  
+  .settings-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+  }
+  
+  .settings-save-text-btn {
+    background: none;
+    border: none;
+    color: #2563eb; /* Saytingizga mos professional ko'k rang */
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: opacity 0.2s;
+  }
+  
+  .settings-save-text-btn:hover {
+    opacity: 0.8;
+  }
+  
+  /* 👤 AVATAR VA TAHRIRLASH TUGMASI */
+  .settings-avatar-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+  
+  .settings-avatar-circle {
+    width: 90px;
+    height: 90px;
+    background-color: #f1f5f9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .default-avatar-icon {
+    color: #94a3b8;
+  }
+  
+  .avatar-edit-badge {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 26px;
+    height: 26px;
+    background-color: #1e293b; /* Qora dumaloq qalam belgisi foni */
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  
+  /* 📝 INPUT GRUPPALARI */
+  .settings-form-body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .settings-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .settings-input-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: #475569;
+    padding-left: 2px;
+  }
+  
+  /* INPUTLAR VA SELECTLAR (Rasmga 100% mos yumshoq kulrang fon) */
+  .settings-custom-input,
+  .settings-select-container,
+  .settings-referral-box {
+    background-color: #f1f3f5; /* Rasmda ko'rsatilgan aniq fon rangi */
+    border: none;
+    border-radius: 12px;
+    height: 54px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .settings-custom-input {
+    padding: 0 16px;
+    font-size: 16px;
+    color: #1e293b;
+    outline: none;
+    font-family: inherit;
+  }
+  
+  /* SELECT CONTAINER LOGIKASI */
+  .settings-select-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    position: relative;
+  }
+  
+  .settings-custom-select {
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    height: 100%;
+    font-size: 16px;
+    color: #1e293b;
+    cursor: pointer;
+    appearance: none; /* Standart brauzer o'qini o'chirish */
+    padding-right: 40px;
+  }
+  
+  .select-arrow-divider {
+    position: absolute;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    pointer-events: none; /* Select bosilishiga xalaqit bermaydi */
+  }
+  
+  .divider-line {
+    color: #cbd5e1;
+    font-weight: 300;
+  }
+  
+  .select-arrow-icon {
+    color: #64748b;
+    font-size: 14px;
+  }
+  
+  /* 📞 REFERAL NOMER BLOKI (Naushnikli qism) */
+  .settings-referral-box {
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 14px;
+  }
+  
+  .referral-icon-container {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .referral-headset-icon {
+    color: #ef4444; /* Naushnik ikonasi rasmda qizil rangda, juda chiroyli turibdi */
+  }
+  
+  .referral-phone-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1e293b;
+    letter-spacing: 0.3px;
+  }

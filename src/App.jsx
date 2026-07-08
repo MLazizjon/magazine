@@ -5,8 +5,9 @@ import "react-toastify/dist/ReactToastify.css";
 // Sahifalarni import qilish
 import Login from "./pages/login/Login";
 import Register from "./pages/registrer/Register";
-import UserDash from "./pages/user/userDash/UserDash"; // Siz aytgan User sahifasi
-import AdminDashboard from "./pages/admin/admindash/AdminDash"; // Siz aytgan Admin sahifasi
+import UserDash from "./pages/user/userDash/UserDash"; 
+import AdminDashboard from "./pages/admin/admindash/AdminDash"; 
+import MasterDetail from "./pages/admin/userdetals/UserDestals";
 
 // Himoyalangan marshrut komponenti
 import ProtectedRoute from "./components/protectedRoute/ProtectedRoute";
@@ -14,9 +15,10 @@ import ProtectedRoute from "./components/protectedRoute/ProtectedRoute";
 function App() {
   return (
     <>
-      {/* Bildirishnomalar uchun xabarnoma oynasi */}
+      {/* ✅ ToastContainer-dan xunuk bo'shliq yaratayotgan inline style olib tashlandi.
+        Endi u dashboard elementlarini to'sib qo'ymaydi va o'ng burchakda chiroyli chiqadi.
+      */}
       <ToastContainer
-
         position="top-right"
         autoClose={2000}
         hideProgressBar={false}
@@ -24,19 +26,16 @@ function App() {
         closeOnClick
         pauseOnHover
         draggable
-        style={{top: '20px', left:'20px', right: '20px'}}
-        
       />
 
       <Routes>
-        {/* Sayt ochilganda to'g'ridan-to'g'ri login sahifasiga yuboradi */}
         <Route path="/" element={<Navigate to="/login" />} />
 
-        {/* Hamma kira oladigan ochiq sahifalar */}
+        {/* Ochiq sahifalar */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* 🔥 USER DASHBOARD: Faqat 'user' (Mijoz) roliga ega bo'lganlar kira oladi */}
+        {/* USER DASHBOARD */}
         <Route
           path="/user-dashboard"
           element={
@@ -46,7 +45,7 @@ function App() {
           }
         />
 
-       
+        {/* ADMIN DASHBOARD */}
         <Route
           path="/admin-dashboard"
           element={
@@ -56,7 +55,17 @@ function App() {
           }
         />
 
-        
+        {/* YANGI MARSHRUT: Ustaning ID raqami bo'yicha profiliga kirish */}
+        <Route
+          path="/admin/master/:id"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <MasterDetail />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Tizimda mavjud bo'lmagan sahifalarga kirganda avtomat yo'naltirish */}
         <Route
           path="*"
           element={
@@ -70,7 +79,7 @@ function App() {
   );
 }
 
-// 💡 Yordamchi komponent: Agar adashib boshqa sahifaga o'tsa, roliga qarab avtomat panellariga otib yuboradi
+// Rollarga qarab avtomat yo'naltiruvchi yordamchi komponent
 function RoleBasedRedirect() {
   const user = JSON.parse(localStorage.getItem("user"));
   if (user?.role === "admin") {

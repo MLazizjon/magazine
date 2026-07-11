@@ -4,17 +4,81 @@ import { toast } from "react-toastify";
 import { FaCoins, FaGift, FaShoppingBag, FaClock, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import "../magazine/magazine.css";
 
-export default function UserMagazin({ currentUser }) {
+export default function UserMagazin({ currentUser, lang = "uz" }) {
   const [prizes, setPrizes] = useState([]);
   const [myOrders, setMyOrders] = useState([]);
   const [userBonus, setUserBonus] = useState(0);
   const [loadingOrderId, setLoadingOrderId] = useState(null);
 
-  // Ma'lumotlarni yuklash (Sovg'alar, Foydalanuvchi balansi va Buyurtmalar tarixi)
+  // 📝 Magazin qismi uchun tillar tarjimasi lug'ati
+  const translations = {
+    uz: {
+      storeTitle: "🎁 Sovg'alar do'koni",
+      storeSub: "Yig'gan ballaringizni ajoyib sovg'alarga almashtiring!",
+      yourBalance: "Sizning balansingiz:",
+      points: "ball",
+      availablePrizes: "Mavjud sovg'alar",
+      noPrizes: "Hozircha do'konda sovg'alar yo'q.",
+      orderHistory: "Buyurtmalaringiz tarixi",
+      noOrders: "Sizda hali buyurtmalar mavjud emas.",
+      thName: "Sovg'a nomi",
+      thPoints: "Sarflangan ball",
+      thDate: "Sana",
+      thStatus: "Status",
+      deletedPrize: "O'chirilgan mahsulot",
+      statusPending: "Kutilmoqda",
+      statusApproved: "Topshirildi",
+      statusRejected: "Rad etildi",
+      btnLoading: "Yuborilmoqda...",
+      btnNotAvailable: "Do'kon yopiq ",
+      btnBuy: "Sotib olish",
+      btnNoPoints: "Ball yetarli emas",
+      toastFetchError: "Ma'lumotlarni yuklashda xatolik: ",
+      toastStockOut: "Kechirasiz, bu mahsulot sotuvda tugagan yoki admin tomonidan muzlatilgan! 🔒",
+      toastNoPoints: "Kechirasiz, balansingizda yetarli ball mavjud emas! 😔",
+      toastSuccess: "Buyurtma qabul qilindi! Admin tasdiqlashini kuting. 🎁",
+      toastError: "Xatolik yuz berdi: ",
+      confirmPrefix: '"',
+      confirmSuffix: '" sovg\'asini '
+    },
+    ru: {
+      storeTitle: "🎁 Магазин подарков",
+      storeSub: "Обменивайте накопленные баллы на отличные подарки!",
+      yourBalance: "Ваш баланс:",
+      points: "балл",
+      availablePrizes: "Доступные подарки",
+      noPrizes: "В магазине пока нет подарков.",
+      orderHistory: "История ваших заказов",
+      noOrders: "У вас еще нет заказов.",
+      thName: "Название подарка",
+      thPoints: "Потраченные баллы",
+      thDate: "Дата",
+      thStatus: "Статус",
+      deletedPrize: "Удаленный товар",
+      statusPending: "В ожидании",
+      statusApproved: "Вручено",
+      statusRejected: "Отклонено",
+      btnLoading: "Отправка...",
+      btnNotAvailable: "Магазин закрыт",
+      btnBuy: "Купить",
+      btnNoPoints: "Недостаточно баллов",
+      toastFetchError: "Ошибка при загрузке данных: ",
+      toastStockOut: "Извините, этот товар закончился или заблокирован админом! 🔒",
+      toastNoPoints: "Извините, на вашем балансе недостаточно баллов! 😔",
+      toastSuccess: "Заказ принят! Ожидайте подтверждения админа. 🎁",
+      toastError: "Произошла ошибка: ",
+      confirmPrefix: 'Вы хотите купить подарок "',
+      confirmSuffix: '" за '
+    }
+  };
+
+  const t = translations[lang] || translations["uz"];
+
+  // Ma'lumotlarni yuklash
   const fetchData = async () => {
     if (!currentUser?.id) return;
     try {
-      // 1. Do'kondagi sovg'alarni olish
+      // Barcha sovg'alarni narxi bo'yicha tartiblab olish
       const { data: pData, error: pErr } = await supabase
         .from("prizes")
         .select("*")
@@ -22,7 +86,7 @@ export default function UserMagazin({ currentUser }) {
       if (pErr) throw pErr;
       setPrizes(pData || []);
 
-      // 2. Foydalanuvchining joriy bonusbalansini qayta tekshirish
+      // Foydalanuvchining joriy balansini (bonus) olish
       const { data: profData, error: profErr } = await supabase
         .from("profiles")
         .select("bonus")
@@ -31,7 +95,7 @@ export default function UserMagazin({ currentUser }) {
       if (profErr) throw profErr;
       setUserBonus(profData?.bonus || 0);
 
-      // 3. Foydalanuvchining buyurtmalar tarixini olish
+      // Foydalanuvchining buyurtmalar tarixini yuklash
       const { data: oData, error: oErr } = await supabase
         .from("orders")
         .select("id, status, created_at, prizes(name, price)")
@@ -41,7 +105,7 @@ export default function UserMagazin({ currentUser }) {
       setMyOrders(oData || []);
 
     } catch (err) {
-      toast.error("Ma'lumotlarni yuklashda xatolik: " + err.message);
+      toast.error(t.toastFetchError + err.message);
     }
   };
 
@@ -49,43 +113,61 @@ export default function UserMagazin({ currentUser }) {
     fetchData();
   }, [currentUser]);
 
-  // Sovg'aga buyurtma berish (Sotib olish)
+  // Sotib olish funksiyasi
   const handleBuyPrize = async (prize) => {
-    if (userBonus < prize.price) {
-      return toast.error("Kechirasiz, balansingizda yetarli ball mavjud emas! 😔");
+    // 1. Birinchi navbatda mahsulot omborda bormi (muzlatilmaganmi) tekshiramiz
+    if (prize.stock <= 0) {
+      return toast.error(t.toastStockOut);
     }
 
-    const confirmBuy = window.confirm(`"${prize.name}" sovg'asini ${prize.price} ballga sotib olmoqchimisiz?`);
+    // 2. Foydalanuvchining bali yetishini tekshiramiz
+    if (userBonus < prize.price) {
+      return toast.error(t.toastNoPoints);
+    }
+
+    // Tilga mos tasdiqlash matnini shakllantirish
+    const confirmMessage = lang === "ru"
+      ? `${t.confirmPrefix}${prize.name}${t.confirmSuffix}${prize.price} ${t.points}?`
+      : `${t.confirmPrefix}${prize.name}${t.confirmSuffix}${prize.price} ${t.points}ga sotib olmoqchimisiz?`;
+
+    const confirmBuy = window.confirm(confirmMessage);
     if (!confirmBuy) return;
 
     setLoadingOrderId(prize.id);
     try {
-      // 1. Foydalanuvchi balansidan ballni ayirish
-      const newBonus = userBonus - prize.price;
+      const newBonus = userBonus - prize.price; // Yangi balans
+      const newStock = prize.stock - 1;         // Ombordan 1 ta ayiramiz
+
+      // A. Foydalanuvchi balansini kamaytiramiz
       const { error: profileErr } = await supabase
         .from("profiles")
         .update({ bonus: newBonus })
         .eq("id", currentUser.id);
-      
       if (profileErr) throw profileErr;
 
-      // 2. Orders (buyurtmalar) jadvaliga yangi qator qo'shish
+      // B. Mahsulot sonini (stock) bittaga kamaytiramiz
+      const { error: prizeErr } = await supabase
+        .from("prizes")
+        .update({ stock: newStock })
+        .eq("id", prize.id);
+      if (prizeErr) throw prizeErr;
+
+      // C. Orders (Buyurtmalar) jadvaliga yangi kutilayotgan so'rov qo'shamiz
       const { error: orderErr } = await supabase
         .from("orders")
         .insert([
           {
             user_id: currentUser.id,
             prize_id: prize.id,
-            status: "pending" // Kutilmoqda statusi
+            status: "pending"
           }
         ]);
-
       if (orderErr) throw orderErr;
 
-      toast.success("Buyurtma qabul qilindi! Admin tasdiqlashini kuting. 🎁");
-      fetchData(); // Sahifani yangilash
+      toast.success(t.toastSuccess);
+      fetchData(); // Ma'lumotlarni yangilash
     } catch (err) {
-      toast.error("Xatolik yuz berdi: " + err.message);
+      toast.error(t.toastError + err.message);
     } finally {
       setLoadingOrderId(null);
     }
@@ -94,45 +176,65 @@ export default function UserMagazin({ currentUser }) {
   return (
     <div className="user-magazin-container">
       
-      {/* 🔝 TEPPA QISM: BALANS KARTASI */}
+      {/* 💳 Header va Balans qismi */}
       <div className="magazin-header-card">
         <div className="header-info">
-          <h2>🎁 Sovg'alar do'koni</h2>
-          <p>Yig'gan ballaringizni ajoyib sovg'alarga almashtiring!</p>
+          <h2>{t.storeTitle}</h2>
+          <p>{t.storeSub}</p>
         </div>
         <div className="user-balance-badge">
           <FaCoins className="coin-icon" />
           <div className="balance-text">
-            <span>Sizning balansingiz:</span>
-            <strong>{userBonus} ball</strong>
+            <span>{t.yourBalance}</span>
+            <strong>{userBonus} {t.points}</strong>
           </div>
         </div>
       </div>
 
-      {/* 🛍️ ASOSIY QISM: SOVG'ALAR RO'YXATI (GRID) */}
-      <h3 className="section-title"><FaShoppingBag /> Mavjud sovg'alar</h3>
+      {/* 🛍 /> Mahsulotlar panjarasi */}
+      <h3 className="section-title"><FaShoppingBag /> {t.availablePrizes}</h3>
       <div className="prizes-grid">
         {prizes.length === 0 ? (
-          <p className="empty-text">Hozircha do'konda sovg'alar yo'q.</p>
+          <p className="empty-text">{t.noPrizes}</p>
         ) : (
           prizes.map((prize) => {
-            const isAffordable = userBonus >= prize.price;
+            const isAffordable = userBonus >= prize.price; // Balans yetadimi?
+            const isAvailable = prize.stock > 0;           // Sotuvda bormi (Admin muzlatmaganmi)?
+
             return (
-              <div className={`prize-card ${!isAffordable ? "locked" : ""}`} key={prize.id}>
-                <div className="prize-icon-wrapper">
-                  <FaGift />
+              <div className={`prize-card ${!isAffordable || !isAvailable ? "locked" : ""}`} key={prize.id}>
+                
+                <div className="prize-icon-wrapper" style={{ overflow: "hidden", height: "150px", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8fafc" }}>
+                  {prize.image_url ? (
+                    <img 
+                      src={prize.image_url} 
+                      alt={prize.name} 
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                    />
+                  ) : (
+                    <FaGift style={{ fontSize: "40px", color: "#cbd5e1" }} />
+                  )}
                 </div>
+
                 <div className="prize-details">
                   <h4>{prize.name}</h4>
                   <div className="prize-price-tag">
-                    <FaCoins /> {prize.price} ball
+                    <FaCoins /> {prize.price} {t.points}
                   </div>
+                  
+                  {/* 🔒 Dinamik button boshqaruvi */}
                   <button
-                    className={`buy-btn ${isAffordable ? "active" : "disabled"}`}
+                    className={`buy-btn ${isAffordable && isAvailable ? "active" : "disabled"}`}
                     onClick={() => handleBuyPrize(prize)}
-                    disabled={!isAffordable || loadingOrderId === prize.id}
+                    disabled={!isAffordable || !isAvailable || loadingOrderId === prize.id}
                   >
-                    {loadingOrderId === prize.id ? "Yuborilmoqda..." : isAffordable ? "Sotib olish" : "Ball yetarli emas"}
+                    {loadingOrderId === prize.id 
+                      ? t.btnLoading 
+                      : !isAvailable 
+                        ? t.btnNotAvailable 
+                        : isAffordable 
+                          ? t.btnBuy 
+                          : t.btnNoPoints}
                   </button>
                 </div>
               </div>
@@ -141,33 +243,33 @@ export default function UserMagazin({ currentUser }) {
         )}
       </div>
 
-      {/* 📜 BUYURTMALAR TARIXI */}
-      <h3 className="section-title"><FaClock /> Buyurtmalaringiz tarixi</h3>
+      {/* 📥 Foydalanuvchining shaxsiy buyurtmalari tarixi */}
+      <h3 className="section-title"><FaClock /> {t.orderHistory}</h3>
       <div className="orders-history-card">
         {myOrders.length === 0 ? (
-          <p className="empty-text">Sizda hali buyurtmalar mavjud emas.</p>
+          <p className="empty-text">{t.noOrders}</p>
         ) : (
           <div className="user-orders-table-wrapper">
             <table className="user-orders-table">
               <thead>
                 <tr>
-                  <th>Sovg'a nomi</th>
-                  <th>Sarflangan ball</th>
-                  <th>Sana</th>
-                  <th>Status</th>
+                  <th>{t.thName}</th>
+                  <th>{t.thPoints}</th>
+                  <th>{t.thDate}</th>
+                  <th>{t.thStatus}</th>
                 </tr>
               </thead>
               <tbody>
                 {myOrders.map((order) => (
                   <tr key={order.id}>
-                    <td><strong>{order.prizes?.name || "O'chirilgan mahsulot"}</strong></td>
+                    <td><strong>{order.prizes?.name || t.deletedPrize}</strong></td>
                     <td className="table-price"><FaCoins /> {order.prizes?.price || 0}</td>
-                    <td>{new Date(order.created_at).toLocaleDateString("uz-UZ")}</td>
+                    <td>{new Date(order.created_at).toLocaleDateString(lang === "ru" ? "ru-RU" : "uz-UZ")}</td>
                     <td>
                       <span className={`user-status-badge ${order.status}`}>
-                        {order.status === "pending" && <><FaClock /> Kutilmoqda</>}
-                        {order.status === "approved" && <><FaCheckCircle /> Topshirildi</>}
-                        {order.status === "rejected" && <><FaTimesCircle /> Rad etildi</>}
+                        {order.status === "pending" && <><FaClock /> {t.statusPending}</>}
+                        {order.status === "approved" && <><FaCheckCircle /> {t.statusApproved}</>}
+                        {order.status === "rejected" && <><FaTimesCircle /> {t.statusRejected}</>}
                       </span>
                     </td>
                   </tr>

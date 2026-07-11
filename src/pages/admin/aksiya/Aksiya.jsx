@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react"; // 1. useCallback qo'shildi
 import { FaCalendarPlus, FaTrashAlt, FaClock, FaGift, FaImage } from "react-icons/fa";
 import { supabase } from "../../../supabase/client";
 import { toast } from "react-toastify";
@@ -17,9 +17,9 @@ export default function AksiyaTab({ lang = "uz" }) {
     uz: {
       formTitle: "Yangi Aksiya Muddatini Belgilash",
       formDesc: "Bu yerda belgilangan muddat ichida foydalanuvchilar o'z panellarida aksiya bannerini ko'rib turishadi.",
-      labelTitle: "Aksiya Nomi / Sarlavhasi *",
+      labelTitle: "Aksiya Nomi *",
       placeholderTitle: "Masalan: Bahoriy Omadli Kunlar Aksiyasi",
-      labelImage: "Aksiya Banneri / Rasmi",
+      labelImage: "Aksiya Rasmi",
       optional: "(Ixtiyoriy)",
       labelStart: "Boshlanish Sanasi va Vaqti *",
       labelEnd: "Tugash Sanasi va Vaqti *",
@@ -80,8 +80,8 @@ export default function AksiyaTab({ lang = "uz" }) {
 
   const t = translations[lang] || translations.uz;
 
-  // Aksiyalarni yuklash
-  const fetchCampaigns = async () => {
+  // 2. Funksiya useCallback ichiga olindi va unga til o'zgarganda yangilanishi uchun t.errorLoadConsole va t.errorLoad bog'landi
+  const fetchCampaigns = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("campaigns")
@@ -94,11 +94,12 @@ export default function AksiyaTab({ lang = "uz" }) {
       console.error(t.errorLoadConsole, err);
       toast.error(t.errorLoad);
     }
-  };
+  }, [t.errorLoadConsole, t.errorLoad]); 
 
+  // 3. useEffect faollashtirildi va fetchCampaigns uning ichiga bog'liqlik sifatida qo'shildi
   useEffect(() => {
     fetchCampaigns();
-  }, []);
+  }, [fetchCampaigns]);
 
   // Yangi aksiya yaratish
   const handleCreateCampaign = async (e) => {

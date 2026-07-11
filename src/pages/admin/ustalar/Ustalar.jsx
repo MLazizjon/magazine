@@ -8,7 +8,7 @@ import { supabase } from "../../../supabase/client";
 import { toast } from "react-toastify";
 import "./ustalar.css"; 
 
-export default function MastersTab({ mastersList, toggleMasterStatus, lang = "uz" }) {
+export default function MastersTab({ mastersList = [], toggleMasterStatus, lang = "uz" }) {
   const [selectedMaster, setSelectedMaster] = useState(null);
   const [scannedCodes, setScannedCodes] = useState([]);
   const [loadingCodes, setLoadingCodes] = useState(false);
@@ -36,16 +36,17 @@ export default function MastersTab({ mastersList, toggleMasterStatus, lang = "uz
       noHistory: "Ushbu usta hali shtrix-kod skanerlamagan.",
       approved: "Tasdiqlangan",
       mainTitle: "Ustalar Umumiy Bazasi",
-      searchPlaceholder: "Ism, raqam yoki viloyat...",
+      searchPlaceholder: "Ism, raqam, viloyat yoki tuman...",
       thName: "F.I.Sh (To'liq ism)",
       thPhone: "Telefon Raqami",
-      thRegion: "Viloyat / Hudud",
+      thRegion: "Viloyat / Tuman",
       thScore: "To'plangan Ball",
+      thStatus: "Holati",
       thProfile: "Profil",
       actionActive: "Faol",
       actionInactive: "Yopiq",
       btnView: "Ko'rish",
-      noMasters: "Bazada hozircha birorta ham usta mavjud emas.",
+      noMasters: "Bazada hozircha birorta ham usta maroon emas.",
       noResults: "Qidiruv bo'yicha hech qanday usta topilmadi."
     },
     ru: {
@@ -68,11 +69,12 @@ export default function MastersTab({ mastersList, toggleMasterStatus, lang = "uz
       noHistory: "Этот мастер еще не сканировал штрих-коды.",
       approved: "Подтверждено",
       mainTitle: "Общая База Мастеров",
-      searchPlaceholder: "Имя, номер или регион...",
+      searchPlaceholder: "Имя, номер, регион или район...",
       thName: "Ф.И.О (Полное имя)",
       thPhone: "Номер телефона",
-      thRegion: "Регион / Область",
+      thRegion: "Регион / Район",
       thScore: "Набранные баллы",
+      thStatus: "Статус",
       thProfile: "Профиль",
       actionActive: "Активен",
       actionInactive: "Закрыт",
@@ -105,17 +107,24 @@ export default function MastersTab({ mastersList, toggleMasterStatus, lang = "uz
       console.error(err);
       toast.error(lang === "ru" ? "Ошибка при загрузке истории" : "Tarixni yuklashda xatolik yuz berdi");
     } finally {
-      setLoadingCodes(false);
+      setLoadingCodes(false); // ✅ Avvalgi xatolik butkul tuzatildi
     }
   };
 
+  // 🔍 Qidiruv tizimi (Viloyat va tuman birgalikda tekshiriladi)
   const filteredMasters = mastersList.filter((master) => {
     const fullName = (master.full_name || "").toLowerCase();
     const phone = (master.phone || "").toLowerCase();
     const region = (master.region || "").toLowerCase();
+    const district = (master.district || "").toLowerCase();
     const search = searchTerm.toLowerCase();
 
-    return fullName.includes(search) || phone.includes(search) || region.includes(search);
+    return (
+      fullName.includes(search) || 
+      phone.includes(search) || 
+      region.includes(search) || 
+      district.includes(search)
+    );
   });
 
   // 👤 BATAFSIL PROFIL SAHIFASI
@@ -169,13 +178,18 @@ export default function MastersTab({ mastersList, toggleMasterStatus, lang = "uz
             </div>
           </div>
 
+          {/* 📍 Profil ichidagi Manzil qismi (Viloyat / Tuman) */}
           <div className="detail-stat-item-card">
             <div className="card-icon-wrap green-bg">
               <FaMapMarkerAlt />
             </div>
             <div className="card-stat-value-wrap">
               <span>{t.serviceRegion}</span>
-              <h3>{selectedMaster.region || t.notIndicated}</h3>
+              <h3>
+                {selectedMaster.region 
+                  ? `${selectedMaster.region}${selectedMaster.district ? ` / ${selectedMaster.district}` : ""}`
+                  : t.notIndicated}
+              </h3>
             </div>
           </div>
         </div>
@@ -266,16 +280,27 @@ export default function MastersTab({ mastersList, toggleMasterStatus, lang = "uz
                   <td>{index + 1}</td>
                   <td className="master-name">{master.full_name || t.notEntered}</td>
                   <td>{master.phone || "-"}</td>
-                  <td>{master.region || "-"}</td>
+                  {/* 📍 Manzil ustuni */}
+                  <td>
+                    {master.region 
+                      ? `${master.region}${master.district ? `, ${master.district}` : ""}` 
+                      : "-"}
+                  </td>
                   <td>
                     <span className="master-score">{master.bonus || 0} {t.unitBall}</span>
                   </td>
                   <td>
+                    {/* 🔄 Status o'zgartirish tugmasi */}
                     <button 
                       className={`status-toggle-btn ${isActive ? "active" : "inactive"}`}
+                      type="button"
                       onClick={(e) => {
-                        e.stopPropagation(); 
-                        toggleMasterStatus(master.id, master.is_active);
+                        e.stopPropagation(); // ❗ Qator bosilib ketishini to'xtatadi
+                        if (toggleMasterStatus) {
+                          toggleMasterStatus(master.id, master.is_active);
+                        } else {
+                          console.warn("toggleMasterStatus funksiyasi props orqali kelmadi!");
+                        }
                       }}
                     >
                       {isActive ? <FaToggleOn size={22} color="#10b981" /> : <FaToggleOff size={22} color="#ef4444" />}

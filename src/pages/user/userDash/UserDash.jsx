@@ -8,20 +8,22 @@ import {
   FaExclamationTriangle, 
   FaChevronRight, 
   FaGlobe, 
-  FaQrcode, 
   FaQuestionCircle, 
   FaSignOutAlt, 
   FaChevronLeft,
-  FaGift // 🎁 Magazin uchun yangi ikona
+  FaGift 
 } from "react-icons/fa";
 
 import Sidebar from "../sidebar/Sidebar";
 import HomeTab from "../home/Home";
 import CodeTab from "../kodkirish/KodKiritish";
 import SettingsTab from "../setting/Setting";
-import UserMagazin from "../magazine/Magazine"; // 👈 YANGI MAGAZIN KOMPONENTI
+import UserMagazin from "../magazine/Magazine"; 
 
 import "./userDash.css";
+
+// Oylar massivini komponent tashqarisiga chiqaramiz (useCallback xatoligini oldini olish uchun)
+const monthsUz = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentyabr", "Oktyabr", "Noyabr", "Dekabr"];
 
 export default function UserDash() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -34,8 +36,7 @@ export default function UserDash() {
   const [month, setMonth] = useState("Iyul");
   const [statType, setStatType] = useState("hafta");
 
-  // 📈 STATISTIKA STATE'LARI
-  const [currentBonus, setCurrentBonus] = useState(0);      
+  // 📈 STATISTIKA STATE'LARI    
   const [codeCount, setCodeCount] = useState(0);          
   const [pendingCount, setPendingCount] = useState(0);     
   const [totalUsedCount, setTotalUsedCount] = useState(0);  
@@ -44,14 +45,18 @@ export default function UserDash() {
   const [activeCampaign, setActiveCampaign] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // 👤 PROFIL SOZLAMALARI STATE'LARI
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [editRegion, setEditRegion] = useState("");
+  const [editDistrict, setEditDistrict] = useState(""); 
   const [saveLoading, setSaveLoading] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
+  // 🌍 TIZIM TILI STATE'LARINI BOSHQARISH
+  const [lang, setLang] = useState(localStorage.getItem("app_lang") || "uz");
+
   const navigate = useNavigate();
-  const monthsUz = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentyabr", "Oktyabr", "Noyabr", "Dekabr"];
 
   // ⚡ AMALDAGI AKSANING MUDDATINI TEKSHIRISH
   const checkActiveCampaign = useCallback(async () => {
@@ -75,6 +80,30 @@ export default function UserDash() {
     }
   }, []);
 
+  // 🌍 TILNI INTERFEYSDA VA SUPABASE BAZASIDA YANGILASH FUNKSIYASI
+  const changeLanguage = async (newLang) => {
+    setLang(newLang);
+    localStorage.setItem("app_lang", newLang);
+    
+    if (currentUser?.id) {
+      try {
+        const { error } = await supabase
+          .from("profiles")
+          .update({ language: newLang })
+          .eq("id", currentUser.id);
+          
+        if (error) throw error;
+
+        const updatedUser = { ...currentUser, language: newLang };
+        setCurrentUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        toast.success(newLang === "uz" ? "Til muvaffaqiyatli o'zgartirildi!" : "Язык успешно изменен!");
+      } catch (err) {
+        console.error("Tilni bazaga saqlashda xatolik:", err);
+      }
+    }
+  };
+
   // 🔄 MA'LUMOTLARNI DINAMIK FILTRLAB YUKLASH FUNKSIYASI
   const fetchUserData = useCallback(async (user, currentYear = year, currentMonth = month, currentStatType = statType) => {
     try {
@@ -82,7 +111,7 @@ export default function UserDash() {
 
       const { data: profile, error: profError } = await supabase
         .from("profiles")
-        .select("full_name, phone, region, bonus, is_active")
+        .select("full_name, phone, region, district, bonus, is_active, language") 
         .eq("id", user.id)
         .single();
 
@@ -95,8 +124,14 @@ export default function UserDash() {
         return;
       }
 
+      if (profile.language) {
+        setLang(profile.language);
+        localStorage.setItem("app_lang", profile.language);
+      }
+
       setEditName(profile.full_name || "");
       setEditRegion(profile.region || "");
+      setEditDistrict(profile.district || ""); 
 
       const updatedLocalUser = { ...user, ...profile };
       localStorage.setItem("user", JSON.stringify(updatedLocalUser));
@@ -135,7 +170,6 @@ export default function UserDash() {
         setCodeCount(approvedCodes.length); 
         setPendingCount(pendingCodes.length); 
         setTotalUsedCount(usedCodes.length); 
-        setCurrentBonus(profile.bonus || 0); // 👈 Umumiy real balansni chiqarish uchun o'zgartirildi
 
         let generatedStats = [];
         const joriyVaqt = new Date();
@@ -201,7 +235,6 @@ export default function UserDash() {
         setCodeCount(0);
         setPendingCount(0);
         setTotalUsedCount(0);
-        setCurrentBonus(profile.bonus || 0);
         const emptyLabels = currentStatType === "oy" ? ["1-Hafta", "2-Hafta", "3-Hafta", "4-Hafta"] : ["Du", "Se", "Ch", "Pa", "Ju", "Sha", "Ya"];
         setDynamicChartData(emptyLabels.map(l => ({ label: l, value: 0, realVal: 0, active: false })));
       }
@@ -248,7 +281,7 @@ export default function UserDash() {
     return () => {
       supabase.removeChannel(realtimeSubscription);
     };
-  }, [navigate, checkActiveCampaign]);
+  }, [navigate, checkActiveCampaign, fetchUserData, year, month, statType]);
 
   const confirmLogout = () => {
     localStorage.removeItem("user");
@@ -263,7 +296,7 @@ export default function UserDash() {
       toast.error("Iltimos, kodni kiriting!");
       return;
     }
-    setLoading(true);
+    loading(true);
     try {
       const { data: promoCode, error: promoError } = await supabase
         .from("promo_codes")
@@ -312,7 +345,11 @@ export default function UserDash() {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ full_name: editName.trim(), region: editRegion.trim() })
+        .update({ 
+          full_name: editName.trim(), 
+          region: editRegion.trim(),
+          district: editDistrict.trim() 
+        })
         .eq("id", currentUser.id);
 
       if (error) throw error;
@@ -374,6 +411,7 @@ export default function UserDash() {
               statType={statType}
               setStatType={setStatType}
               monthsUz={monthsUz}
+              lang={lang}
             />
           )}
 
@@ -383,14 +421,16 @@ export default function UserDash() {
               setBonusCode={setBonusCode} 
               handleSendCode={handleSendCode} 
               loading={loading} 
+              lang={lang}
             />
           )}
 
-          {/* 🎁 MAGAZIN (SOVG'ALAR DO'KONI) TABI SHU YERDA */}
+          {/* 🎁 MAGAZIN (SOVG'ALAR DO'KONI) TABI */}
           {activeTab === "magazin" && (
             <UserMagazin 
               currentUser={currentUser} 
               fetchUserData={() => fetchUserData(currentUser, year, month, statType)} 
+              lang={lang}
             />
           )}
 
@@ -402,11 +442,15 @@ export default function UserDash() {
               setEditName={setEditName} 
               editRegion={editRegion} 
               setEditRegion={setEditRegion} 
+              editDistrict={editDistrict}         
+              setEditDistrict={setEditDistrict}   
               currentUser={currentUser} 
               saveLoading={saveLoading} 
               handleSaveProfile={handleSaveProfile} 
               fetchUserData={() => fetchUserData(currentUser, year, month, statType)} 
               setShowLogoutModal={setShowLogoutModal} 
+              lang={lang}
+              changeLanguage={changeLanguage}
               onBack={() => {
                 setIsDrawerOpen(true);
                 setActiveTab("home");
@@ -424,7 +468,7 @@ export default function UserDash() {
               <button className="drawer-back-btn" onClick={() => setIsDrawerOpen(false)}>
                 <FaChevronLeft size={16} />
               </button>
-              <h2>Profil</h2>
+              <h2>{lang === "uz" ? "Profil" : "Профиль"}</h2>
               <div style={{ width: 36 }}></div>
             </div>
 
@@ -432,27 +476,34 @@ export default function UserDash() {
               <button className="drawer-item" onClick={() => { setActiveTab("settings"); setIsDrawerOpen(false); }}>
                 <div className="d-item-left">
                   <div className="d-icon-box"><FaUserCircle /></div>
-                  <span>Sozlamalar</span>
+                  <span>{lang === "uz" ? "Sozlamalar" : "Настройки"}</span>
                 </div>
                 <FaChevronRight className="d-chevron" />
               </button>
 
-              <button className="drawer-item">
+              {/* 🌐 TIL TUGMASI - ENDI BOSILGANDA TILLARNI ALMAShTIRADI */}
+              <button 
+                className="drawer-item" 
+                onClick={() => {
+                  const nextLang = lang === "uz" ? "ru" : "uz";
+                  changeLanguage(nextLang);
+                }}
+              >
                 <div className="d-item-left">
                   <div className="d-icon-box"><FaGlobe /></div>
-                  <span>Til</span>
+                  <span>{lang === "uz" ? "Til" : "Язык"}</span>
                 </div>
                 <div className="d-item-right">
-                  <span className="d-lang-val">Uz</span>
+                  <span className="d-lang-val">{lang === "uz" ? "Uz" : "Ru"}</span>
                   <FaChevronRight className="d-chevron" />
                 </div>
               </button>
 
-              {/* 🎁 MAGAZIN TUGMASI MOBIL DRAWYERGA BIRIKTIRILDI */}
+              {/* 🎁 MAGAZIN TUGMASI */}
               <button className="drawer-item" onClick={() => { setActiveTab("magazin"); setIsDrawerOpen(false); }}>
                 <div className="d-item-left">
                   <div className="d-icon-box"><FaGift /></div>
-                  <span>Sovg'alar do'koni (Magazin)</span>
+                  <span>{lang === "uz" ? "Sovg'alar do'koni" : "Магазин подарков"}</span>
                 </div>
                 <FaChevronRight className="d-chevron" />
               </button>
@@ -468,7 +519,7 @@ export default function UserDash() {
               <button className="drawer-item d-logout-style" onClick={() => { setIsDrawerOpen(false); setShowLogoutModal(true); }}>
                 <div className="d-item-left">
                   <div className="d-icon-box"><FaSignOutAlt /></div>
-                  <span>Chiqish</span>
+                  <span>{lang === "uz" ? "Chiqish" : "Выйти"}</span>
                 </div>
                 <FaChevronRight className="d-chevron" />
               </button>
@@ -484,11 +535,11 @@ export default function UserDash() {
             <div className="logout-modal-icon">
               <FaExclamationTriangle size={28} />
             </div>
-            <h3>Tizimdan chiqish</h3>
-            <p>Haqiqatan ham shaxsiy kabinetingizdan chiqmoqchimisiz?</p>
+            <h3>{lang === "uz" ? "Tizimdan chiqish" : "Выход из системы"}</h3>
+            <p>{lang === "uz" ? "Haqiqatan ham shaxsiy kabinetingizdan chiqmoqchimisiz?" : "Вы действительно хотите выйти из своего личного кабинета?"}</p>
             <div className="logout-modal-actions">
-              <button className="modal-confirm-btn" onClick={confirmLogout}>Ha, chiqish</button>
-              <button className="modal-cancel-btn" onClick={() => setShowLogoutModal(false)}>Bekor qilish</button>
+              <button className="modal-confirm-btn" onClick={confirmLogout}>{lang === "uz" ? "Ha, chiqish" : "Да, выйти"}</button>
+              <button className="modal-cancel-btn" onClick={() => setShowLogoutModal(false)}>{lang === "uz" ? "Bekor qilish" : "Отмена"}</button>
             </div>
           </div>
         </div>

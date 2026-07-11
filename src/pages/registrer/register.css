@@ -1,128 +1,169 @@
 /* ==========================================================================
-   📌 AUTHENTICATION UNIVERSAL STYLES (login.css)
+   📌 AUTHENTICATION CUSTOM DROPDOWN STYLES (register.css)
    ========================================================================== */
 
-/* 🌌 Butun ekranni o'rab turuvchi va markazlashtiruvchi fon */
-.auth-page-wrapper {
-  margin: 0 !important;
-  padding: 20px !important;
-  width: 100vw !important;
-  min-height: 100vh !important;
-  display: flex !important;
-  align-items: center !important;       /* Vertikal qoq markaz */
-  justify-content: center !important;   /* Gorizontal qoq markaz */
-  background: #f1f5f9 !important;      /* Chiroyli och kulrang zamonaviy fon */
-  box-sizing: border-box !important;
-  position: fixed !important;          /* Ekrandan chiqib ketmasligi uchun */
-  top: 0 !important;
-  left: 0 !important;
-}
-
-/* 🏢 Kirish va Ro'yxatdan o'tish kartasi (Oq blok) */
-.auth {
-  width: 100% !important;
-  max-width: 400px !important;        /* Karta kengligi */
-  padding: 40px 32px !important;
-  background: #ffffff !important;
-  border-radius: 16px !important;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06) !important; /* Mayin soya */
-  display: flex !important;
-  flex-direction: column !important;
-  box-sizing: border-box !important;
-}
-
-/* 🏷️ Sarlavhalar (Tizimga kirish / Ro'yxatdan o'tish) */
-.auth h2 {
-  margin: 0 0 28px 0 !important;
-  color: #0f172a !important;
-  font-size: 26px !important;
-  font-weight: 700 !important;
-  text-align: center !important;
-  letter-spacing: -0.5px !important;
-}
-
-/* 📦 Inputlar atrofidagi o'rab turuvchi div */
-.input-group {
-  width: 100% !important;
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-  margin-bottom: 20px !important;
-  display: block !important;
-}
-
-/* 🌟 Input elementlarining o'zi */
-.auth input {
-  display: block !important;
-  width: 100% !important;
-  height: 52px !important;
-  padding: 0 16px !important;
-  border-radius: 10px !important;
-  border: 1.5px solid #e2e8f0 !important;
-  background-color: #f8fafc !important;
-  font-size: 16px !important;
-  line-height: 1.5 !important;
-  color: #334155 !important;
-  outline: none !important;
-  box-sizing: border-box !important;
-  transition: all 0.2s ease !important;
-}
-
-/* Input bosilgandagi ko'k chiziq va effekt */
-.auth input:focus {
-  border-color: #2563eb !important;
-  background-color: #ffffff !important;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12) !important;
-}
-
-.auth input::placeholder {
-  color: #94a3b8 !important;
-}
-
-/* 🚀 Aktiv tugmalar */
-.auth button {
-  width: 100% !important;
-  height: 50px !important;
-  background: #2563eb !important;
-  color: white !important;
-  border: none !important;
-  cursor: pointer !important;
-  border-radius: 10px !important;
-  font-size: 16px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.5px !important;
-  margin-top: 10px !important;
-  box-sizing: border-box !important;
-  transition: all 0.2s ease !important;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
-}
-
-.auth button:hover {
-  background: #1d4ed8 !important;
-  transform: translateY(-1px) !important;
-}
-
-.auth button:active {
-  transform: translateY(1px) !important;
-}
-
-.auth button:disabled {
-  background-color: #93c5fd !important;
-  cursor: not-allowed !important;
-}
-
-/* 🔗 Pastdagi o'tish havolalari (Linklar) */
-.register-link, .auth p {
-  margin: 24px 0 0 0 !important;
-  color: #64748b !important;
-  font-size: 14px !important;
-  cursor: pointer !important;
-  text-align: center !important;
-  font-weight: 500 !important;
-  display: block !important;
-}
-
-.register-link:hover, .auth p:hover {
-  color: #2563eb !important;
-  text-decoration: underline !important;
-}
+   .auth-page-wrapper {
+    margin: 0 !important;
+    padding: 16px !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    display: flex !important;
+    align-items: center !important;      
+    justify-content: center !important;   
+    background: #f1f5f9 !important;      
+    box-sizing: border-box !important;
+  }
+  
+  .auth {
+    width: 100% !important;
+    max-width: 400px !important;        
+    padding: 32px 24px !important;      
+    background: #ffffff !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+  }
+  
+  .auth h2 {
+    margin: 0 0 24px 0 !important;
+    color: #0f172a !important;
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    letter-spacing: -0.5px !important;
+  }
+  
+  .input-group {
+    width: 100% !important;
+    margin-bottom: 16px !important;
+    position: relative !important; /* Ichidagi ro'yxat aniq joylashishi uchun */
+  }
+  
+  /* 🌟 Inputlar va Custom Dropdown Boshi */
+  .auth input, 
+  .custom-select-trigger {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    height: 50px !important;
+    padding: 0 16px !important;
+    border-radius: 10px !important;
+    border: 1.5px solid #e2e8f0 !important;
+    background-color: #f8fafc !important;
+    font-size: 15px !important;
+    color: #334155 !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s ease !important;
+  }
+  
+  /* 🏙️ Custom Select Tugmasi dizayni va strelkasi */
+  .custom-select-trigger {
+    cursor: pointer !important;
+    user-select: none !important;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    background-size: 16px !important;
+    padding-right: 40px !important;
+  }
+  
+  .auth input:focus,
+  .custom-select-trigger:hover {
+    border-color: #2563eb !important;
+  }
+  
+  /* Placeholder holatidagi rang (tanlanmagan paytda) */
+  .custom-select-trigger.is-placeholder {
+    color: #94a3b8 !important;
+  }
+  
+  .auth input::placeholder {
+    color: #94a3b8 !important;
+  }
+  
+  /* 📦 VARIANTLAR OCHILADIGAN QUTI (Input ostida chiroyli chiqadi) */
+  .custom-options-box {
+    position: absolute !important;
+    top: 54px !important;               /* Input tagidan joy tashlaydi */
+    left: 0 !important;
+    width: 100% !important;
+    max-height: 200px !important;       /* Juda katta bo'lib ketmasligi uchun chegara */
+    overflow-y: auto !important;        /* Katta ro'yxat ichidan skroll bo'ladi */
+    background-color: #ffffff !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.1) !important;
+    z-index: 9999 !important;           /* Hamma narsaning ustida chiroyli turadi */
+    box-sizing: border-box !important;
+  }
+  
+  /* 📍 Har bir viloyat/tuman qatori */
+  .custom-option {
+    padding: 12px 16px !important;
+    font-size: 15px !important;
+    color: #334155 !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease !important;
+  }
+  
+  .custom-option:hover {
+    background-color: #f1f5f9 !important; /* Sichqoncha kelganda och rang */
+    color: #2563eb !important;
+  }
+  
+  .custom-option.selected {
+    background-color: #eff6ff !important; /* Tanlangan variant foni */
+    color: #2563eb !important;
+    font-weight: 600 !important;
+  }
+  
+  /* 🚀 Yuborish tugmasi (Matn markazga tekislandi) */
+  .auth button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 50px !important;
+    background: #2563eb !important;
+    color: white !important;
+    border: none !important;
+    cursor: pointer !important;
+    border-radius: 10px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    margin-top: 8px !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15) !important;
+  }
+  
+  .auth button:hover {
+    background: #1d4ed8 !important;
+  }
+  
+  /* 🔗 O'tish havolasi */
+  .auth-link {
+    margin: 20px 0 0 0 !important;
+    color: #64748b !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    text-align: center !important;
+    font-weight: 500 !important;
+    display: block !important;
+  }
+  
+  .auth-link:hover {
+    color: #2563eb !important;
+    text-decoration: underline !important;
+  }
+  
+  /* 📱 Mobil moslashuvchanlik */
+  @media (max-width: 480px) {
+    .auth {
+      padding: 24px 16px !important;
+      border-radius: 12px !important;
+    }
+  }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react"; // 1. useCallback import qilindi
 import { supabase } from "../../../supabase/client";
 import { 
   FaPlus, 
@@ -100,11 +100,8 @@ export default function CodeGenerator({ lang = "uz" }) {
 
   const t = translations[lang] || translations.uz;
 
-  useEffect(() => {
-    fetchRecentCodes();
-  }, []);
-
-  const fetchRecentCodes = async () => {
+  // 2. Funksiya useCallback ichiga olindi va lang o'zgaruvchisiga bog'landi
+  const fetchRecentCodes = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("promo_codes")
@@ -145,7 +142,12 @@ export default function CodeGenerator({ lang = "uz" }) {
     } catch (err) {
       console.error(t.toastErrLoad, err);
     }
-  };
+  }, [lang, t.toastErrLoad]); // Bog'liqliklar
+
+  // 3. useEffect ichiga fetchRecentCodes qo'shildi
+  useEffect(() => {
+    fetchRecentCodes();
+  }, [fetchRecentCodes]);
 
   const handleGenerate = async () => {
     if (quantity < 1 || quantity > 100) {
@@ -184,6 +186,7 @@ export default function CodeGenerator({ lang = "uz" }) {
     if (selectedGroupCodes.length === 0) return;
     setDeleteLoading(true);
 
+  
     try {
       const idsToDelete = selectedGroupCodes.map(c => c.id);
       const { error } = await supabase.from("promo_codes").delete().in("id", idsToDelete);

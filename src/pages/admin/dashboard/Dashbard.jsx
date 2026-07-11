@@ -34,7 +34,7 @@ export default function DashboardTab({
     uz: {
       totalUsers: "Umumiy Foydalanuvchilar",
       activeMasters: "Faol Ustalar",
-      totalCodes: "Jami Tasdiqlangan Kodlar",
+      totalCodes: "Jami Kodlar",
       newClients: "Yangi Mijozlar (Oy)",
       chartTitle: "📊 Top Ustalar Ballari Diagrammasi",
       sortDesc: "Kamayish tartibida (Max)",
@@ -177,20 +177,20 @@ export default function DashboardTab({
           <p className="stat-number">{stats.totalCodes.toLocaleString()} {t.unit}</p>
         </div>
 
-        <div className="stat-card">
+        {/* <div className="stat-card">
           <div className="stat-card-header">
             <h4>{t.newClients}</h4>
             <div className="icon-wrapper purple"><FaUserPlus /></div>
           </div>
           <p className="stat-number">{stats.newClients.toLocaleString()}</p>
-        </div>
+        </div> */}
       </div>
 
       {/* 📊 Diagramma Bo'limi */}
       <div className="chart-fullwidth-section">
         <div className="chart-header-container">
           <h4 className="chart-title">{t.chartTitle}</h4>
-          <div className="select-wrapper">
+          {/* <div className="select-wrapper">
             <FaSortAmountDown className="select-icon" />
             <select
               className="text-sort-select"
@@ -200,7 +200,7 @@ export default function DashboardTab({
               <option value="desc">{t.sortDesc}</option>
               <option value="asc">{t.sortAsc}</option>
             </select>
-          </div>
+          </div> */}
         </div>
 
         <div className="chart-scroll-wrapper">

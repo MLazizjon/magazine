@@ -2,19 +2,17 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { supabase } from "../../../supabase/client";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
 import { FaBars, FaTimes } from "react-icons/fa";
 
 import Sidebar from "../sidebar/Sidebar";
 import DashboardTab from "../dashboard/Dashbard";
 import MastersTab from "../ustalar/Ustalar";
 import GeneratorTab from "../kodgenarator/Kodgenerator";
+import MagazinTab from "../magazine/Magazine"; 
+import HistoryTab from "../kodtarixi/Kodtarixi";
 import AksiyaTab from "../aksiya/Aksiya";
 import MaslahatlarTab from "../news/News";
 import ProfilTab from "../profil/Profil"; 
-import HistoryTab from "../kodtarixi/Kodtarixi";
-import MagazinTab from "../magazine/Magazine"; 
 
 import "./adminDash.css";
 
@@ -30,10 +28,67 @@ export default function AdminDash() {
   const [mastersList, setMastersList] = useState([]);
   const [allPromoCodes, setAllPromoCodes] = useState([]); 
   const [codeQuantity, setCodeQuantity] = useState("");
-  const [generationDate, setGenerationDate] = useState(""); 
   const [sortOrder, setSortOrder] = useState("desc");
 
   const navigate = useNavigate();
+
+  // 🌍 Tilni o'zgartirish va ma'lumotlarni saqlash funksiyasi
+  const changeLanguage = async (newLang) => {
+    setLang(newLang);
+    localStorage.setItem("app_lang", newLang);
+    
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const localUser = JSON.parse(storedUser);
+      try {
+        await supabase
+          .from("profiles")
+          .update({ language: newLang })
+          .eq("id", localUser.id);
+          
+        localUser.language = newLang;
+        localStorage.setItem("user", JSON.stringify(localUser));
+        toast.success(newLang === "uz" ? "Til o'zgartirildi!" : "Язык изменен!");
+      } catch (error) {
+        console.error("Tilni saqlashda xatolik:", error);
+      }
+    }
+  };
+
+  // 🔄 Usta holatini (is_active) o'zgartirish funksiyasi
+  const handleToggleMasterStatus = async (masterId, currentStatus) => {
+    const newStatus = currentStatus === false ? true : false;
+    
+    try {
+      // 1. Supabase ma'lumotlar bazasida yangilash
+      const { error } = await supabase
+        .from("profiles")
+        .update({ is_active: newStatus })
+        .eq("id", masterId);
+
+      if (error) throw error;
+
+      // 2. React state-ini (mahalliy ro'yxatni) yangilash
+      setMastersList((prevList) =>
+        prevList.map((master) =>
+          master.id === masterId ? { ...master, is_active: newStatus } : master
+        )
+      );
+
+      toast.success(
+        lang === "uz" 
+          ? "Usta holati muvaffaqiyatli o'zgartirildi!" 
+          : "Статус мастера успешно изменен!"
+      );
+    } catch (error) {
+      console.error("Statusni o'zgartirishda xatolik:", error);
+      toast.error(
+        lang === "uz" 
+          ? "Xatolik yuz berdi!" 
+          : "Произошла ошибка!"
+      );
+    }
+  };
 
   const fetchDashboardData = useCallback(async () => {
     setLoading(true);
@@ -93,7 +148,6 @@ export default function AdminDash() {
 
   return (
     <div className="dash-container">
-      {/* 📱 Chap tomondagi ixcham to'rtburchak mobil menyu tugmasi */}
       <button className="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
         {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
       </button>
@@ -117,7 +171,12 @@ export default function AdminDash() {
           )}
 
           {activeTab === "ustalar" && (
-            <MastersTab mastersList={mastersList} navigate={navigate} toggleMasterStatus={() => {}} lang={lang} />
+            <MastersTab 
+              mastersList={mastersList} 
+              navigate={navigate} 
+              toggleMasterStatus={handleToggleMasterStatus} 
+              lang={lang} 
+            />
           )}
 
           {activeTab === "random" && (
@@ -141,7 +200,11 @@ export default function AdminDash() {
           )}
 
           {activeTab === "profil" && (
-            <ProfilTab handleLogout={handleLogout} lang={lang} changeLanguage={() => {}} />
+            <ProfilTab 
+              handleLogout={handleLogout} 
+              lang={lang} 
+              changeLanguage={changeLanguage} 
+            />
           )}
         </section>
       </main>

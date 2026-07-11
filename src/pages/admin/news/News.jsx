@@ -1,27 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { FaLightbulb, FaTrashAlt, FaPlusCircle, FaRegCommentDots } from "react-icons/fa";
+import { FaLightbulb, FaTrashAlt, FaPlusCircle, FaRegCommentDots, FaUpload, FaImage } from "react-icons/fa";
 import { supabase } from "../../../supabase/client";
 import { toast } from "react-toastify";
 import "./news.css"; 
 
 export default function MaslahatlarTab({ lang = "uz" }) {
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState(""); // Jadvalingizdagi 'content' maydoni uchun
+  const [content, setContent] = useState(""); 
+  const [imageUrl, setImageUrl] = useState(""); // Государство для ссылки на изображение
   const [newsList, setNewsList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false); // Состояние загрузки файла
 
-  // 🌍 Ko'p tillilik lug'ati
+  // 🌍 Ko'p tillilik lug'ati / Словарь локализации
   const translations = {
     uz: {
       formTitle: "Ustalar uchun Maslahatlar va Tavsiyalar",
       formDesc: "Bu yerga yozilgan tavsiyalar yoki muhim gaplar bevosita ustalar (userlar) panelida ko'rinadi.",
-      labelTitle: "Sarlavha / Nomlanishi *",
+      labelTitle: " Nomlanishi *",
       placeholderTitle: "Masalan: To'lov tizimidagi yangilanishlar",
-      labelContent: "Maslahat yoki Yangilik Matni *",
+      labelContent: "Maslahat Matni *",
       placeholderContent: "Foydalanuvchilar ko'rishi kerak bo'lgan gaplar va tavsiyalarni yozing...",
       btnPublish: "E'lon Qilish",
       btnSaving: "Saqlanmoqda...",
-      listTitle: "📋 Mavjud Maslahat va Yangiliklar",
+      listTitle: "📋 Mavjud Yangiliklar",
       thTitle: "Sarlavha",
       thContent: "Matn",
       thDate: "Sana",
@@ -33,7 +35,12 @@ export default function MaslahatlarTab({ lang = "uz" }) {
       confirmDelete: "Ushbu ma'lumotni o'chirib tashlamoqchimisiz?",
       errorLoad: "Mavjud ma'lumotlarni yuklab bo'lmadi",
       errorLoadConsole: "Ma'lumotlarni yuklashda xatolik:",
-      errorAction: "Xatolik yuz berdi: "
+      errorAction: "Xatolik yuz berdi: ",
+      uploadBtn: "Rasm tanlash",
+      uploadingText: "Rasm yuklanmoqda...",
+      uploadSuccess: "Rasm muvaffaqiyatli yuklandi! 📸",
+      uploadTypeErr: "Iltimos, faqat rasm faylini tanlang!",
+      imgText: "Rasm"
     },
     ru: {
       formTitle: "Советы и Рекомендации для Мастеров",
@@ -56,7 +63,12 @@ export default function MaslahatlarTab({ lang = "uz" }) {
       confirmDelete: "Вы действительно хотите удалить эту информацию?",
       errorLoad: "Не удалось загрузить существующие данные",
       errorLoadConsole: "Ошибка при загрузке данных:",
-      errorAction: "Произошла ошибка: "
+      errorAction: "Произошла ошибка: ",
+      uploadBtn: "Выбрать изображение с компьютера",
+      uploadingText: "Изображение загружается...",
+      uploadSuccess: "Изображение успешно загружено! 📸",
+      uploadTypeErr: "Пожалуйста, выберите только файлы изображений!",
+      imgText: "Фото"
     }
   };
 
@@ -82,6 +94,39 @@ export default function MaslahatlarTab({ lang = "uz" }) {
     fetchNews();
   }, []);
 
+  // 📷 Rasmni Supabase Storage-ga yuklash funksiyasi
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      return toast.error(t.uploadTypeErr);
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `news-images/${fileName}`; // Новости будут загружаться в отдельную папку
+
+      // Загружаем в созданный ранее бакет 'prizes'
+      const { error: uploadError } = await supabase.storage
+        .from("prizes")
+        .upload(filePath, file, { cacheControl: "3600", upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from("prizes").getPublicUrl(filePath);
+      
+      setImageUrl(data.publicUrl);
+      toast.success(t.uploadSuccess);
+    } catch (error) {
+      toast.error(t.errorAction + error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   // 2. Yangi maslahat/yangilik yaratish va bazaga yozish
   const handleCreateNews = async (e) => {
     e.preventDefault();
@@ -96,7 +141,8 @@ export default function MaslahatlarTab({ lang = "uz" }) {
       const { error } = await supabase.from("news").insert([
         {
           title: title.trim(),
-          content: content.trim(), // 'content' maydoniga yozadi
+          content: content.trim(), 
+          image_url: imageUrl.trim() || null, // Добавляем ссылку на картинку в базу данных
         },
       ]);
 
@@ -105,6 +151,7 @@ export default function MaslahatlarTab({ lang = "uz" }) {
       toast.success(t.toastSuccess);
       setTitle("");
       setContent("");
+      setImageUrl(""); // Очищаем картинку после успешной публикации
       fetchNews();
     } catch (err) {
       toast.error(t.errorAction + err.message);
@@ -166,7 +213,45 @@ export default function MaslahatlarTab({ lang = "uz" }) {
             />
           </div>
 
-          <button type="submit" disabled={loading} className="btn-submit" style={{ background: "#eab308" }}>
+          {/* КНОПКА ЗАГРУЗКИ КАРТИНКИ */}
+          <div style={{ display: "flex", gap: "12px", alignItems: "center", marginBottom: "15px", flexWrap: "wrap" }}>
+            <div style={{ position: "relative", flex: 1 }}>
+              <label htmlFor="news-file-upload" style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                padding: "10px 15px",
+                background: "#f1f5f9",
+                border: "1px dashed #cbd5e1",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontWeight: "500",
+                color: "#475569",
+                textAlign: "center"
+              }}>
+                <FaUpload /> {uploading ? t.uploadingText : t.uploadBtn}
+              </label>
+              <input 
+                id="news-file-upload"
+                type="file" 
+                accept="image/*"
+                onChange={handleImageUpload} 
+                disabled={uploading}
+                style={{ display: "none" }}
+              />
+            </div>
+
+            {/* Превью картинки при наличии ссылки */}
+            {imageUrl && (
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "#f0fdf4", padding: "6px 12px", borderRadius: "6px", border: "1px solid #bbf7d0" }}>
+                <img src={imageUrl} alt="Uploaded preview" style={{ width: "35px", height: "35px", objectFit: "cover", borderRadius: "4px" }} />
+                <span style={{ fontSize: "12px", color: "#16a34a" }}>✓ Ready</span>
+              </div>
+            )}
+          </div>
+
+          <button type="submit" disabled={loading || uploading} className="btn-submit" style={{ background: "#eab308" }}>
             <FaPlusCircle /> {loading ? t.btnSaving : t.btnPublish}
           </button>
         </form>
@@ -180,8 +265,9 @@ export default function MaslahatlarTab({ lang = "uz" }) {
           <table className="custom-table">
             <thead>
               <tr>
-                <th style={{ width: "25%" }}>{t.thTitle}</th>
-                <th style={{ width: "50%" }}>{t.thContent}</th>
+                <th style={{ width: "10%" }}>{t.imgText}</th>
+                <th style={{ width: "20%" }}>{t.thTitle}</th>
+                <th style={{ width: "45%" }}>{t.thContent}</th>
                 <th style={{ width: "15%" }}>{t.thDate}</th>
                 <th style={{ textAlign: "center", width: "10%" }}>{t.thAction}</th>
               </tr>
@@ -189,6 +275,16 @@ export default function MaslahatlarTab({ lang = "uz" }) {
             <tbody>
               {newsList.map((item) => (
                 <tr key={item.id}>
+                  {/*Отображение фото в таблице списков */}
+                  <td>
+                    {item.image_url ? (
+                      <img src={item.image_url} alt="" style={{ width: "45px", height: "45px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e2e8f0" }} />
+                    ) : (
+                      <div style={{ width: "45px", height: "45px", background: "#f1f5f9", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <FaImage style={{ color: "#cbd5e1" }} />
+                      </div>
+                    )}
+                  </td>
                   <td><strong>{item.title}</strong></td>
                   <td>
                     <div className="tip-desc-cell">
@@ -216,7 +312,7 @@ export default function MaslahatlarTab({ lang = "uz" }) {
               
               {newsList.length === 0 && (
                 <tr>
-                  <td colSpan="4" className="empty-row" style={{ textAlign: "center", padding: "20px", color: "#64748b" }}>
+                  <td colSpan="5" className="empty-row" style={{ textAlign: "center", padding: "20px", color: "#64748b" }}>
                     {t.emptyRow}
                   </td>
                 </tr>

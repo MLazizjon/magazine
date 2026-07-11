@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "../../../supabase/client"; // 🛠️ Supabase ulash parchalari
+import { supabase } from "../../../supabase/client"; 
 import { 
   FaArrowLeft, 
   FaPhone, 
@@ -12,19 +12,18 @@ import { toast } from "react-toastify";
 import "./userdetals.css"; 
 
 export default function UserDetails() {
-  const { id } = useParams(); // URL orqali ustaning IDsini olamiz
+  const { id } = useParams(); 
   const navigate = useNavigate();
   
   const [master, setMaster] = useState(null);
   const [scannedCodes, setScannedCodes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 👤 Ustaning ma'lumotlarini va u skaner qilgan kodlarni yuklash funksiyasi
   const fetchMasterAndCodesData = useCallback(async () => {
     try {
       setLoading(true);
 
-      // 1. Ustaning shaxsiy ma'lumotlarini profiles jadvalidan olish
+      // 1. Ustaning hamma ma'lumotlarini profiles jadvalidan olish (*)
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
@@ -45,7 +44,7 @@ export default function UserDetails() {
           )
         `)
         .eq("user_id", id)
-        .order("created_at", { ascending: false }); // Eng oxirgi skaner qilingan kod tepada chiqadi
+        .order("created_at", { ascending: false });
 
       if (codesError) throw codesError;
       setScannedCodes(codesData || []);
@@ -95,17 +94,23 @@ export default function UserDetails() {
               <p>{master.phone || "Ko'rsatilmagan"}</p>
             </div>
           </div>
+          
+          {/* 📍 Alohida sahifadagi Manzil qismi (Viloyat va tuman birgalikda) */}
           <div className="hero-detail-item">
             <FaMapMarkerAlt className="hero-icon" />
             <div>
               <span>Xizmat ko'rsatish hududi</span>
-              <p>{master.region || "Kiritilmagan"}</p>
+              <p>
+                {master.region 
+                  ? `${master.region}${master.district ? ` (${master.district} tumani)` : ""}` 
+                  : "Kiritilmagan"}
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 📊 Skanerlar soni vidjeti (Usta skaner qilishi bilan soni ortadi) */}
+      {/* 📊 Skanerlar soni vidjeti */}
       <div className="detail-stats-grid" style={{ marginTop: "24px" }}>
         <div className="detail-stat-item-card" style={{ maxWidth: "350px" }}>
           <div className="card-icon-wrap blue-bg">
@@ -113,13 +118,12 @@ export default function UserDetails() {
           </div>
           <div className="card-stat-value-wrap">
             <span>Skanerlangan kodlar soni</span>
-            {/* Array uzunligi usta skaner qilgan kodlar miqdoriga teng */}
             <h3>{scannedCodes.length} ta kod</h3>
           </div>
         </div>
       </div>
 
-      {/* 📋 Skaner qilingan kodlar ro'yxati (Pastroqda chiqadigan qismi) */}
+      {/* 📋 Skaner qilingan kodlar ro'yxati */}
       <div className="history-table-section" style={{ marginTop: "32px" }}>
         <div className="table-section-title">
           <FaCalendarAlt style={{ color: "#2563eb", marginRight: "8px" }} />

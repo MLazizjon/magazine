@@ -1,19 +1,42 @@
 import React from "react";
-import { FaChartBar, FaKey, FaGift, FaCogs, FaSignOutAlt } from "react-icons/fa"; // 🎁 FaGift ikonasi qo'shildi
+import { FaChartBar, FaKey, FaGift, FaCogs, FaSignOutAlt } from "react-icons/fa";
 import "./sidebar.css";
 
 export default function Sidebar({ 
   activeTab, 
   setActiveTab, 
   setShowLogoutModal, 
-  currentUser 
+  currentUser,
+  lang // 🌍 UserDash-dan kelayotgan til state-i
 }) {
+
+  // 📝 Sidebar uchun tillar tarjimasi
+  const translations = {
+    uz: {
+      panel: "Panel",
+      kodKiritish: "Kod kiritish",
+      magazin: "Magazin",
+      sozlamalar: "Sozlamalar",
+      chiqish: "Chiqish",
+      usta: "Usta"
+    },
+    ru: {
+      panel: "Панель",
+      kodKiritish: "Ввод кода",
+      magazin: "Магазин",
+      sozlamalar: "Настройки",
+      chiqish: "Выйти",
+      usta: "Мастер"
+    }
+  };
+
+  const t = translations[lang] || translations["uz"];
+
   return (
     <aside className="dash-sidebar">
       
-      {/* 💻 FAQAT DESKTOPDA KO'RINADIGAN TEPPA QISM */}
+      {/* 💻 LOGOTIP QISMI */}
       <div className="sidebar-top-section">
-        {/* 💎 Logotip qismi */}
         <div className="sidebar-logo">
           <div className="logo-icon-box">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -27,7 +50,7 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* 🧭 NAVIGATSIYA MENYUSI (Kompyuterda vertikal, telefonda gorizontal bottom-bar bo'ladi) */}
+      {/* 🧭 NAVIGATSIYA MENYUSI */}
       <nav className="sidebar-menu">
         <button 
           className={`menu-item ${activeTab === "home" ? "active" : ""}`} 
@@ -36,7 +59,7 @@ export default function Sidebar({
           <div className="icon-wrapper">
             <FaChartBar className="icon" />
           </div>
-          <span>Panel</span>
+          <span>{t.panel}</span>
           {activeTab === "home" && <span className="active-indicator" />}
         </button>
 
@@ -47,11 +70,10 @@ export default function Sidebar({
           <div className="icon-wrapper">
             <FaKey className="icon" />
           </div>
-          <span>Kod kiritish</span>
+          <span>{t.kodKiritish}</span>
           {activeTab === "code" && <span className="active-indicator" />}
         </button>
 
-        {/* 🎁 YANGI: MAGAZIN (SOVG'ALAR DO'KONI) TUGMASI */}
         <button 
           className={`menu-item ${activeTab === "magazin" ? "active" : ""}`} 
           onClick={() => setActiveTab("magazin")}
@@ -59,7 +81,7 @@ export default function Sidebar({
           <div className="icon-wrapper">
             <FaGift className="icon" />
           </div>
-          <span>Magazin</span>
+          <span>{t.magazin}</span>
           {activeTab === "magazin" && <span className="active-indicator" />}
         </button>
 
@@ -70,30 +92,29 @@ export default function Sidebar({
           <div className="icon-wrapper">
             <FaCogs className="icon" />
           </div>
-          <span>Sozlamalar</span>
+          <span>{t.sozlamalar}</span>
           {activeTab === "settings" && <span className="active-indicator" />}
         </button>
 
-        {/* 📱 FAQAT MOBILDA BOTTOM BAR ICHIDA CHIQADIGAN CHIQISH TUGMASI */}
         <button className="menu-item mobile-logout-btn" onClick={() => setShowLogoutModal(true)}>
           <div className="icon-wrapper">
             <FaSignOutAlt className="icon" />
           </div>
-          <span>Chiqish</span>
+          <span>{t.chiqish}</span>
         </button>
       </nav>
 
-      {/* 👤 FAQAT DESKTOPDA KO'RINADIGAN PROFIL KARTASI */}
-      <div className="sidebar-footer">
+      {/* 👤 PROFIL KARTASI (Ekran kichrayganda ham yo'qolmaydi) */}
+      <div className="sidebar-footer show-on-mobile">
         <div className="user-profile-card">
           <div className="user-avatar">
             <span>{currentUser?.full_name ? currentUser.full_name.charAt(0).toUpperCase() : "U"}</span>
           </div>
           <div className="user-info">
-            <span className="user-name">{currentUser?.full_name || "Usta"}</span>
-            <span className="user-role">Usta</span>
+            <span className="user-name">{currentUser?.full_name || t.usta}</span>
+            <span className="user-role">{t.usta}</span>
           </div>
-          <button className="sidebar-logout-shortcut" onClick={() => setShowLogoutModal(true)} title="Chiqish">
+          <button className="sidebar-logout-shortcut" onClick={() => setShowLogoutModal(true)} title={t.chiqish}>
             <FaSignOutAlt />
           </button>
         </div>

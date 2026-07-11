@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react"; // 💡 useCallback qo'shildi
 import { supabase } from "../../../supabase/client";
 import { toast } from "react-toastify";
 import { FaCoins, FaGift, FaShoppingBag, FaClock, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
@@ -74,8 +74,8 @@ export default function UserMagazin({ currentUser, lang = "uz" }) {
 
   const t = translations[lang] || translations["uz"];
 
-  // Ma'lumotlarni yuklash
-  const fetchData = async () => {
+  // 💡 Ma'lumotlarni yuklash funksiyasi useCallback ichiga olindi
+  const fetchData = useCallback(async () => {
     if (!currentUser?.id) return;
     try {
       // Barcha sovg'alarni narxi bo'yicha tartiblab olish
@@ -107,25 +107,23 @@ export default function UserMagazin({ currentUser, lang = "uz" }) {
     } catch (err) {
       toast.error(t.toastFetchError + err.message);
     }
-  };
+  }, [currentUser?.id, t.toastFetchError]); // Bog'liqliklar (dependencies)
 
+  // 💡 useEffect ichiga fetchData to'g'ri bog'liqlik sifatida qo'shildi
   useEffect(() => {
     fetchData();
-  }, [currentUser]);
+  }, [fetchData]);
 
   // Sotib olish funksiyasi
   const handleBuyPrize = async (prize) => {
-    // 1. Birinchi navbatda mahsulot omborda bormi (muzlatilmaganmi) tekshiramiz
     if (prize.stock <= 0) {
       return toast.error(t.toastStockOut);
     }
 
-    // 2. Foydalanuvchining bali yetishini tekshiramiz
     if (userBonus < prize.price) {
       return toast.error(t.toastNoPoints);
     }
 
-    // Tilga mos tasdiqlash matnini shakllantirish
     const confirmMessage = lang === "ru"
       ? `${t.confirmPrefix}${prize.name}${t.confirmSuffix}${prize.price} ${t.points}?`
       : `${t.confirmPrefix}${prize.name}${t.confirmSuffix}${prize.price} ${t.points}ga sotib olmoqchimisiz?`;
@@ -135,24 +133,21 @@ export default function UserMagazin({ currentUser, lang = "uz" }) {
 
     setLoadingOrderId(prize.id);
     try {
-      const newBonus = userBonus - prize.price; // Yangi balans
-      const newStock = prize.stock - 1;         // Ombordan 1 ta ayiramiz
+      const newBonus = userBonus - prize.price;
+      const newStock = prize.stock - 1;
 
-      // A. Foydalanuvchi balansini kamaytiramiz
       const { error: profileErr } = await supabase
         .from("profiles")
         .update({ bonus: newBonus })
         .eq("id", currentUser.id);
       if (profileErr) throw profileErr;
 
-      // B. Mahsulot sonini (stock) bittaga kamaytiramiz
       const { error: prizeErr } = await supabase
         .from("prizes")
         .update({ stock: newStock })
         .eq("id", prize.id);
       if (prizeErr) throw prizeErr;
 
-      // C. Orders (Buyurtmalar) jadvaliga yangi kutilayotgan so'rov qo'shamiz
       const { error: orderErr } = await supabase
         .from("orders")
         .insert([
@@ -165,7 +160,7 @@ export default function UserMagazin({ currentUser, lang = "uz" }) {
       if (orderErr) throw orderErr;
 
       toast.success(t.toastSuccess);
-      fetchData(); // Ma'lumotlarni yangilash
+      fetchData(); 
     } catch (err) {
       toast.error(t.toastError + err.message);
     } finally {
@@ -191,15 +186,15 @@ export default function UserMagazin({ currentUser, lang = "uz" }) {
         </div>
       </div>
 
-      {/* 🛍 /> Mahsulotlar panjarasi */}
+      {/* 🛍 Mahsulotlar panjarasi */}
       <h3 className="section-title"><FaShoppingBag /> {t.availablePrizes}</h3>
       <div className="prizes-grid">
         {prizes.length === 0 ? (
           <p className="empty-text">{t.noPrizes}</p>
         ) : (
           prizes.map((prize) => {
-            const isAffordable = userBonus >= prize.price; // Balans yetadimi?
-            const isAvailable = prize.stock > 0;           // Sotuvda bormi (Admin muzlatmaganmi)?
+            const isAffordable = userBonus >= prize.price;
+            const isAvailable = prize.stock > 0;
 
             return (
               <div className={`prize-card ${!isAffordable || !isAvailable ? "locked" : ""}`} key={prize.id}>
@@ -222,7 +217,6 @@ export default function UserMagazin({ currentUser, lang = "uz" }) {
                     <FaCoins /> {prize.price} {t.points}
                   </div>
                   
-                  {/* 🔒 Dinamik button boshqaruvi */}
                   <button
                     className={`buy-btn ${isAffordable && isAvailable ? "active" : "disabled"}`}
                     onClick={() => handleBuyPrize(prize)}

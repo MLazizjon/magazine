@@ -41,12 +41,12 @@ export default function MastersTab({ mastersList = [], toggleMasterStatus, lang 
       thPhone: "Telefon Raqami",
       thRegion: "Viloyat / Tuman",
       thScore: "To'plangan Ball",
-      thStatus: "Holati",
+      thMasterStatus: "Holati", // 🌟 Duplikat kalit o'zgartirildi
       thProfile: "Profil",
       actionActive: "Faol",
       actionInactive: "Yopiq",
       btnView: "Ko'rish",
-      noMasters: "Bazada hozircha birorta ham usta maroon emas.",
+      noMasters: "Bazada hozircha birorta ham usta mavjud emas.",
       noResults: "Qidiruv bo'yicha hech qanday usta topilmadi."
     },
     ru: {
@@ -74,7 +74,7 @@ export default function MastersTab({ mastersList = [], toggleMasterStatus, lang 
       thPhone: "Номер телефона",
       thRegion: "Регион / Район",
       thScore: "Набранные баллы",
-      thStatus: "Статус",
+      thMasterStatus: "Статус", // 🌟 Duplikat kalit o'zgartirildi
       thProfile: "Профиль",
       actionActive: "Активен",
       actionInactive: "Закрыт",
@@ -107,11 +107,11 @@ export default function MastersTab({ mastersList = [], toggleMasterStatus, lang 
       console.error(err);
       toast.error(lang === "ru" ? "Ошибка при загрузке истории" : "Tarixni yuklashda xatolik yuz berdi");
     } finally {
-      setLoadingCodes(false); // ✅ Avvalgi xatolik butkul tuzatildi
+      setLoadingCodes(false);
     }
   };
 
-  // 🔍 Qidiruv tizimi (Viloyat va tuman birgalikda tekshiriladi)
+  // 🔍 Qidiruv tizimi
   const filteredMasters = mastersList.filter((master) => {
     const fullName = (master.full_name || "").toLowerCase();
     const phone = (master.phone || "").toLowerCase();
@@ -162,7 +162,7 @@ export default function MastersTab({ mastersList = [], toggleMasterStatus, lang 
             <div className="card-icon-wrap blue-bg">
               <FaBarcode />
             </div>
-            <div className="card-stat-value-wrap">
+            <div className="card-icon-wrap">
               <span>{t.totalScanned}</span>
               <h3>{scannedCodes.length} {t.unitProducts}</h3>
             </div>
@@ -172,18 +172,17 @@ export default function MastersTab({ mastersList = [], toggleMasterStatus, lang 
             <div className="card-icon-wrap gold-bg">
               <FaAward />
             </div>
-            <div className="card-stat-value-wrap">
+            <div className="card-icon-wrap">
               <span>{t.totalBonus}</span>
               <h3 className="gold-text">{selectedMaster.bonus || 0} {t.unitBall}</h3>
             </div>
           </div>
 
-          {/* 📍 Profil ichidagi Manzil qismi (Viloyat / Tuman) */}
           <div className="detail-stat-item-card">
             <div className="card-icon-wrap green-bg">
               <FaMapMarkerAlt />
             </div>
-            <div className="card-stat-value-wrap">
+            <div className="card-icon-wrap">
               <span>{t.serviceRegion}</span>
               <h3>
                 {selectedMaster.region 
@@ -268,7 +267,7 @@ export default function MastersTab({ mastersList = [], toggleMasterStatus, lang 
               <th>{t.thPhone}</th>
               <th>{t.thRegion}</th>
               <th>{t.thScore}</th>
-              <th>{t.thStatus}</th>
+              <th>{t.thMasterStatus}</th> {/* 🌟 Yangi kalit nomi ulandi */}
               <th>{t.thProfile}</th>
             </tr>
           </thead>
@@ -280,7 +279,6 @@ export default function MastersTab({ mastersList = [], toggleMasterStatus, lang 
                   <td>{index + 1}</td>
                   <td className="master-name">{master.full_name || t.notEntered}</td>
                   <td>{master.phone || "-"}</td>
-                  {/* 📍 Manzil ustuni */}
                   <td>
                     {master.region 
                       ? `${master.region}${master.district ? `, ${master.district}` : ""}` 
@@ -290,12 +288,11 @@ export default function MastersTab({ mastersList = [], toggleMasterStatus, lang 
                     <span className="master-score">{master.bonus || 0} {t.unitBall}</span>
                   </td>
                   <td>
-                    {/* 🔄 Status o'zgartirish tugmasi */}
                     <button 
                       className={`status-toggle-btn ${isActive ? "active" : "inactive"}`}
                       type="button"
                       onClick={(e) => {
-                        e.stopPropagation(); // ❗ Qator bosilib ketishini to'xtatadi
+                        e.stopPropagation(); 
                         if (toggleMasterStatus) {
                           toggleMasterStatus(master.id, master.is_active);
                         } else {

@@ -66,7 +66,7 @@ export default function MaslahatlarTab({ lang = "uz" }) {
       errorAction: "Произошла ошибка: ",
       uploadBtn: "Выбрать изображение с компьютера",
       uploadingText: "Изображение загружается...",
-      uploadSuccess: "Изображение успешно загружено! 📸",
+      uploadSuccess: "Изображение успешно загрузилось! 📸",
       uploadTypeErr: "Пожалуйста, выберите только файлы изображений!",
       imgText: "Фото"
     }
@@ -74,25 +74,38 @@ export default function MaslahatlarTab({ lang = "uz" }) {
 
   const t = translations[lang] || translations.uz;
 
-  // 1. Supabase-dagi 'news' jadvalidan ma'lumotlarni yuklash
-  const fetchNews = async () => {
+  // 1. Supabase-dagi 'news' jadvalidan ma'lumotlarni yuklash (useEffect ichiga olindi)
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("news")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        setNewsList(data || []);
+      } catch (err) {
+        console.error(t.errorLoadConsole, err);
+        toast.error(t.errorLoad);
+      }
+    };
+
+    fetchNews();
+  }, [t.errorLoad, t.errorLoadConsole]);
+
+  // Qolgan funksiyalar uchun ro'yxatni yangilash mexanizmi
+  const refreshNews = async () => {
     try {
       const { data, error } = await supabase
         .from("news")
         .select("*")
         .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setNewsList(data || []);
+      if (!error) setNewsList(data || []);
     } catch (err) {
-      console.error(t.errorLoadConsole, err);
-      toast.error(t.errorLoad);
+      console.error(err);
     }
   };
-
-  useEffect(() => {
-    fetchNews();
-  }, []);
 
   // 📷 Rasmni Supabase Storage-ga yuklash funksiyasi
   const handleImageUpload = async (e) => {
@@ -107,9 +120,8 @@ export default function MaslahatlarTab({ lang = "uz" }) {
     try {
       const fileExt = file.name.split(".").pop();
       const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `news-images/${fileName}`; // Новости будут загружаться в отдельную папку
+      const filePath = `news-images/${fileName}`;
 
-      // Загружаем в созданный ранее бакет 'prizes'
       const { error: uploadError } = await supabase.storage
         .from("prizes")
         .upload(filePath, file, { cacheControl: "3600", upsert: true });
@@ -142,7 +154,7 @@ export default function MaslahatlarTab({ lang = "uz" }) {
         {
           title: title.trim(),
           content: content.trim(), 
-          image_url: imageUrl.trim() || null, // Добавляем ссылку на картинку в базу данных
+          image_url: imageUrl.trim() || null,
         },
       ]);
 
@@ -151,8 +163,8 @@ export default function MaslahatlarTab({ lang = "uz" }) {
       toast.success(t.toastSuccess);
       setTitle("");
       setContent("");
-      setImageUrl(""); // Очищаем картинку после успешной публикации
-      fetchNews();
+      setImageUrl(""); 
+      refreshNews();
     } catch (err) {
       toast.error(t.errorAction + err.message);
     } finally {
@@ -171,7 +183,7 @@ export default function MaslahatlarTab({ lang = "uz" }) {
       if (error) throw error;
 
       toast.info(t.toastDeleted);
-      fetchNews();
+      refreshNews();
     } catch (err) {
       toast.error(t.errorAction + err.message);
     } finally {
@@ -275,7 +287,6 @@ export default function MaslahatlarTab({ lang = "uz" }) {
             <tbody>
               {newsList.map((item) => (
                 <tr key={item.id}>
-                  {/*Отображение фото в таблице списков */}
                   <td>
                     {item.image_url ? (
                       <img src={item.image_url} alt="" style={{ width: "45px", height: "45px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e2e8f0" }} />

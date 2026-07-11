@@ -3,6 +3,69 @@ import { FaTrophy, FaCheckCircle, FaHourglassHalf, FaListOl, FaChartBar, FaCalen
 import { supabase } from "../../../supabase/client"; 
 import "./home.css"; 
 
+// 📝 Ko'p tilli tarjimalar lug'ati (Komponentdan tashqariga chiqarildi)
+const translations = {
+  uz: {
+    place: "-o'rin",
+    confirmed: "Tasdiqlangan",
+    pending: "Kutilmoqda",
+    totalEntered: "Kiritilgan jami",
+    activeCampaigns: "Faol Aksiyalar",
+    noCampaigns: "Hozircha faol aksiyalar mavjud emas.",
+    adminTips: "Admin Maslahatlari",
+    noTips: "Maslahatlar mavjud emas.",
+    yearLabel: "Yil",
+    monthLabel: "Oy",
+    collectedPoints: "To'plangan ball",
+    points: "ball",
+    activityStat: "Faollik statistikasi",
+    chartAnalysis: "Tanlangan davr bo'yicha grafik tahlil",
+    statDaily: "Sutkalik",
+    statWeekly: "Haftalik",
+    statMonthly: "Oylik",
+    totalCodesMonth: "Oydagi jami kodlar",
+    avgBonusPoint: "O'rtacha bonus ball",
+    modalCampaign: "AKSIYA",
+    modalTip: "MASLAHAT",
+    startDate: "Boshlanishi",
+    endDate: "Tugashi",
+    ta: "ta",
+    weekLabels: ["Du", "Se", "Ch", "Pa", "Ju", "Sha", "Ya"],
+    monthLabels: ["1-Hafta", "2-Hafta", "3-Hafta", "4-Hafta"]
+  },
+  ru: {
+    place: "-е место",
+    confirmed: "Подтверждено",
+    pending: "В ожидании",
+    totalEntered: "Всего введено",
+    activeCampaigns: "Активные Акции",
+    noCampaigns: "Активных акций пока нет.",
+    adminTips: "Советы от Админа",
+    noTips: "Советы отсутствуют.",
+    yearLabel: "Год",
+    monthLabel: "Месяц",
+    collectedPoints: "Собранные баллы",
+    points: "балл",
+    activityStat: "Статистика активности",
+    chartAnalysis: "Графический анализ за выбранный период",
+    statDaily: "Суточный",
+    statWeekly: "Еженедельный",
+    statMonthly: "Ежемесячный",
+    totalCodesMonth: "Всего кодов за месяц",
+    avgBonusPoint: "Средний бонусный балл",
+    modalCampaign: "АКЦИЯ",
+    modalTip: "СОВЕТ",
+    startDate: "Начало",
+    endDate: "Конец",
+    ta: "шт",
+    weekLabels: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
+    monthLabels: ["1-Неделя", "2-Неделя", "3-Неделя", "4-Неделя"]
+  }
+};
+
+const monthsUzDefault = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentyabr", "Oktyabr", "Noyabr", "Dekabr"];
+const monthsRu = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+
 export default function HomeTab({ 
   userId = "", 
   currentBonus = 0, 
@@ -11,16 +74,14 @@ export default function HomeTab({
   pendingCount = 0,
   totalUsedCount = 0,
   region = "Samarqand",
-  
-  // Ota komponentdan boshqariladigan proplar
   year,
   setYear,
   month,
   setMonth,
   statType,
   setStatType,
-  lang = "uz", // 🌍 UserDash-dan kelayotgan til state-i
-  monthsUz = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentyabr", "Oktyabr", "Noyabr", "Dekabr"]
+  lang = "uz", 
+  monthsUz = monthsUzDefault
 }) {
   const [campaigns, setCampaigns] = useState([]);
   const [news, setNews] = useState([]); 
@@ -31,70 +92,7 @@ export default function HomeTab({
   const [monthlyTotalCodes, setMonthlyTotalCodes] = useState(0);
   const [monthlyAverageBonus, setMonthlyAverageBonus] = useState(0);
 
-  // 📝 Ko'p tilli tarjimalar lug'ati
-  const translations = {
-    uz: {
-      place: "-o'rin",
-      confirmed: "Tasdiqlangan",
-      pending: "Kutilmoqda",
-      totalEntered: "Kiritilgan jami",
-      activeCampaigns: "Faol Aksiyalar",
-      noCampaigns: "Hozircha faol aksiyalar mavjud emas.",
-      adminTips: "Admin Maslahatlari",
-      noTips: "Maslahatlar mavjud emas.",
-      yearLabel: "Yil",
-      monthLabel: "Oy",
-      collectedPoints: "To'plangan ball",
-      points: "ball",
-      activityStat: "Faollik statistikasi",
-      chartAnalysis: "Tanlangan davr bo'yicha grafik tahlil",
-      statDaily: "Sutkalik",
-      statWeekly: "Haftalik",
-      statMonthly: "Oylik",
-      totalCodesMonth: "Oydagi jami kodlar",
-      avgBonusPoint: "O'rtacha bonus ball",
-      modalCampaign: "AKSIYA",
-      modalTip: "MASLAHAT",
-      startDate: "Boshlanishi",
-      endDate: "Tugashi",
-      ta: "ta",
-      weekLabels: ["Du", "Se", "Ch", "Pa", "Ju", "Sha", "Ya"],
-      monthLabels: ["1-Hafta", "2-Hafta", "3-Hafta", "4-Hafta"]
-    },
-    ru: {
-      place: "-е место",
-      confirmed: "Подтверждено",
-      pending: "В ожидании",
-      totalEntered: "Всего введено",
-      activeCampaigns: "Активные Акции",
-      noCampaigns: "Активных акций пока нет.",
-      adminTips: "Советы от Админа",
-      noTips: "Советы отсутствуют.",
-      yearLabel: "Год",
-      monthLabel: "Месяц",
-      collectedPoints: "Собранные баллы",
-      points: "балл",
-      activityStat: "Статистика активности",
-      chartAnalysis: "Графический анализ за выбранный период",
-      statDaily: "Суточный",
-      statWeekly: "Еженедельный",
-      statMonthly: "Ежемесячный",
-      totalCodesMonth: "Всего кодов за месяц",
-      avgBonusPoint: "Средний бонусный балл",
-      modalCampaign: "АКЦИЯ",
-      modalTip: "СОВЕТ",
-      startDate: "Начало",
-      endDate: "Конец",
-      ta: "шт",
-      weekLabels: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
-      monthLabels: ["1-Неделя", "2-Неделя", "3-Неделя", "4-Неделя"]
-    }
-  };
-
   const t = translations[lang] || translations["uz"];
-
-  // Ruscha oylar ro'yxati
-  const monthsRu = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
   const currentMonthsList = lang === "ru" ? monthsRu : monthsUz;
 
   // 1. FAOL AKSIYALARNI YUKLASH
@@ -154,7 +152,6 @@ export default function HomeTab({
 
         if (!activeUserId) return;
 
-        // Oyni har doim o'zbekcha indeks bo'yicha bazadan qidirish uchun moslash
         let monthIndex = monthsUz.indexOf(month);
         if (monthIndex === -1) {
           monthIndex = monthsRu.indexOf(month);
@@ -240,17 +237,13 @@ export default function HomeTab({
 
       } catch (err) {
         console.error("Statistikani hisoblashda xatolik:", err);
-        setDefaultEmptyChart();
+        const labels = statType === "oy" ? t.monthLabels : t.weekLabels;
+        setChartStats(labels.map(l => ({ label: l, value: 0, realVal: 0, active: false })));
       }
     };
 
-    const setDefaultEmptyChart = () => {
-      const labels = statType === "oy" ? t.monthLabels : t.weekLabels;
-      setChartStats(labels.map(l => ({ label: l, value: 0, realVal: 0, active: false })));
-    };
-
     fetchRealStatistics();
-  }, [year, month, statType, userId, lang]);
+  }, [year, month, statType, userId, lang, monthsUz, t.monthLabels, t.weekLabels]);
 
   const handleOpenModal = (data, type) => {
     setModalData(data);

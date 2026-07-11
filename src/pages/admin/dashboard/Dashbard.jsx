@@ -3,9 +3,9 @@ import {
   FaUsers, 
   FaTools, 
   FaBarcode, 
-  FaUserPlus, 
+  // FaUserPlus, 
   FaCheck, 
-  FaSortAmountDown, 
+  // FaSortAmountDown, 
   FaSpinner 
 } from "react-icons/fa";
 import { supabase } from "../../../supabase/client"; // Supabase client manzilingizni tekshiring
@@ -14,8 +14,8 @@ import "./dashboard.css";
 
 export default function DashboardTab({
   stats = { totalUsers: 0, activeMasters: 0, totalCodes: 0, newClients: 0 },
-  sortOrder,
-  setSortOrder,
+  // sortOrder,
+  // setSortOrder,
   sortedChartData = [],
   lang = "uz"
 }) {

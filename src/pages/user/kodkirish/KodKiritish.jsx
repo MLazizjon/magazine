@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FaCloudUploadAlt, FaCheckCircle, FaHourglassHalf, FaTimesCircle, FaTrashAlt, FaHashtag } from "react-icons/fa";
 import { supabase } from "../../../supabase/client"; 
 import "./kodkiritish.css";
@@ -76,15 +76,15 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
     return null;
   };
 
-  // 🔄 KODLAR TARIXINI YUKLASH (RELATION BILAN)
-  const fetchHistory = async () => {
+  // 🔄 KODLAR TARIXINI YUKLASH (useCallback bilan o'raldi)
+  const fetchHistory = useCallback(async () => {
     try {
       const activeId = await getActiveUserId();
       if (!activeId) return;
 
       const { data, error } = await supabase
         .from("used_codes")
-        .select("*, promo_codes(code)") // promo_codes ichidan matnli kodni tortib olamiz
+        .select("*, promo_codes(code)") 
         .eq("user_id", activeId)
         .order("created_at", { ascending: false })
         .limit(10);
@@ -93,11 +93,11 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [userId]);
 
   useEffect(() => {
     fetchHistory();
-  }, [userId]);
+  }, [fetchHistory]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -117,7 +117,7 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
     setImagePreview(null);
   };
 
-  // 🚀 KOD VA RASMNI JO'NATISH (DUPLICATE TEKSHIRUVI BILAN)
+  // 🚀 KOD VA RASMNI JO'NATISH
   const handleSendCodeSubmit = async () => {
     if (!bonusCode.trim() || !selectedFile) {
       alert(t.alertWarning);
@@ -144,7 +144,7 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
         throw new Error("Kiritilgan kod xato yoki bazada mavjud emas!");
       }
 
-      // 2. DUPLICATE TEKSHIRUVI: Usta bu kodni oldin yuborganmi?
+      // 2. DUPLICATE TEKSHIRUVI
       const { data: alreadyUsed, error: checkError } = await supabase
         .from("used_codes")
         .select("id")
@@ -286,7 +286,6 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
                 {historyData.length > 0 ? (
                   historyData.map((item, idx) => (
                     <tr key={item.id || idx}>
-                      {/* ID o'rniga chiroyli matnli kod chiqadi */}
                       <td className="font-bold text-dark">
                         {item.promo_codes?.code || `ID: ${item.code_id}`}
                       </td>

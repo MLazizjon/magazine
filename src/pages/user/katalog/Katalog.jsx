@@ -1,96 +1,300 @@
-import React, { useState, useEffect } from "react";
-import { supabase } from "../../../supabase/client";
-import { FiArrowLeft, FiPackage, FiGrid, FiImage } from "react-icons/fi";
-import { toast } from "react-toastify";
-import "./katalog.css"; // Admin katalog stili bilan bir xil yoki o'xshash qilsangiz bo'ladi
+// import React, { useState, useEffect } from "react";
+// import { supabase } from "../../../supabase/client";
+// import { FiArrowLeft, FiPackage, FiGrid, FiImage } from "react-icons/fi";
+// import { toast } from "react-toastify";
+// import "./katalog.css"; // Admin katalog stili bilan bir xil yoki o'xshash qilsangiz bo'ladi
 
-export default function UserKatalog() {
-  const [categories, setCategories] = useState([]);
-  const [products, setProducts] = useState([]);
+// export default function UserKatalog() {
+//   const [categories, setCategories] = useState([]);
+//   const [products, setProducts] = useState([]);
+//   const [selectedCategory, setSelectedCategory] = useState(null);
+//   const [loading, setLoading] = useState(false);
+//   const [productsLoading, setProductsLoading] = useState(false);
+
+//   // 1. Kataloglarni (Toifalarni) yuklash
+//   useEffect(() => {
+//     const fetchCategories = async () => {
+//       setLoading(true);
+//       try {
+//         const { data, error } = await supabase
+//           .from("categories")
+//           .select("*")
+//           .order("id", { ascending: true });
+//         if (error) throw error;
+//         if (data) setCategories(data);
+//       } catch (error) {
+//         toast.error("Kataloglarni yuklashda xatolik yuz berdi!");
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchCategories();
+//   }, []);
+
+//   // 2. Tanlangan katalogga tegishli mahsulotlarni yuklash
+//   useEffect(() => {
+//     const fetchProducts = async () => {
+//       if (!selectedCategory) return;
+//       setProductsLoading(true);
+//       try {
+//         const { data, error } = await supabase
+//           .from("products")
+//           .select("*")
+//           .eq("category_id", selectedCategory.id)
+//           .order("created_at", { ascending: false });
+//         if (error) throw error;
+//         if (data) setProducts(data);
+//       } catch (error) {
+//         toast.error("Mahsulotlarni yuklab bo'lmadi");
+//       } finally {
+//         setProductsLoading(false);
+//       }
+//     };
+
+//     fetchProducts();
+//   }, [selectedCategory]);
+
+//   // --- REJIM 1: FOYDALANUVCHIGA TOIFALARNI KO'RSATISH ---
+//   if (!selectedCategory) {
+//     return (
+//       <div className="user-katalog-wrapper">
+//         <div className="user-katalog-banner">
+//           <div className="banner-icon-title">
+//             <FiGrid className="main-grid-icon" />
+//             <h2>Mahsulotlar Katalogi</h2>
+//           </div>
+//           <p>Mavjud barcha mahsulotlar va toifalar bilan tanshishingiz mumkin</p>
+//         </div>
+
+//         <div className="section-divider">
+//           <h3>Kataloglar</h3>
+//           <span className="badge-count">{categories.length} ta toifa</span>
+//         </div>
+
+//         {loading ? (
+//           <div className="katalog-spinner-box"><div className="spinner"></div></div>
+//         ) : (
+//           <div className="categories-user-grid">
+//             {categories.map((cat) => (
+//               <div key={cat.id} className="category-user-card" onClick={() => setSelectedCategory(cat)}>
+//                 <div className="card-img-top">
+//                   {cat.image_url ? (
+//                     <img src={cat.image_url} alt={cat.name_uz} onError={(e) => { e.target.style.display = 'none'; }} />
+//                   ) : (
+//                     <div className="no-image-placeholder"><FiImage size={28} /></div>
+//                   )}
+//                 </div>
+//                 <div className="card-body-content">
+//                   <h3>{cat.name_uz}</h3>
+//                   <div className="card-footer-action">
+//                     <span>Tovarlarni ko'rish</span>
+//                     <span className="arrow-icon">→</span>
+//                   </div>
+//                 </div>
+//               </div>
+//             ))}
+//           </div>
+//         )}
+//       </div>
+//     );
+//   }
+
+//   // --- REJIM 2: TANLANGAN KATALOG ICHIDAGI MAHSULOTLAR RO'YXATI ---
+//   return (
+//     <div className="user-katalog-wrapper">
+//       <div className="katalog-inner-header">
+//         <button className="katalog-back-btn" onClick={() => setSelectedCategory(null)}>
+//           <FiArrowLeft size={16} /> Orqaga
+//         </button>
+//         <div className="inner-title-box">
+//           <h2>{selectedCategory.name_uz}</h2>
+//           <span className="badge">{products.length} ta mahsulot</span>
+//         </div>
+//       </div>
+
+//       {productsLoading ? (
+//         <div className="katalog-spinner-box"><div className="spinner"></div></div>
+//       ) : products.length === 0 ? (
+//         <div className="no-data-box">
+//           <FiPackage size={44} />
+//           <p>Bu katalogda hozircha mahsulotlar mavjud emas.</p>
+//         </div>
+//       ) : (
+//         <div className="products-user-grid">
+//           {products.map((prod) => (
+//             <div key={prod.id} className="product-user-card">
+//               <div className="product-img-box">
+//                 <img src={prod.image_url || "https://via.placeholder.com/250x180?text=No+Image"} alt={prod.title_uz} onError={(e) => { e.target.src = "https://via.placeholder.com/250x180?text=No+Image"; }} />
+//               </div>
+//               <div className="product-details">
+//                 <h4 className="product-title">{prod.title_uz}</h4>
+//                 {prod.price && <p className="product-price">{prod.price.toLocaleString()} UZS</p>}
+//               </div>
+//             </div>
+//           ))}
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
+
+
+import React, { useState } from "react";
+import { FiArrowLeft, FiGrid, FiPackage, FiImage } from "react-icons/fi";
+import "./katalog.css";
+
+// 1. KATALOGLAR RO'YXATI
+const MOCK_CATEGORIES = [
+  { id: 1, name_uz: "Nasoslar", image_url: "https://via.placeholder.com/250x180?text=Nasoslar" }
+];
+
+// 2. JADVALDAGI REYTINGI BO'YICHA ROSTMANA 24 TA NASOS ARRAYI
+const MOCK_PRODUCTS = [
+  // === QB (Вихревой) - 4 ta ===
+  { id: 1, category_id: 1, title_uz: "Pumpman QB60 ECO (Вихревой)", price: 280000, image_url: "https://via.placeholder.com/250x180?text=QB60+ECO",
+    specs: [ { key: "Turi", value: "Вихревой" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.37" }, { key: "Suv sarfi (л/м)", value: "35" }, { key: "Balandligi (Подъём, m)", value: "32" } ] },
+  { id: 2, category_id: 1, title_uz: "Pumpman QB60 (Вихревой)", price: 320000, image_url: "https://via.placeholder.com/250x180?text=QB60",
+    specs: [ { key: "Turi", value: "Вихревой" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.37" }, { key: "Suv sarfi (л/м)", value: "35" }, { key: "Balandligi (Подъём, m)", value: "35" } ] },
+  { id: 3, category_id: 1, title_uz: "Pumpman QB70 (Вихревой)", price: 520000, image_url: "https://via.placeholder.com/250x180?text=QB70",
+    specs: [ { key: "Turi", value: "Вихревой" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.55" }, { key: "Suv sarfi (л/м)", value: "45" }, { key: "Balandligi (Подъём, m)", value: "45" } ] },
+  { id: 4, category_id: 1, title_uz: "Pumpman QB80 (Вихревой)", price: 570000, image_url: "https://via.placeholder.com/250x180?text=QB80",
+    specs: [ { key: "Turi", value: "Вихревой" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.75" }, { key: "Suv sarfi (л/м)", value: "45" }, { key: "Balandligi (Подъём, m)", value: "53" } ] },
+
+  // === CPm (Центробежный) - 5 ta ===
+  { id: 5, category_id: 1, title_uz: "Pumpman CPm130 (Центробежный)", price: 510000, image_url: "https://via.placeholder.com/250x180?text=CPm130",
+    specs: [ { key: "Turi", value: "Центробежный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.37" }, { key: "Suv sarfi (л/м)", value: "105" }, { key: "Balandligi (Подъём, m)", value: "22" } ] },
+  { id: 6, category_id: 1, title_uz: "Pumpman CPm146 (Центробежный)", price: 620000, image_url: "https://via.placeholder.com/250x180?text=CPm146",
+    specs: [ { key: "Turi", value: "Центробежный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.55" }, { key: "Suv sarfi (л/м)", value: "125" }, { key: "Balandligi (Подъём, m)", value: "27" } ] },
+  { id: 7, category_id: 1, title_uz: "Pumpman CPm158 (Центробежный)", price: 690000, image_url: "https://via.placeholder.com/250x180?text=CPm158",
+    specs: [ { key: "Turi", value: "Центробежный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.75" }, { key: "Suv sarfi (л/м)", value: "125" }, { key: "Balandligi (Подъём, m)", value: "32" } ] },
+  { id: 8, category_id: 1, title_uz: "Pumpman CPm170 (Центробежный)", price: 1120000, image_url: "https://via.placeholder.com/250x180?text=CPm170",
+    specs: [ { key: "Turi", value: "Центробежный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "1.1" }, { key: "Suv sarfi (л/м)", value: "133" }, { key: "Balandligi (Подъём, m)", value: "41" } ] },
+  { id: 9, category_id: 1, title_uz: "Pumpman CPm200 (Центробежный)", price: 1250000, image_url: "https://via.placeholder.com/250x180?text=CPm200",
+    specs: [ { key: "Turi", value: "Центробежный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "1.5" }, { key: "Suv sarfi (л/м)", value: "133" }, { key: "Balandligi (Подъём, m)", value: "43" } ] },
+
+  // === PW (Периферийный) - 6 ta ===
+  { id: 10, category_id: 1, title_uz: "Pumpman PW125 (Периферийный)", price: 550000, image_url: "https://via.placeholder.com/250x180?text=PW125",
+    specs: [ { key: "Turi", value: "Периферийный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.125" }, { key: "Suv sarfi (л/м)", value: "33" }, { key: "Balandligi (Подъём, m)", value: "24" } ] },
+  { id: 11, category_id: 1, title_uz: "Pumpman PW250 (Периферийный)", price: 570000, image_url: "https://via.placeholder.com/250x180?text=PW250",
+    specs: [ { key: "Turi", value: "Периферийный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.25" }, { key: "Suv sarfi (л/м)", value: "36" }, { key: "Balandligi (Подъём, m)", value: "30" } ] },
+  { id: 12, category_id: 1, title_uz: "Pumpman PW370 (Периферийный)", price: 580000, image_url: "https://via.placeholder.com/250x180?text=PW370",
+    specs: [ { key: "Turi", value: "Периферийный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.37" }, { key: "Suv sarfi (л/м)", value: "40" }, { key: "Balandligi (Подъём, m)", value: "36" } ] },
+  { id: 13, category_id: 1, title_uz: "Pumpman PW550 (Периферийный)", price: 700000, image_url: "https://via.placeholder.com/250x180?text=PW550",
+    specs: [ { key: "Turi", value: "Периферийный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.55" }, { key: "Suv sarfi (л/м)", value: "50" }, { key: "Balandligi (Подъём, m)", value: "42" } ] },
+  { id: 14, category_id: 1, title_uz: "Pumpman PW750 (Периферийный)", price: 780000, image_url: "https://via.placeholder.com/250x180?text=PW750",
+    specs: [ { key: "Turi", value: "Периферийный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.75" }, { key: "Suv sarfi (л/м)", value: "56" }, { key: "Balandligi (Подъём, m)", value: "50" } ] },
+  { id: 15, category_id: 1, title_uz: "Pumpman PW1100 (Периферийный)", price: 1070000, image_url: "https://via.placeholder.com/250x180?text=PW1100",
+    specs: [ { key: "Turi", value: "Периферийный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "40*40" }, { key: "Quvvati (кВт)", value: "1.1" }, { key: "Suv sarfi (л/м)", value: "100" }, { key: "Balandligi (Подъём, m)", value: "55" } ] },
+
+  // === PWE (Периферийный с сухой защитой) - 5 ta ===
+  { id: 16, category_id: 1, title_uz: "Pumpman PWE 125", price: 620000, image_url: "https://via.placeholder.com/250x180?text=PWE+125",
+    specs: [ { key: "Turi", value: "Периферийный с сухой защитой" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.125 кВт" }, { key: "Suv sarfi", value: "33 л/м" }, { key: "Balandligi", value: "24 m" } ] },
+  { id: 17, category_id: 1, title_uz: "Pumpman PWE 250", price: 670000, image_url: "https://via.placeholder.com/250x180?text=PWE+250",
+    specs: [ { key: "Turi", value: "Периферийный с сухой защитой" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.25 кВт" }, { key: "Suv sarfi", value: "36 л/м" }, { key: "Balandligi", value: "30 m" } ] },
+  { id: 18, category_id: 1, title_uz: "Pumpman PWE 370", price: 690000, image_url: "https://via.placeholder.com/250x180?text=PWE+370",
+    specs: [ { key: "Turi", value: "Периферийный с сухой защитой" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.37 кВт" }, { key: "Suv sarfi", value: "40 л/м" }, { key: "Balandligi", value: "36 m" } ] },
+  { id: 19, category_id: 1, title_uz: "Pumpman PWE 550", price: 840000, image_url: "https://via.placeholder.com/250x180?text=PWE+550",
+    specs: [ { key: "Turi", value: "Периферийный с сухой защитой" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.55 кВт" }, { key: "Suv sarfi", value: "50 л/м" }, { key: "Balandligi", value: "42 m" } ] },
+  { id: 20, category_id: 1, title_uz: "Pumpman PWE 750", price: 920000, image_url: "https://via.placeholder.com/250x180?text=PWE+750",
+    specs: [ { key: "Turi", value: "Периферийный с сухой защитой" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.75 кВт" }, { key: "Suv sarfi", value: "56 л/м" }, { key: "Balandligi", value: "50 m" } ] },
+
+  // === PWF (Периферийный с защитой Адаптивный) - 4 ta ===
+  { id: 21, category_id: 1, title_uz: "Pumpman PWF 125", price: 670000, image_url: "https://via.placeholder.com/250x180?text=PWF+125",
+    specs: [ { key: "Turi", value: "Адаптивный" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.125 кВт" }, { key: "Suv sarfi", value: "33 л/м" }, { key: "Balandligi", value: "24 m" } ] },
+  { id: 22, category_id: 1, title_uz: "Pumpman PWF 250", price: 710000, image_url: "https://via.placeholder.com/250x180?text=PWF+250",
+    specs: [ { key: "Turi", value: "Адаптивный" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.25 кВт" }, { key: "Suv sarfi", value: "36 л/м" }, { key: "Balandligi", value: "30 m" } ] },
+  { id: 23, category_id: 1, title_uz: "Pumpman PWF 370", price: 750000, image_url: "https://via.placeholder.com/250x180?text=PWF+370",
+    specs: [ { key: "Turi", value: "Адаптивный" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.37 кВт" }, { key: "Suv sarfi", value: "40 л/м" }, { key: "Balandligi", value: "36 m" } ] },
+  { id: 24, category_id: 1, title_uz: "Pumpman PWF 550", price: 900000, image_url: "https://via.placeholder.com/250x180?text=PWF+550",
+    specs: [ { key: "Turi", value: "Адаптивный" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.55 кВт" }, { key: "Suv sarfi", value: "50 л/м" }, { key: "Balandligi", value: "42 m" } ] }
+];
+
+export default function KatalogTab() {
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [productsLoading, setProductsLoading] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // 1. Kataloglarni (Toifalarni) yuklash
-  useEffect(() => {
-    const fetchCategories = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from("categories")
-          .select("*")
-          .order("id", { ascending: true });
-        if (error) throw error;
-        if (data) setCategories(data);
-      } catch (error) {
-        toast.error("Kataloglarni yuklashda xatolik yuz berdi!");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const filteredProducts = MOCK_PRODUCTS.filter(
+    (prod) => selectedCategory && prod.category_id === selectedCategory.id
+  );
 
-    fetchCategories();
-  }, []);
-
-  // 2. Tanlangan katalogga tegishli mahsulotlarni yuklash
-  useEffect(() => {
-    const fetchProducts = async () => {
-      if (!selectedCategory) return;
-      setProductsLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from("products")
-          .select("*")
-          .eq("category_id", selectedCategory.id)
-          .order("created_at", { ascending: false });
-        if (error) throw error;
-        if (data) setProducts(data);
-      } catch (error) {
-        toast.error("Mahsulotlarni yuklab bo'lmadi");
-      } finally {
-        setProductsLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [selectedCategory]);
-
-  // --- REJIM 1: FOYDALANUVCHIGA TOIFALARNI KO'RSATISH ---
-  if (!selectedCategory) {
+  // --- REJIM 3: MAHSULOT XUSUSIYATLARI JADVALI EKRANI ---
+  if (selectedProduct) {
     return (
-      <div className="user-katalog-wrapper">
-        <div className="user-katalog-banner">
-          <div className="banner-icon-title">
-            <FiGrid className="main-grid-icon" />
-            <h2>Mahsulotlar Katalogi</h2>
+      <div className="katalog-light-wrapper">
+        <div className="katalog-inner-header">
+          <button className="katalog-back-btn" onClick={() => setSelectedProduct(null)}>
+            <FiArrowLeft size={16} /> Orqaga
+          </button>
+          <h2>Mahsulot xususiyatlari</h2>
+        </div>
+
+        <div className="product-detail-container">
+          <div className="product-detail-main">
+            <div className="product-detail-img">
+              <img src={selectedProduct.image_url} alt={selectedProduct.title_uz} />
+            </div>
+            <div className="product-detail-info">
+              <h3 className="product-detail-title">{selectedProduct.title_uz}</h3>
+              <p className="product-detail-price">
+                Narxi: <span>{selectedProduct.price.toLocaleString()} UZS</span>
+              </p>
+            </div>
           </div>
-          <p>Mavjud barcha mahsulotlar va toifalar bilan tanshishingiz mumkin</p>
+
+          {selectedProduct.specs && selectedProduct.specs.length > 0 && (
+            <div className="product-specs-section">
+              <table className="specs-table">
+                <tbody>
+                  {selectedProduct.specs.map((spec, index) => (
+                    <tr key={index}>
+                      <td className="spec-key">{spec.key}</td>
+                      <td className="spec-value">{spec.value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // --- REJIM 2: MAHSULOTLAR RO'YXATI (CARD REJIM) ---
+  if (selectedCategory) {
+    return (
+      <div className="katalog-light-wrapper">
+        <div className="katalog-inner-header">
+          <button className="katalog-back-btn" onClick={() => setSelectedCategory(null)}>
+            <FiArrowLeft size={16} /> Orqaga
+          </button>
+          <div className="inner-title-box">
+            <h2>{selectedCategory.name_uz}</h2>
+            <span className="badge">{filteredProducts.length} ta mahsulot</span>
+          </div>
         </div>
 
-        <div className="section-divider">
-          <h3>Kataloglar</h3>
-          <span className="badge-count">{categories.length} ta toifa</span>
-        </div>
-
-        {loading ? (
-          <div className="katalog-spinner-box"><div className="spinner"></div></div>
+        {filteredProducts.length === 0 ? (
+          <div className="no-data-box">
+            <FiPackage size={44} />
+            <p>Bu katalogda hozircha mahsulotlar mavjud emas.</p>
+          </div>
         ) : (
-          <div className="categories-user-grid">
-            {categories.map((cat) => (
-              <div key={cat.id} className="category-user-card" onClick={() => setSelectedCategory(cat)}>
-                <div className="card-img-top">
-                  {cat.image_url ? (
-                    <img src={cat.image_url} alt={cat.name_uz} onError={(e) => { e.target.style.display = 'none'; }} />
-                  ) : (
-                    <div className="no-image-placeholder"><FiImage size={28} /></div>
-                  )}
+          <div className="products-light-grid">
+            {filteredProducts.map((prod) => (
+              <div 
+                key={prod.id} 
+                className="product-light-card" 
+                onClick={() => setSelectedProduct(prod)}
+                style={{ cursor: "pointer" }}
+              >
+                <div className="product-img-box">
+                  <img src={prod.image_url} alt={prod.title_uz} />
                 </div>
-                <div className="card-body-content">
-                  <h3>{cat.name_uz}</h3>
-                  <div className="card-footer-action">
-                    <span>Tovarlarni ko'rish</span>
-                    <span className="arrow-icon">→</span>
-                  </div>
+                <div className="product-details">
+                  <h4 className="product-title">{prod.title_uz}</h4>
+                  <p className="product-price">{prod.price.toLocaleString()} UZS</p>
                 </div>
               </div>
             ))}
@@ -100,41 +304,42 @@ export default function UserKatalog() {
     );
   }
 
-  // --- REJIM 2: TANLANGAN KATALOG ICHIDAGI MAHSULOTLAR RO'YXATI ---
+  // --- REJIM 1: ASOSIY KATALOGLAR REJIMI ---
   return (
-    <div className="user-katalog-wrapper">
-      <div className="katalog-inner-header">
-        <button className="katalog-back-btn" onClick={() => setSelectedCategory(null)}>
-          <FiArrowLeft size={16} /> Orqaga
-        </button>
-        <div className="inner-title-box">
-          <h2>{selectedCategory.name_uz}</h2>
-          <span className="badge">{products.length} ta mahsulot</span>
+    <div className="katalog-light-wrapper">
+      <div className="katalog-light-banner">
+        <div className="banner-left-info">
+          <div className="banner-icon-title">
+            <FiGrid className="main-grid-icon" />
+            <h2>Xo'jalik Mollari Katalogi</h2>
+          </div>
+          <p>Kerakli toifani tanlang va mahsulotlar bilan tanishing</p>
         </div>
       </div>
 
-      {productsLoading ? (
-        <div className="katalog-spinner-box"><div className="spinner"></div></div>
-      ) : products.length === 0 ? (
-        <div className="no-data-box">
-          <FiPackage size={44} />
-          <p>Bu katalogda hozircha mahsulotlar mavjud emas.</p>
-        </div>
-      ) : (
-        <div className="products-user-grid">
-          {products.map((prod) => (
-            <div key={prod.id} className="product-user-card">
-              <div className="product-img-box">
-                <img src={prod.image_url || "https://via.placeholder.com/250x180?text=No+Image"} alt={prod.title_uz} onError={(e) => { e.target.src = "https://via.placeholder.com/250x180?text=No+Image"; }} />
-              </div>
-              <div className="product-details">
-                <h4 className="product-title">{prod.title_uz}</h4>
-                {prod.price && <p className="product-price">{prod.price.toLocaleString()} UZS</p>}
+      <div className="section-divider">
+        <h3>Mavjud Kataloglar</h3>
+        <span className="badge-count">{MOCK_CATEGORIES.length} toifa</span>
+      </div>
+
+      <div className="categories-light-grid">
+        {MOCK_CATEGORIES.map((cat) => (
+          <div key={cat.id} className="category-light-card" onClick={() => setSelectedCategory(cat)}>
+            <div className="card-img-top">
+              <div className="no-image-placeholder">
+                <FiImage size={28} />
               </div>
             </div>
-          ))}
-        </div>
-      )}
+            <div className="card-body-content">
+              <h3>{cat.name_uz}</h3>
+              <div className="card-footer-action">
+                <span>Tovarlarni ko'rish</span>
+                <span className="arrow-icon">→</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -30,7 +30,8 @@ const KASBLAR_DATA = [
 export default function Register() {
   const [step, setStep] = useState(1); 
   const [fullName, setFullName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("+998 "); // Telefon raqam inputi qo'shildi
+  const [password, setPassword] = useState(""); // Parol inputi qo'shildi
   const [birthDate, setBirthDate] = useState("");
   const [region, setRegion] = useState("");
   const [district, setDistrict] = useState(""); 
@@ -64,9 +65,35 @@ export default function Register() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [tg]);
 
+  // Telefon raqamini chiroyli formatlash funksiyasi
+  const handlePhoneChange = (e) => {
+    let input = e.target.value;
+    if (!input.startsWith("+998")) {
+      input = "+998 " + input.replace(/\D/g, "");
+    }
+    const rawNumbers = input.slice(4).replace(/\D/g, "");
+    const limitedNumbers = rawNumbers.slice(0, 9);
+
+    let formatted = "+998 ";
+    if (limitedNumbers.length > 0) formatted += limitedNumbers.slice(0, 2);
+    if (limitedNumbers.length > 2) formatted += " " + limitedNumbers.slice(2, 5);
+    if (limitedNumbers.length > 5) formatted += " " + limitedNumbers.slice(5, 7);
+    if (limitedNumbers.length > 7) formatted += " " + limitedNumbers.slice(7, 9);
+
+    setPhone(formatted);
+  };
+
   const handleStepOneNext = () => {
-    if (fullName.trim().length < 3 || lastName.trim().length < 3) {
-      return toast.error("Ism va familiya kamida 3 ta harf bo‘lishi kerak!");
+    const cleanPhone = phone.replace(/\s/g, "");
+
+    if (fullName.trim().length < 3) {
+      return toast.error("Ism kamida 3 ta harf bo‘lishi kerak!");
+    }
+    if (cleanPhone.length !== 13) {
+      return toast.error("Telefon raqami to‘liq kiritilmagan!");
+    }
+    if (password.trim().length < 4) {
+      return toast.error("Parol kamida 4 ta belgidan iborat bo‘lishi kerak!");
     }
     setStep(2);
   };
@@ -78,33 +105,23 @@ export default function Register() {
     setStep(3);
   };
 
-  const handleFinalSubmit = () => {
+  const handleFinalSubmit = async () => {
     if (!region || !district || !job) {
       return toast.error("Viloyat, tuman va kasbingizni tanlang!");
     }
 
-    // Brauzerda sariq ogohlantirish chiqmasligi uchun faqat haqiqiy Telegram muhitini tekshiramiz
-    if (tg && tg.initDataUnsafe?.user && tg.requestContact) {
-      tg.requestContact(async (shared) => {
-        if (shared) {
-          const contactPhone = tg.initDataUnsafe.user.phone_number || ""; 
-          const telegramId = tg.initDataUnsafe.user.id;
-          const formattedPhone = contactPhone.startsWith("+") ? contactPhone : "+" + contactPhone;
-          await saveUserToSupabase(formattedPhone, telegramId);
-        } else {
-          toast.error("Ro'yxatdan o'tish uchun telefon raqamingizni ulashingiz shart!");
-        }
-      });
-    } else {
-      // Chrome brauzerida yoki Localhost testida birdaniga bazaga saqlashga o'tadi
-      saveUserToSupabase("+998991234567", 123456789);
-    }
+    const cleanPhone = phone.replace(/\s/g, "");
+    // Agar Telegram ichida bo'lsa, Telegram ID sini aniqlaymiz, aks holda null yoki mock id beramiz
+    const telegramId = tg?.initDataUnsafe?.user?.id || null;
+
+    await saveUserToSupabase(cleanPhone, telegramId);
   };
 
   const saveUserToSupabase = async (rawPhone, telegramId) => {
     if (loading) return;
     setLoading(true);
     try {
+      // 1. Avval bu telefon raqami ro'yxatdan o'tganmi yoki yo'qmi tekshiramiz
       const { data: existing, error: checkError } = await supabase
         .from("profiles")
         .select("*") 
@@ -114,22 +131,21 @@ export default function Register() {
       if (checkError) throw checkError;
 
       if (existing) {
-        localStorage.setItem("user", JSON.stringify(existing));
-        toast.success("Tizimga qaytadan xush kelibsiz!");
-        setTimeout(() => {
-          navigate("/user-dashboard");
-        }, 150);
+        toast.error("Bu telefon raqami allaqachon ro‘yxatdan o‘tgan! Iltimos tizimga kiring.");
+        setLoading(false);
         return;
       }
 
+      // 2. Yangi foydalanuvchi obyekti
       const newUser = {
-        full_name: `${fullName.trim()} ${lastName.trim()}`,
+        full_name: fullName.trim(),
         phone: rawPhone,
         telegram_id: telegramId,
         birth_date: birthDate,
         region,
         district, 
         job,
+        password: password, 
         role: "user"
       };
 
@@ -141,10 +157,10 @@ export default function Register() {
 
       if (insertError) throw insertError;
 
+      // 3. Mahalliy xotiraga yozish va dashboardga yo'naltirish
       localStorage.setItem("user", JSON.stringify(insertedData));
       toast.success("Ro‘yxatdan muvaffaqiyatli o‘tdingiz!");
       
-      // Sahifa qotib qolmasdan tezroq o'tishi uchun kechikish vaqti kamaytirildi
       setTimeout(() => {
         navigate("/user-dashboard");
       }, 150);
@@ -167,7 +183,7 @@ export default function Register() {
       </div>
 
       <div className="auth">
-        <h2>Ma'lumotlarni to'ldiring</h2>
+        <h2>Ro'yxatdan o'tish</h2>
 
         {step === 1 && (
           <div className="step-container">
@@ -181,15 +197,26 @@ export default function Register() {
             </div>
             <div className="input-group">
               <input
-                type="text"
-                placeholder="Familiyangizni kiriting"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+                type="tel"
+                placeholder="+998 90 123 45 67"
+                value={phone}
+                onChange={handlePhoneChange}
+              />
+            </div>
+            <div className="input-group">
+              <input
+                type="password"
+                placeholder="Parol yarating"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
             <button className="btn-submit" onClick={handleStepOneNext}>
               Keyingi
             </button>
+            <p className="login-link" onClick={() => navigate("/login")} style={{textAlign: "center", marginTop: "15px", cursor: "pointer", color: "#007bff"}}>
+              Sizda allaqachon akkaunt bormi? Kirish
+            </p>
           </div>
         )}
 

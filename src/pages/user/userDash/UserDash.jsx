@@ -19,6 +19,7 @@ import HomeTab from "../home/Home";
 import CodeTab from "../kodkirish/KodKiritish";
 import SettingsTab from "../setting/Setting";
 import UserMagazin from "../magazine/Magazine"; 
+import UserKatalog from "../katalog/Katalog"; // 📂 Yangi qo'shilgan foydalanuvchi katalogi
 
 import "./userDash.css";
 
@@ -30,6 +31,9 @@ export default function UserDash() {
   const [activeTab, setActiveTab] = useState("home");
   const [bonusCode, setBonusCode] = useState("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // 📂 KATALOG FILTRLARI UCHUN STATE (READ-ONLY)
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   // 📅 FILTRLAR STATE'LARI
   const [year, setYear] = useState("2026");
@@ -57,6 +61,12 @@ export default function UserDash() {
   const [lang, setLang] = useState(localStorage.getItem("app_lang") || "uz");
 
   const navigate = useNavigate();
+
+  // 🔄 TAB ALMASHTIRISHNI NAZORAT QILUVCHI FUNKSIYA
+  const handleTabChange = (tabName) => {
+    setActiveTab(tabName);
+    setSelectedCategory(null); // Boshqa tabga o'tganda katalog ichki holatini boshlang'ich nuqtaga qaytaradi
+  };
 
   // ⚡ AMALDAGI AKSANING MUDDATINI TEKSHIRISH
   const checkActiveCampaign = useCallback(async () => {
@@ -296,7 +306,7 @@ export default function UserDash() {
       toast.error("Iltimos, kodni kiriting!");
       return;
     }
-    loading(true);
+    setLoading(true);
     try {
       const { data: promoCode, error: promoError } = await supabase
         .from("promo_codes")
@@ -327,7 +337,7 @@ export default function UserDash() {
 
       toast.info("Kod muvaffaqiyatli yuborildi! Admin tasdiqlashini kuting. ⏳");
       setBonusCode("");
-      setActiveTab("home");
+      handleTabChange("home");
       fetchUserData(currentUser, year, month, statType);
     } catch (err) {
       toast.error("Xatolik yuz berdi: " + err.message);
@@ -371,7 +381,7 @@ export default function UserDash() {
         <button className="mobile-profile-btn" onClick={() => setIsDrawerOpen(true)} title="Profil paneli">
           <FaUserCircle size={28} />
         </button>
-        <div className="mobile-header-center" onClick={() => setActiveTab("home")}>
+        <div className="mobile-header-center" onClick={() => handleTabChange("home")}>
           <span className="mobile-header-label">Mening joriy ballim</span>
           <span className="mobile-header-value">
             {currentUser?.bonus || 0} <span className="arrow-detail">›</span>
@@ -385,7 +395,7 @@ export default function UserDash() {
       {/* SIDEBAR & BOTTOM NAVIGATION BAR */}
       <Sidebar 
         activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
+        setActiveTab={handleTabChange} 
         setShowLogoutModal={setShowLogoutModal} 
         currentUser={currentUser}
       />
@@ -403,7 +413,7 @@ export default function UserDash() {
               totalUsedCount={totalUsedCount} 
               region={currentUser?.region || "Samarqand"} 
               dynamicChartData={dynamicChartData} 
-              setActiveTab={setActiveTab} 
+              setActiveTab={handleTabChange} 
               year={year}
               setYear={setYear}
               month={month}
@@ -421,6 +431,15 @@ export default function UserDash() {
               setBonusCode={setBonusCode} 
               handleSendCode={handleSendCode} 
               loading={loading} 
+              lang={lang}
+            />
+          )}
+
+          {/* 📂 READ-ONLY MAHSULOTLAR KATALOGI */}
+          {activeTab === "katalog" && (
+            <UserKatalog 
+              selectedCategory={selectedCategory} 
+              setSelectedCategory={setSelectedCategory} 
               lang={lang}
             />
           )}
@@ -453,7 +472,7 @@ export default function UserDash() {
               changeLanguage={changeLanguage}
               onBack={() => {
                 setIsDrawerOpen(true);
-                setActiveTab("home");
+                handleTabChange("home");
               }}
             />
           )}
@@ -473,7 +492,7 @@ export default function UserDash() {
             </div>
 
             <div className="drawer-menu-list">
-              <button className="drawer-item" onClick={() => { setActiveTab("settings"); setIsDrawerOpen(false); }}>
+              <button className="drawer-item" onClick={() => { handleTabChange("settings"); setIsDrawerOpen(false); }}>
                 <div className="d-item-left">
                   <div className="d-icon-box"><FaUserCircle /></div>
                   <span>{lang === "uz" ? "Sozlamalar" : "Настройки"}</span>
@@ -500,7 +519,7 @@ export default function UserDash() {
               </button>
 
               {/* 🎁 MAGAZIN TUGMASI */}
-              <button className="drawer-item" onClick={() => { setActiveTab("magazin"); setIsDrawerOpen(false); }}>
+              <button className="drawer-item" onClick={() => { handleTabChange("magazin"); setIsDrawerOpen(false); }}>
                 <div className="d-item-left">
                   <div className="d-icon-box"><FaGift /></div>
                   <span>{lang === "uz" ? "Sovg'alar do'koni" : "Магазин подарков"}</span>

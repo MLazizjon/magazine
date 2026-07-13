@@ -9,6 +9,7 @@ import {
   FiCamera,
   FiGift,
   FiShoppingBag,
+  FiLayers, // 📂 Katalog uchun yangi ikonka
   FiX 
 } from "react-icons/fi"; 
 import "./sidebar.css"; 
@@ -42,6 +43,7 @@ export default function Sidebar({
       dashboard: "Dashboard / Asosiy",
       masters: `Ustalar Bazasi (${mastersCount})`,
       generator: `Kod Generator (${codesCount})`,
+      katalog: "Mahsulotlar Katalogi", // 🇺🇿 O'zbekcha tarjima
       magazin: "Sovg'alar Do'koni", 
       aksiya: "Aksiya Muddatlari",
       news: "Yangiliklar va Maslahatlar",
@@ -53,6 +55,7 @@ export default function Sidebar({
       dashboard: "Главная / Панель",
       masters: `База Мастеров (${mastersCount})`,
       generator: `Генератор Кодов (${codesCount})`,
+      katalog: "Каталог Товаров", // 🇷🇺 Ruscha tarjima
       magazin: "Магазин Подарков", 
       aksiya: "Сроки Акций",
       news: "Новости и Советы",
@@ -67,6 +70,7 @@ export default function Sidebar({
     { id: "dashboard", label: t.dashboard, icon: <FiSliders /> },
     { id: "ustalar", label: t.masters, icon: <FiTool /> },
     { id: "random", label: t.generator, icon: <FiCode /> },
+    { id: "katalog", label: t.katalog, icon: <FiLayers /> }, // 📂 YANGI QO'SHILGAN KATALOG TUGMASI
     { id: "magazin", label: t.magazin, icon: <FiGift /> }, 
     { id: "aksiya", label: t.aksiya, icon: <FiCalendar /> },
     { id: "maslahatlar", label: t.news, icon: <FiFileText /> }, 

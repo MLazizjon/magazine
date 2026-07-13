@@ -1,5 +1,5 @@
 import React from "react";
-import { FaChartBar, FaKey, FaGift, FaCogs, FaSignOutAlt } from "react-icons/fa";
+import { FaChartBar, FaKey, FaGift, FaCogs, FaSignOutAlt, FaThList } from "react-icons/fa";
 import "./sidebar.css";
 
 export default function Sidebar({ 
@@ -15,6 +15,7 @@ export default function Sidebar({
     uz: {
       panel: "Panel",
       kodKiritish: "Kod kiritish",
+      katalog: "Katalog", // 📂 Yangi tarjima
       magazin: "Magazin",
       sozlamalar: "Sozlamalar",
       chiqish: "Chiqish",
@@ -23,6 +24,7 @@ export default function Sidebar({
     ru: {
       panel: "Панель",
       kodKiritish: "Ввод кода",
+      katalog: "Каталог", // 📂 Yangi tarjima
       magazin: "Магазин",
       sozlamalar: "Настройки",
       chiqish: "Выйти",
@@ -72,6 +74,18 @@ export default function Sidebar({
           </div>
           <span>{t.kodKiritish}</span>
           {activeTab === "code" && <span className="active-indicator" />}
+        </button>
+
+        {/* 📂 READ-ONLY KATALOG TUGMASI */}
+        <button 
+          className={`menu-item ${activeTab === "katalog" ? "active" : ""}`} 
+          onClick={() => setActiveTab("katalog")}
+        >
+          <div className="icon-wrapper">
+            <FaThList className="icon" />
+          </div>
+          <span>{t.katalog}</span>
+          {activeTab === "katalog" && <span className="active-indicator" />}
         </button>
 
         <button 

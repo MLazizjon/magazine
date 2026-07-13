@@ -13,6 +13,7 @@ import HistoryTab from "../kodtarixi/Kodtarixi";
 import AksiyaTab from "../aksiya/Aksiya";
 import MaslahatlarTab from "../news/News";
 import ProfilTab from "../profil/Profil"; 
+import KatalogTab from "../katalog/Katalog"; // 📂 Yangi katalog komponenti
 
 import "./adminDash.css";
 
@@ -29,6 +30,9 @@ export default function AdminDash() {
   const [allPromoCodes, setAllPromoCodes] = useState([]); 
   const [codeQuantity, setCodeQuantity] = useState("");
   const [sortOrder, setSortOrder] = useState("desc");
+
+  // 📂 Kataloglar bo'limida tanlangan katalogni saqlash uchun state
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   const navigate = useNavigate();
 
@@ -183,6 +187,15 @@ export default function AdminDash() {
             <GeneratorTab codeQuantity={codeQuantity} setCodeQuantity={setCodeQuantity} loading={loading} allPromoCodes={allPromoCodes} lang={lang} />
           )}
 
+          {/* 📂 YANGI QO'SHILGAN KATALOG TABI */}
+          {activeTab === "katalog" && (
+            <KatalogTab 
+              lang={lang} 
+              selectedCategory={selectedCategory} 
+              setSelectedCategory={setSelectedCategory} 
+            />
+          )}
+
           {activeTab === "magazin" && (
             <MagazinTab lang={lang} />
           )}
@@ -210,4 +223,4 @@ export default function AdminDash() {
       </main>
     </div>
   );
-}
+} 

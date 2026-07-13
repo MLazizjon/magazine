@@ -55,7 +55,8 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
 
   const t = translations[lang] || translations.uz;
 
-  const getActiveUserId = async () => {
+  // 🔄 1. getActiveUserId funksiyasi
+  const getActiveUserId = useCallback(async () => {
     if (userId) return userId;
     
     const { data: { session } } = await supabase.auth.getSession();
@@ -74,9 +75,9 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
       }
     }
     return null;
-  };
+  }, [userId]);
 
-  // 🔄 KODLAR TARIXINI YUKLASH (useCallback bilan o'raldi)
+  // 🔄 2. fetchHistory funksiyasi (Tuzatilgan joyi: dependency massiviga getActiveUserId qo'shildi)
   const fetchHistory = useCallback(async () => {
     try {
       const activeId = await getActiveUserId();
@@ -93,7 +94,7 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
     } catch (err) {
       console.error(err);
     }
-  }, [userId]);
+  }, [getActiveUserId]);
 
   useEffect(() => {
     fetchHistory();
@@ -117,8 +118,8 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
     setImagePreview(null);
   };
 
-  // 🚀 KOD VA RASMNI JO'NATISH
-  const handleSendCodeSubmit = async () => {
+  // 🚀 3. handleSendCodeSubmit funksiyasi
+  const handleSendCodeSubmit = useCallback(async () => {
     if (!bonusCode.trim() || !selectedFile) {
       alert(t.alertWarning);
       return;
@@ -133,7 +134,6 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
 
       const cleanCode = bonusCode.trim().toUpperCase();
 
-      // 1. Promo_codes jadvalidan kod mavjudligini tekshirish
       const { data: promoData, error: promoError } = await supabase
         .from("promo_codes")
         .select("id")
@@ -144,7 +144,6 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
         throw new Error("Kiritilgan kod xato yoki bazada mavjud emas!");
       }
 
-      // 2. DUPLICATE TEKSHIRUVI
       const { data: alreadyUsed, error: checkError } = await supabase
         .from("used_codes")
         .select("id")
@@ -158,7 +157,6 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
         throw new Error("Siz bu kodni allaqachon tekshirishga yuborgansiz! ❌");
       }
 
-      // 3. Rasmni yuklash
       const fileExt = selectedFile.name.split('.').pop();
       const cleanFileName = `${Date.now()}.${fileExt}`;
       const filePath = `${activeId}/${cleanFileName}`;
@@ -176,7 +174,6 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
         .from("product_images")
         .getPublicUrl(filePath);
 
-      // 4. used_codes jadvaliga yozish
       const { error: dbError } = await supabase
         .from("used_codes")
         .insert([
@@ -203,7 +200,7 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [bonusCode, selectedFile, getActiveUserId, fetchHistory, t.alertSuccess, t.alertWarning]);
 
   const renderStatusBadge = (status) => {
     if (status === "approved" || status === "confirmed") {

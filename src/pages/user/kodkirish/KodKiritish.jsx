@@ -77,7 +77,7 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
     return null;
   }, [userId]);
 
-  // 🔄 2. fetchHistory funksiyasi (Tuzatilgan joyi: dependency massiviga getActiveUserId qo'shildi)
+  // 🔄 2. fetchHistory funksiyasi
   const fetchHistory = useCallback(async () => {
     try {
       const activeId = await getActiveUserId();
@@ -118,7 +118,7 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
     setImagePreview(null);
   };
 
-  // 🚀 3. handleSendCodeSubmit funksiyasi
+  // 🚀 3. To'g'rilangan handleSendCodeSubmit (barcha kerakli dependencies qo'shildi)
   const handleSendCodeSubmit = useCallback(async () => {
     if (!bonusCode.trim() || !selectedFile) {
       alert(t.alertWarning);

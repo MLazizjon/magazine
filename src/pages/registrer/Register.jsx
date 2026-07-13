@@ -12,7 +12,7 @@ const UZBEKISTAN_DATA = {
   "Farg'ona": ["Farg‘ona shahri", "Marg‘ilon shahri", "Qo‘qon shahri", "Quva shahri", "Oltiariq tumani", "Bag‘dod tumani", "Beshariq tumani", "Buvayda tumani", "Dang‘ara tumani", "Farg‘ona tumani", "Furqat tumani", "Qo‘shtepa tumani", "Quva tumani", "Rishton tumani", "So‘x tumani", "Toshloq tumani", "Uchko‘prik tumani", "O‘zbekiston tumani", "Yozyovon tumani"],
   "Jizzax": ["Jizzax shahri", "Arnasoy tumani", "Baxtamal tumani", "Do‘stlik tumani", "Forish tumani", "G‘allaorol tumani", "Sharof Rashidov tumani", "Mirzachöl tumani", "Paxtakor tumani", "Yangiobod tumani", "Zamin tumani", "Zafarobod tumani", "Zarbdor tumani"],
   "Xorazm": ["Urganch shahri", "Xiva shahri", "Bog‘ot tumani", "Gurlan tumani", "Xonqa tumani", "Hazorasp tumani", "Qushko‘pir tumani", "Shovot tumani", "Tuproqqal‘a tumani", "Urganch tumani", "Xiva tumani", "Yangiariq tumani", "Yangibozor tumani"],
-  "Namangan": ["Namangan shahri", "Chortoq tumani", "Chust tumani", "Kosonsoy tumani", "Mingbuloq tumani", "Namangan tumani", "Norin tumani", "Pop tumani", "To‘raqo‘rg‘on tumani", "Uychi tumani", "Uchqo‘rg‘on tumani", "Yangiqo‘rg‘on tumani", "Davlatobod tumani", "Yangi Namangan tumani"],
+  "Namangan": ["Namangan shahri", "Chortoq tumani", "Chust tumani", "Kosonsoy tumani", "Mingbuloq tumani", "Namangan tumani", "Norin tumani", "Pop tumani", "To‘raqo‘rg‘on tumani", "Uychi tumani", "Uchko‘prik tumani", "Yangiqo‘rg‘on tumani", "Davlatobod tumani", "Yangi Namangan tumani"],
   "Navoiy": ["Navoiy shahri", "Zarafshon shahri", "G‘ozg‘on shahri", "Karmana tumani", "Konimex tumani", "Qiziltepa tumani", "Xatirchi tumani", "Navbahor tumani", "Nurota tumani", "Tomdi tumani", "Uchquduq tumani"],
   "Qashqadaryo": ["Qarshi shahri", "Shahrisabz shahri", "Chiroqchi tumani", "Dehqonobod tumani", "G‘uzor tumani", "Kasbi tumani", "Kitob tumani", "Koson tumani", "Ko‘kdala tumani", "Mirishkor tumani", "Muborak tumani", "Nishan tumani", "Qarshi tumani", "Shahrisabz tumani", "Yakkabog‘ tumani", "Kamashi tumani"],
   "Samarqand": ["Samarqand shahri", "Kattaqo‘rg‘on shahri", "Bulung‘ur tumani", "Ishtixon tumani", "Jomboy tumani", "Kattaqo‘rg‘on tumani", "Narpay tumani", "Nurobod tumani", "Oqdaryo tumani", "Paxtachi tumani", "Payariq tumani", "Pastdarg‘om tumani", "Samarqand tumani", "Toyloq tumani", "Urgut tumani", "Qo‘shrabot tumani"],
@@ -21,18 +21,10 @@ const UZBEKISTAN_DATA = {
   "Qoraqalpog'iston Respublikasi": ["Nukus shahri", "Amudaryo tumani", "Beruniy tumani", "Chimboy tumani", "Ellikqal‘a tumani", "Kegeyli tumani", "Mo‘ynoq tumani", "Nukus tumani", "Qonliko‘l tumani", "Qo‘ng‘irot tumani", "Qorao‘zak tumani", "Shumanay tumani", "Taxtako‘pir tumani", "To‘rtko‘l tumani", "Xo‘jayli tumani", "Taxiatosh tumani", "Bo‘zatov tumani"]
 };
 
-// 🛠️ Yangilangan ustalar kasblari ro'yxati
 const KASBLAR_DATA = [
-  "Santexnik",
-  "Elektrik",
-  "Malyar / Suvoqchi",
-  "Kafelchi (Plitkar)",
-  "Gvipsokarton ustasi",
-  "Armaturchi / Svarshik",
-  "Alyumin profil ustasi (Akfa)",
-  "Mebelchi",
-  "Duradgor (Yog'och ustasi)",
-  "Boshqa"
+  "Santexnik", "Elektrik", "Malyar / Suvoqchi", "Kafelchi (Plitkar)", 
+  "Gvipsokarton ustasi", "Armaturchi / Svarshik", "Alyumin profil ustasi (Akfa)", 
+  "Mebelchi", "Duradgor (Yog'och ustasi)", "Boshqa"
 ];
 
 export default function Register() {
@@ -43,8 +35,8 @@ export default function Register() {
   const [region, setRegion] = useState("");
   const [district, setDistrict] = useState(""); 
   const [job, setJob] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Dropdown ochilib/yopilish holatlari
   const [regionOpen, setRegionOpen] = useState(false);
   const [districtOpen, setDistrictOpen] = useState(false);
   const [jobOpen, setJobOpen] = useState(false);
@@ -54,7 +46,6 @@ export default function Register() {
   const jobRef = useRef(null);
   const navigate = useNavigate();
 
-  // Telegram WebApp obyektini olish
   const tg = window.Telegram?.WebApp;
 
   useEffect(() => {
@@ -68,11 +59,11 @@ export default function Register() {
       if (districtRef.current && !districtRef.current.contains(event.target)) setDistrictOpen(false);
       if (jobRef.current && !jobRef.current.contains(event.target)) setJobOpen(false);
     }
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [tg]);
 
-  // Step 1 validation
   const handleStepOneNext = () => {
     if (fullName.trim().length < 3 || lastName.trim().length < 3) {
       return toast.error("Ism va familiya kamida 3 ta harf bo‘lishi kerak!");
@@ -80,7 +71,6 @@ export default function Register() {
     setStep(2);
   };
 
-  // Step 2 validation
   const handleStepTwoNext = () => {
     if (!birthDate) {
       return toast.error("Tug‘ilgan kuningizni kiriting!");
@@ -88,19 +78,17 @@ export default function Register() {
     setStep(3);
   };
 
-  // Step 3: Saqlash tugmasi bosilganda (Oferta tekshiruvi butunlay o'chirildi)
   const handleFinalSubmit = () => {
     if (!region || !district || !job) {
       return toast.error("Viloyat, tuman va kasbingizni tanlang!");
     }
 
-    // Telegramdan telefon raqam olish oynasini chaqirish
-    if (tg && tg.requestContact) {
+    // Brauzerda sariq ogohlantirish chiqmasligi uchun faqat haqiqiy Telegram muhitini tekshiramiz
+    if (tg && tg.initDataUnsafe?.user && tg.requestContact) {
       tg.requestContact(async (shared) => {
-        if (shared && tg.initDataUnsafe?.user) {
+        if (shared) {
           const contactPhone = tg.initDataUnsafe.user.phone_number || ""; 
           const telegramId = tg.initDataUnsafe.user.id;
-          
           const formattedPhone = contactPhone.startsWith("+") ? contactPhone : "+" + contactPhone;
           await saveUserToSupabase(formattedPhone, telegramId);
         } else {
@@ -108,24 +96,30 @@ export default function Register() {
         }
       });
     } else {
-      toast.warn("Telegram interfeysi topilmadi. Test rejimi.");
+      // Chrome brauzerida yoki Localhost testida birdaniga bazaga saqlashga o'tadi
       saveUserToSupabase("+998991234567", 123456789);
     }
   };
 
   const saveUserToSupabase = async (rawPhone, telegramId) => {
+    if (loading) return;
+    setLoading(true);
     try {
       const { data: existing, error: checkError } = await supabase
         .from("profiles")
-        .select("phone")
+        .select("*") 
         .eq("phone", rawPhone)
         .maybeSingle();
 
       if (checkError) throw checkError;
+
       if (existing) {
         localStorage.setItem("user", JSON.stringify(existing));
         toast.success("Tizimga qaytadan xush kelibsiz!");
-        return navigate("/user-dashboard");
+        setTimeout(() => {
+          navigate("/user-dashboard");
+        }, 150);
+        return;
       }
 
       const newUser = {
@@ -136,7 +130,7 @@ export default function Register() {
         region,
         district, 
         job,
-        role: "user",
+        role: "user"
       };
 
       const { data: insertedData, error: insertError } = await supabase
@@ -149,15 +143,21 @@ export default function Register() {
 
       localStorage.setItem("user", JSON.stringify(insertedData));
       toast.success("Ro‘yxatdan muvaffaqiyatli o‘tdingiz!");
-      navigate("/user-dashboard"); 
+      
+      // Sahifa qotib qolmasdan tezroq o'tishi uchun kechikish vaqti kamaytirildi
+      setTimeout(() => {
+        navigate("/user-dashboard");
+      }, 150);
+
     } catch (err) {
       toast.error(err.message || "Xatolik yuz berdi");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="auth-page-wrapper">
-      {/* 🟢 STEPPER (Bosqichlar indikatori) */}
       <div className="stepper-wrapper">
         <div className={`step-circle ${step >= 1 ? "active" : ""}`}>1</div>
         <div className="step-line"></div>
@@ -169,7 +169,6 @@ export default function Register() {
       <div className="auth">
         <h2>Ma'lumotlarni to'ldiring</h2>
 
-        {/* 🔹 1-BOSQICH: Ism va Familiya */}
         {step === 1 && (
           <div className="step-container">
             <div className="input-group">
@@ -194,7 +193,6 @@ export default function Register() {
           </div>
         )}
 
-        {/* 🔹 2-BOSQICH: Tug'ilgan kun */}
         {step === 2 && (
           <div className="step-container">
             <div className="input-group">
@@ -216,10 +214,8 @@ export default function Register() {
           </div>
         )}
 
-        {/* 🔹 3-BOSQICH: Viloyat, Tuman va Kasb (Oferta olib tashlandi) */}
         {step === 3 && (
           <div className="step-container">
-            {/* Custom Viloyat Select */}
             <div className="input-group" ref={regionRef}>
               <div 
                 className={`custom-select-trigger ${!region ? "is-placeholder" : ""}`}
@@ -246,7 +242,6 @@ export default function Register() {
               )}
             </div>
 
-            {/* Custom Tuman Select */}
             {region && (
               <div className="input-group" ref={districtRef}>
                 <div 
@@ -274,7 +269,6 @@ export default function Register() {
               </div>
             )}
 
-            {/* Custom Ustalar Kasbi Select */}
             <div className="input-group" ref={jobRef}>
               <div 
                 className={`custom-select-trigger ${!job ? "is-placeholder" : ""}`}
@@ -301,11 +295,11 @@ export default function Register() {
             </div>
 
             <div className="btn-group" style={{ display: "flex", gap: "10px" }}>
-              <button className="btn-back" onClick={() => setStep(2)} style={{ background: "#ccc", width: "100%" }}>
+              <button className="btn-back" onClick={() => setStep(2)} style={{ background: "#ccc", width: "100%" }} disabled={loading}>
                 Orqaga
               </button>
-              <button className="btn-submit" onClick={handleFinalSubmit} style={{ width: "100%" }}>
-                Saqlash
+              <button className="btn-submit" onClick={handleFinalSubmit} style={{ width: "100%" }} disabled={loading}>
+                {loading ? "Saqlanmoqda..." : "Saqlash"}
               </button>
             </div>
           </div>

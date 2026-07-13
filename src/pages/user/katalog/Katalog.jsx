@@ -12,46 +12,46 @@ export default function UserKatalog() {
   const [productsLoading, setProductsLoading] = useState(false);
 
   // 1. Kataloglarni (Toifalarni) yuklash
-  const fetchCategories = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("*")
-        .order("id", { ascending: true });
-      if (error) throw error;
-      if (data) setCategories(data);
-    } catch (error) {
-      toast.error("Kataloglarni yuklashda xatolik yuz berdi!");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchCategories = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("categories")
+          .select("*")
+          .order("id", { ascending: true });
+        if (error) throw error;
+        if (data) setCategories(data);
+      } catch (error) {
+        toast.error("Kataloglarni yuklashda xatolik yuz berdi!");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchCategories();
   }, []);
 
   // 2. Tanlangan katalogga tegishli mahsulotlarni yuklash
-  const fetchProducts = async () => {
-    if (!selectedCategory) return;
-    setProductsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("category_id", selectedCategory.id)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      if (data) setProducts(data);
-    } catch (error) {
-      toast.error("Mahsulotlarni yuklab bo'lmadi");
-    } finally {
-      setProductsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchProducts = async () => {
+      if (!selectedCategory) return;
+      setProductsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .eq("category_id", selectedCategory.id)
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        if (data) setProducts(data);
+      } catch (error) {
+        toast.error("Mahsulotlarni yuklab bo'lmadi");
+      } finally {
+        setProductsLoading(false);
+      }
+    };
+
     fetchProducts();
   }, [selectedCategory]);
 

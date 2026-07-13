@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { supabase } from "../../../supabase/client";
 import { 
   FiArrowLeft, FiPlus, FiPackage, FiFolderPlus,
@@ -19,15 +19,15 @@ export default function KatalogTab({ selectedCategory, setSelectedCategory }) {
   const [isProdModalOpen, setIsProdModalOpen] = useState(false);
 
   // --- EDIT MODES ---
-  const [editCatId, setEditCatId] = useState(null); // null bo'lsa yangi qo'shish, id bo'lsa tahrirlash
+  const [editCatId, setEditCatId] = useState(null);
   const [editProdId, setEditProdId] = useState(null);
 
   // --- FORM STATES ---
   const [newCat, setNewCat] = useState({ name_uz: "", image_url: "" });
   const [newProd, setNewProd] = useState({ title_uz: "", price: "", image_url: "" });
 
-  // 1. Kataloglarni yuklash
-  const fetchCategories = async () => {
+  // 1. Kataloglarni yuklash (useCallback bilan optimallashtirildi)
+  const fetchCategories = useCallback(async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.from("categories").select("*").order("id", { ascending: true });
@@ -36,14 +36,14 @@ export default function KatalogTab({ selectedCategory, setSelectedCategory }) {
     } catch (error) {
       toast.error("Kataloglarni yuklashda xatolik yuz berdi!");
     } finally { setLoading(false); }
-  };
+  }, []);
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
-  // 2. Mahsulotlarni yuklash
-  const fetchProducts = async () => {
+  // 2. Mahsulotlarni yuklash (useCallback bilan optimallashtirildi)
+  const fetchProducts = useCallback(async () => {
     if (!selectedCategory) return;
     setProductsLoading(true);
     try {
@@ -57,11 +57,11 @@ export default function KatalogTab({ selectedCategory, setSelectedCategory }) {
     } catch (error) {
       toast.error("Mahsulotlarni yuklab bo'lmadi");
     } finally { setProductsLoading(false); }
-  };
+  }, [selectedCategory]);
 
   useEffect(() => {
     fetchProducts();
-  }, [selectedCategory]);
+  }, [fetchProducts]);
 
   // 📸 SUPABASE STORAGE'GA RASM YUKLASH
   const handleImageUpload = async (e, target) => {
@@ -83,10 +83,10 @@ export default function KatalogTab({ selectedCategory, setSelectedCategory }) {
       const { data } = supabase.storage.from("images").getPublicUrl(filePath);
       
       if (target === "category") {
-        setNewCat({ ...newCat, image_url: data.publicUrl });
+        setNewCat(prev => ({ ...prev, image_url: data.publicUrl }));
         toast.success("Katalog rasmi yuklandi! ✅");
       } else {
-        setNewProd({ ...newProd, image_url: data.publicUrl });
+        setNewProd(prev => ({ ...prev, image_url: data.publicUrl }));
         toast.success("Mahsulot rasmi yuklandi! ✅");
       }
     } catch (error) {
@@ -114,12 +114,10 @@ export default function KatalogTab({ selectedCategory, setSelectedCategory }) {
       };
 
       if (editCatId) {
-        // TAHRIRLASH (UPDATE)
         const { error } = await supabase.from("categories").update(finalData).eq("id", editCatId);
         if (error) throw error;
         toast.success("Katalog muvaffaqiyatli yangilandi! 📝");
       } else {
-        // YANGI QO'SHISH (INSERT)
         const { error } = await supabase.from("categories").insert([finalData]);
         if (error) throw error;
         toast.success("Yangi katalog muvaffaqiyatli qo'shildi! 🎉");
@@ -136,7 +134,7 @@ export default function KatalogTab({ selectedCategory, setSelectedCategory }) {
 
   // 📝 TAHRIRLASH REJIMINI YOQISH (KATALOG)
   const handleEditCategoryClick = (cat, e) => {
-    e.stopPropagation(); // Kartaga bosilib ichiga kirib ketmasligi uchun
+    e.stopPropagation();
     setEditCatId(cat.id);
     setNewCat({ name_uz: cat.name_uz, image_url: cat.image_url || "" });
     setIsCatModalOpen(true);
@@ -172,12 +170,10 @@ export default function KatalogTab({ selectedCategory, setSelectedCategory }) {
       };
 
       if (editProdId) {
-        // TAHRIRLASH (UPDATE)
         const { error } = await supabase.from("products").update(productData).eq("id", editProdId);
         if (error) throw error;
         toast.success("Mahsulot muvaffaqiyatli yangilandi! 📝");
       } else {
-        // YANGI QO'SHISH (INSERT)
         const { error } = await supabase.from("products").insert([productData]);
         if (error) throw error;
         toast.success("Mahsulot muvaffaqiyatli qo'shildi! 📦");
@@ -348,7 +344,7 @@ export default function KatalogTab({ selectedCategory, setSelectedCategory }) {
       ) : products.length === 0 ? (
         <div className="no-data-box">
           <FiPackage size={44} />
-          <p>Bu katalogda hozircha mahsulotlar mavjud emas.</p>
+          <p>Bu katalogda hozircha mahsulotlar mevjud emas.</p>
         </div>
       ) : (
         <div className="products-light-grid">

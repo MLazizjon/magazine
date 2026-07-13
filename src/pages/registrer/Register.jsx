@@ -21,63 +21,97 @@ const UZBEKISTAN_DATA = {
   "Qoraqalpog'iston Respublikasi": ["Nukus shahri", "Amudaryo tumani", "Beruniy tumani", "Chimboy tumani", "Ellikqal‘a tumani", "Kegeyli tumani", "Mo‘ynoq tumani", "Nukus tumani", "Qonliko‘l tumani", "Qo‘ng‘irot tumani", "Qorao‘zak tumani", "Shumanay tumani", "Taxtako‘pir tumani", "To‘rtko‘l tumani", "Xo‘jayli tumani", "Taxiatosh tumani", "Bo‘zatov tumani"]
 };
 
+const KASBLAR_DATA = ["Dasturchi", "O'qituvchi", "Tadbirkor", "Talaba", "Shifokor", "Boshqa"];
+
 export default function Register() {
+  const [step, setStep] = useState(1); // 1, 2, yoki 3-bosqichni nazorat qilish
   const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("+998 ");
+  const [lastName, setLastName] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [region, setRegion] = useState("");
   const [district, setDistrict] = useState(""); 
-  const [password, setPassword] = useState("");
+  const [job, setJob] = useState("");
+  const [ofertaAccepted, setOfertaAccepted] = useState(false);
 
   // Dropdown ochilib/yopilish holatlari
   const [regionOpen, setRegionOpen] = useState(false);
   const [districtOpen, setDistrictOpen] = useState(false);
+  const [jobOpen, setJobOpen] = useState(false);
 
   const regionRef = useRef(null);
   const districtRef = useRef(null);
+  const jobRef = useRef(null);
   const navigate = useNavigate();
 
-  // Tashqariga bosilganda ro'yxatni yopish
+  // Telegram WebApp obyektini olish
+  const tg = window.Telegram?.WebApp;
+
   useEffect(() => {
+    if (tg) {
+      tg.ready();
+      tg.expand(); // Mini App oynasini to'liq ochish
+    }
+
     function handleClickOutside(event) {
       if (regionRef.current && !regionRef.current.contains(event.target)) setRegionOpen(false);
       if (districtRef.current && !districtRef.current.contains(event.target)) setDistrictOpen(false);
+      if (jobRef.current && !jobRef.current.contains(event.target)) setJobOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [tg]);
 
-  const handlePhoneChange = (e) => {
-    let input = e.target.value;
-    if (!input.startsWith("+998")) input = "+998 ";
-    const cleanNumbers = input.slice(4).replace(/\D/g, "");
-    const limitedNumbers = cleanNumbers.substring(0, 9);
-
-    let formattedPhone = "+998 ";
-    if (limitedNumbers.length > 0) formattedPhone += limitedNumbers.substring(0, 2);
-    if (limitedNumbers.length > 2) formattedPhone += " " + limitedNumbers.substring(2, 5);
-    if (limitedNumbers.length > 5) formattedPhone += " " + limitedNumbers.substring(5, 7);
-    if (limitedNumbers.length > 7) formattedPhone += " " + limitedNumbers.substring(7, 9);
-
-    setPhone(formattedPhone);
+  // Step 1 validation
+  const handleStepOneNext = () => {
+    if (fullName.trim().length < 3 || lastName.trim().length < 3) {
+      return toast.error("Ism va familiya kamida 3 ta harf bo‘lishi kerak!");
+    }
+    setStep(2);
   };
 
-  const register = async () => {
-    const rawPhone = phone.replace(/\s/g, "");
+  // Step 2 validation
+  const handleStepTwoNext = () => {
+    if (!birthDate) {
+      return toast.error("Tug‘ilgan kuningizni kiriting!");
+    }
+    setStep(3);
+  };
 
-    if (!fullName || rawPhone === "+998" || !region || !district || !password) {
-      return toast.error("Iltimos, barcha maydonlarni to‘ldiring!");
+  // Step 3: Telegram orqali telefon raqam so'rash va yakuniy ro'yxatdan o'tkazish
+  const handleFinalSubmit = () => {
+    if (!region || !district || !job) {
+      return toast.error("Viloyat, tuman va kasbingizni tanlang!");
     }
-    if (fullName.trim().length <= 2) {
-      return toast.error("Ism kamida 3 ta harf bo‘lishi kerak!");
-    }
-    if (rawPhone.length !== 13) {
-      return toast.error("Telefon raqami to'liq kiritilmadi!");
-    }
-    if (password.length < 4) {
-      return toast.error("Parol kamida 4 ta belgidan iborat bo‘lsin!");
+    if (!ofertaAccepted) {
+      return toast.error("Oferta shartlarini qabul qilishingiz kerak!");
     }
 
+    // Telegramdan telefon raqam olish oynasini chaqirish
+    if (tg && tg.requestContact) {
+      tg.requestContact(async (shared) => {
+        if (shared && tg.initDataUnsafe?.user) {
+          const contactPhone = tg.initDataUnsafe.user.phone_number || ""; 
+          const telegramId = tg.initDataUnsafe.user.id;
+          
+          // Agar telefon raqami formatsiz kelsa, to'g'rilaymiz (+ belgisini qo'shish)
+          const formattedPhone = contactPhone.startsWith("+") ? contactPhone : "+" + contactPhone;
+
+          await saveUserToSupabase(formattedPhone, telegramId);
+        } else {
+          toast.error("Ro'yxatdan o'tish uchun telefon raqamingizni ulashingiz shart!");
+        }
+      });
+    } else {
+      // Agar Telegram muhitidan tashqarida (oddiy brauzerda) test qilinayotgan bo'lsa
+      // Test uchun vaqtinchalik raqam berib ketamiz
+      toast.warn("Telegram interfeysi topilmadi. Test rejimi.");
+      saveUserToSupabase("+998991234567", 123456789);
+    }
+  };
+
+  const saveUserToSupabase = async (rawPhone, telegramId) => {
     try {
+      // Avval tekshiramiz bazada bormi
       const { data: existing, error: checkError } = await supabase
         .from("profiles")
         .select("phone")
@@ -85,23 +119,36 @@ export default function Register() {
         .maybeSingle();
 
       if (checkError) throw checkError;
-      if (existing) return toast.error("Bu telefon allaqachon ro‘yxatdan o‘tgan!");
+      if (existing) {
+        // Agar allaqachon bo'lsa, to'g'ri tizimga kirgizamiz
+        localStorage.setItem("user", JSON.stringify(existing));
+        toast.success("Tizimga qaytadan xush kelibsiz!");
+        return navigate("/user-dashboard");
+      }
 
-      const { error: insertError } = await supabase.from("profiles").insert([
-        {
-          full_name: fullName.trim(),
-          phone: rawPhone,
-          region,
-          district, 
-          password,
-          role: "user",
-        },
-      ]);
+      // Yangi foydalanuvchini qo'shish
+      const newUser = {
+        full_name: `${fullName.trim()} ${lastName.trim()}`,
+        phone: rawPhone,
+        telegram_id: telegramId,
+        birth_date: birthDate,
+        region,
+        district, 
+        job,
+        role: "user",
+      };
+
+      const { data: insertedData, error: insertError } = await supabase
+        .from("profiles")
+        .insert([newUser])
+        .select()
+        .single();
 
       if (insertError) throw insertError;
 
+      localStorage.setItem("user", JSON.stringify(insertedData));
       toast.success("Ro‘yxatdan muvaffaqiyatli o‘tdingiz!");
-      navigate("/login");
+      navigate("/user-dashboard"); // To'g'ridan-to'g'ri sayt ichiga (Dashboardga) kirish
     } catch (err) {
       toast.error(err.message || "Xatolik yuz berdi");
     }
@@ -109,98 +156,172 @@ export default function Register() {
 
   return (
     <div className="auth-page-wrapper">
+      {/* 🟢 STEPPER (Bosqichlar indikatori) */}
+      <div className="stepper-wrapper">
+        <div className={`step-circle ${step >= 1 ? "active" : ""}`}>1</div>
+        <div className="step-line"></div>
+        <div className={`step-circle ${step >= 2 ? "active" : ""}`}>2</div>
+        <div className="step-line"></div>
+        <div className={`step-circle ${step >= 3 ? "active" : ""}`}>3</div>
+      </div>
+
       <div className="auth">
-        <h2>Ro`yxatdan o`tish</h2>
+        <h2>Ma'lumotlarni to'ldiring</h2>
 
-        <div className="input-group">
-          <input
-            type="text"
-            placeholder="Ism (kamida 3 ta harf)"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-          />
-        </div>
-
-        <div className="input-group">
-          <input
-            type="text"
-            placeholder="+998 90 123 45 67"
-            value={phone}
-            onChange={handlePhoneChange}
-          />
-        </div>
-
-        {/* 🏙️ Custom Viloyat Select */}
-        <div className="input-group" ref={regionRef}>
-          <div 
-            className={`custom-select-trigger ${!region ? "is-placeholder" : ""}`}
-            onClick={() => setRegionOpen(!regionOpen)}
-          >
-            {region || "Viloyatni tanlang"}
-          </div>
-          {regionOpen && (
-            <div className="custom-options-box">
-              {Object.keys(UZBEKISTAN_DATA).map((reg) => (
-                <div 
-                  key={reg} 
-                  className={`custom-option ${region === reg ? "selected" : ""}`}
-                  onClick={() => {
-                    setRegion(reg);
-                    setDistrict("");
-                    setRegionOpen(false);
-                  }}
-                >
-                  {reg}
-                </div>
-              ))}
+        {/* 🔹 1-BOSQICH: Ism va Familiya */}
+        {step === 1 && (
+          <div className="step-container">
+            <div className="input-group">
+              <input
+                type="text"
+                placeholder="Ismingizni kiriting"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
             </div>
-          )}
-        </div>
-
-        {/* 🏡 Custom Tuman Select */}
-        {region && (
-          <div className="input-group" ref={districtRef}>
-            <div 
-              className={`custom-select-trigger ${!district ? "is-placeholder" : ""}`}
-              onClick={() => setDistrictOpen(!districtOpen)}
-            >
-              {district || "Tumanni/Shaharni tanlang"}
+            <div className="input-group">
+              <input
+                type="text"
+                placeholder="Familiyangizni kiriting"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
             </div>
-            {districtOpen && (
-              <div className="custom-options-box">
-                {UZBEKISTAN_DATA[region].map((dist) => (
-                  <div 
-                    key={dist} 
-                    className={`custom-option ${district === dist ? "selected" : ""}`}
-                    onClick={() => {
-                      setDistrict(dist);
-                      setDistrictOpen(false);
-                    }}
-                  >
-                    {dist}
-                  </div>
-                ))}
-              </div>
-            )}
+            <button className="btn-submit" onClick={handleStepOneNext}>
+              Keyingi
+            </button>
           </div>
         )}
 
-        <div className="input-group">
-          <input
-            type="password"
-            placeholder="Parol (kamida 4 ta belgi)"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+        {/* 🔹 2-BOSQICH: Tug'ilgan kun */}
+        {step === 2 && (
+          <div className="step-container">
+            <div className="input-group">
+              <label style={{ fontSize: "14px", color: "#666", display: "block", marginBottom: "5px" }}>Tug'ilgan kuningiz</label>
+              <input
+                type="date"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+              />
+            </div>
+            <div className="btn-group" style={{ display: "flex", gap: "10px" }}>
+              <button className="btn-back" onClick={() => setStep(1)} style={{ background: "#ccc", width: "100%" }}>
+                Orqaga
+              </button>
+              <button className="btn-submit" onClick={handleStepTwoNext} style={{ width: "100%" }}>
+                Keyingi
+              </button>
+            </div>
+          </div>
+        )}
 
-        <button className="btn-submit" onClick={register}>
-          Yuborish
-        </button>
+        {/* 🔹 3-BOSQICH: Viloyat, Tuman, Kasb va Oferta */}
+        {step === 3 && (
+          <div className="step-container">
+            {/* Custom Viloyat Select */}
+            <div className="input-group" ref={regionRef}>
+              <div 
+                className={`custom-select-trigger ${!region ? "is-placeholder" : ""}`}
+                onClick={() => setRegionOpen(!regionOpen)}
+              >
+                {region || "Viloyatni tanlang"}
+              </div>
+              {regionOpen && (
+                <div className="custom-options-box">
+                  {Object.keys(UZBEKISTAN_DATA).map((reg) => (
+                    <div 
+                      key={reg} 
+                      className={`custom-option ${region === reg ? "selected" : ""}`}
+                      onClick={() => {
+                        setRegion(reg);
+                        setDistrict("");
+                        setRegionOpen(false);
+                      }}
+                    >
+                      {reg}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-        <p className="auth-link" onClick={() => navigate("/login")}>
-          Tizimga kirish sahifasiga o`tish
-        </p>
+            {/* Custom Tuman Select */}
+            {region && (
+              <div className="input-group" ref={districtRef}>
+                <div 
+                  className={`custom-select-trigger ${!district ? "is-placeholder" : ""}`}
+                  onClick={() => setDistrictOpen(!districtOpen)}
+                >
+                  {district || "Shahar tumanni tanlang"}
+                </div>
+                {districtOpen && (
+                  <div className="custom-options-box">
+                    {UZBEKISTAN_DATA[region].map((dist) => (
+                      <div 
+                        key={dist} 
+                        className={`custom-option ${district === dist ? "selected" : ""}`}
+                        onClick={() => {
+                          setDistrict(dist);
+                          setDistrictOpen(false);
+                        }}
+                      >
+                        {dist}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Custom Kasb Select */}
+            <div className="input-group" ref={jobRef}>
+              <div 
+                className={`custom-select-trigger ${!job ? "is-placeholder" : ""}`}
+                onClick={() => setJobOpen(!jobOpen)}
+              >
+                {job || "Kasbingizni tanlang"}
+              </div>
+              {jobOpen && (
+                <div className="custom-options-box">
+                  {KASBLAR_DATA.map((j) => (
+                    <div 
+                      key={j} 
+                      className={`custom-option ${job === j ? "selected" : ""}`}
+                      onClick={() => {
+                        setJob(j);
+                        setJobOpen(false);
+                      }}
+                    >
+                      {j}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Oferta shartlari */}
+            <div className="oferta-checkbox" style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "15px" }}>
+              <input 
+                type="checkbox" 
+                id="oferta" 
+                checked={ofertaAccepted} 
+                onChange={(e) => setOfertaAccepted(e.target.checked)} 
+              />
+              <label htmlFor="oferta" style={{ fontSize: "12px" }}>
+                Men <a href="/oferta" target="_blank" rel="noreferrer">oferta shartlarini</a> qabul qilaman
+              </label>
+            </div>
+
+            <div className="btn-group" style={{ display: "flex", gap: "10px" }}>
+              <button className="btn-back" onClick={() => setStep(2)} style={{ background: "#ccc", width: "100%" }}>
+                Orqaga
+              </button>
+              <button className="btn-submit" onClick={handleFinalSubmit} style={{ width: "100%" }}>
+                Saqlash
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -21,17 +21,28 @@ const UZBEKISTAN_DATA = {
   "Qoraqalpog'iston Respublikasi": ["Nukus shahri", "Amudaryo tumani", "Beruniy tumani", "Chimboy tumani", "Ellikqal‘a tumani", "Kegeyli tumani", "Mo‘ynoq tumani", "Nukus tumani", "Qonliko‘l tumani", "Qo‘ng‘irot tumani", "Qorao‘zak tumani", "Shumanay tumani", "Taxtako‘pir tumani", "To‘rtko‘l tumani", "Xo‘jayli tumani", "Taxiatosh tumani", "Bo‘zatov tumani"]
 };
 
-const KASBLAR_DATA = ["Dasturchi", "O'qituvchi", "Tadbirkor", "Talaba", "Shifokor", "Boshqa"];
+// 🛠️ Yangilangan ustalar kasblari ro'yxati
+const KASBLAR_DATA = [
+  "Santexnik",
+  "Elektrik",
+  "Malyar / Suvoqchi",
+  "Kafelchi (Plitkar)",
+  "Gvipsokarton ustasi",
+  "Armaturchi / Svarshik",
+  "Alyumin profil ustasi (Akfa)",
+  "Mebelchi",
+  "Duradgor (Yog'och ustasi)",
+  "Boshqa"
+];
 
 export default function Register() {
-  const [step, setStep] = useState(1); // 1, 2, yoki 3-bosqichni nazorat qilish
+  const [step, setStep] = useState(1); 
   const [fullName, setFullName] = useState("");
   const [lastName, setLastName] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [region, setRegion] = useState("");
   const [district, setDistrict] = useState(""); 
   const [job, setJob] = useState("");
-  const [ofertaAccepted, setOfertaAccepted] = useState(false);
 
   // Dropdown ochilib/yopilish holatlari
   const [regionOpen, setRegionOpen] = useState(false);
@@ -49,7 +60,7 @@ export default function Register() {
   useEffect(() => {
     if (tg) {
       tg.ready();
-      tg.expand(); // Mini App oynasini to'liq ochish
+      tg.expand(); 
     }
 
     function handleClickOutside(event) {
@@ -77,13 +88,10 @@ export default function Register() {
     setStep(3);
   };
 
-  // Step 3: Telegram orqali telefon raqam so'rash va yakuniy ro'yxatdan o'tkazish
+  // Step 3: Saqlash tugmasi bosilganda (Oferta tekshiruvi butunlay o'chirildi)
   const handleFinalSubmit = () => {
     if (!region || !district || !job) {
       return toast.error("Viloyat, tuman va kasbingizni tanlang!");
-    }
-    if (!ofertaAccepted) {
-      return toast.error("Oferta shartlarini qabul qilishingiz kerak!");
     }
 
     // Telegramdan telefon raqam olish oynasini chaqirish
@@ -93,17 +101,13 @@ export default function Register() {
           const contactPhone = tg.initDataUnsafe.user.phone_number || ""; 
           const telegramId = tg.initDataUnsafe.user.id;
           
-          // Agar telefon raqami formatsiz kelsa, to'g'rilaymiz (+ belgisini qo'shish)
           const formattedPhone = contactPhone.startsWith("+") ? contactPhone : "+" + contactPhone;
-
           await saveUserToSupabase(formattedPhone, telegramId);
         } else {
           toast.error("Ro'yxatdan o'tish uchun telefon raqamingizni ulashingiz shart!");
         }
       });
     } else {
-      // Agar Telegram muhitidan tashqarida (oddiy brauzerda) test qilinayotgan bo'lsa
-      // Test uchun vaqtinchalik raqam berib ketamiz
       toast.warn("Telegram interfeysi topilmadi. Test rejimi.");
       saveUserToSupabase("+998991234567", 123456789);
     }
@@ -111,7 +115,6 @@ export default function Register() {
 
   const saveUserToSupabase = async (rawPhone, telegramId) => {
     try {
-      // Avval tekshiramiz bazada bormi
       const { data: existing, error: checkError } = await supabase
         .from("profiles")
         .select("phone")
@@ -120,13 +123,11 @@ export default function Register() {
 
       if (checkError) throw checkError;
       if (existing) {
-        // Agar allaqachon bo'lsa, to'g'ri tizimga kirgizamiz
         localStorage.setItem("user", JSON.stringify(existing));
         toast.success("Tizimga qaytadan xush kelibsiz!");
         return navigate("/user-dashboard");
       }
 
-      // Yangi foydalanuvchini qo'shish
       const newUser = {
         full_name: `${fullName.trim()} ${lastName.trim()}`,
         phone: rawPhone,
@@ -148,7 +149,7 @@ export default function Register() {
 
       localStorage.setItem("user", JSON.stringify(insertedData));
       toast.success("Ro‘yxatdan muvaffaqiyatli o‘tdingiz!");
-      navigate("/user-dashboard"); // To'g'ridan-to'g'ri sayt ichiga (Dashboardga) kirish
+      navigate("/user-dashboard"); 
     } catch (err) {
       toast.error(err.message || "Xatolik yuz berdi");
     }
@@ -215,7 +216,7 @@ export default function Register() {
           </div>
         )}
 
-        {/* 🔹 3-BOSQICH: Viloyat, Tuman, Kasb va Oferta */}
+        {/* 🔹 3-BOSQICH: Viloyat, Tuman va Kasb (Oferta olib tashlandi) */}
         {step === 3 && (
           <div className="step-container">
             {/* Custom Viloyat Select */}
@@ -273,7 +274,7 @@ export default function Register() {
               </div>
             )}
 
-            {/* Custom Kasb Select */}
+            {/* Custom Ustalar Kasbi Select */}
             <div className="input-group" ref={jobRef}>
               <div 
                 className={`custom-select-trigger ${!job ? "is-placeholder" : ""}`}
@@ -297,19 +298,6 @@ export default function Register() {
                   ))}
                 </div>
               )}
-            </div>
-
-            {/* Oferta shartlari */}
-            <div className="oferta-checkbox" style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "15px" }}>
-              <input 
-                type="checkbox" 
-                id="oferta" 
-                checked={ofertaAccepted} 
-                onChange={(e) => setOfertaAccepted(e.target.checked)} 
-              />
-              <label htmlFor="oferta" style={{ fontSize: "12px" }}>
-                Men <a href="/oferta" target="_blank" rel="noreferrer">oferta shartlarini</a> qabul qilaman
-              </label>
             </div>
 
             <div className="btn-group" style={{ display: "flex", gap: "10px" }}>

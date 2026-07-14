@@ -19,7 +19,7 @@ import HomeTab from "../home/Home";
 import CodeTab from "../kodkirish/KodKiritish";
 import SettingsTab from "../setting/Setting";
 import UserMagazin from "../magazine/Magazine"; 
-import UserKatalog from "../katalog/Katalog"; // 📂 Yangi qo'shilgan foydalanuvchi katalogi
+// import UserKatalog from "../katalog/Katalog"; // 📂 Yangi qo'shilgan foydalanuvchi katalogi
 
 import "./userDash.css";
 

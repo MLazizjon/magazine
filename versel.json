@@ -1,8 +1,12 @@
 {
-    "routes": [
-      {
-        "src": "/api/webhook",
-        "dest": "api/webhook.py"
-      }
-    ]
-  }
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/webhook.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/api/webhook.py"
+    }
+  ]
+}

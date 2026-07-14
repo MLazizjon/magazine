@@ -7,15 +7,17 @@ TOKEN = "8640815581:AAH6bOE98p9F0vHLNukp_R3G69y2xWAUOto"
 bot = Bot(token=TOKEN)
 dp = Dispatcher(storage=MemoryStorage())
 
-# Botingiz buyruqlari
+# Foydalanuvchi botga kirib /start bossa, shu funksiya ishlaydi
 @dp.message()
 async def echo_handler(message: types.Message):
     if message.text == "/start":
-        await message.answer("Salom! Bot Vercel serverida muvaffaqiyatli ishga tushdi! 🎉")
+        # Bu yerga o'zingiz xohlagan istalgan matnni yozishingiz mumkin
+        await message.answer("Senga keyin aytaman! 😉")
     else:
-        await message.reply(f"Siz yozdingiz: {message.text}")
+        # Agar startdan boshqa narsa yozsa:
+        await message.reply("Hozir bandman, keyinroq gaplashamiz.")
 
-# Vercel ushbu funksiyani avtomatik ishga tushiradi
+# Vercel uchun maxsus qism
 async def handler(request):
     if request.method == "POST":
         json_string = await request.text()

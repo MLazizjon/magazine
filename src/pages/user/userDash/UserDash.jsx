@@ -8,7 +8,7 @@ import {
   FaExclamationTriangle, 
   FaChevronRight, 
   FaGlobe, 
-  FaQuestionCircle, 
+  // FaQuestionCircle, 
   FaSignOutAlt, 
   FaChevronLeft,
   FaGift 

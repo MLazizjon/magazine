@@ -15,10 +15,10 @@ import imgCPm from "./pumpman¦-гл/4TMS.png";
 import imgPW from "./pumpman¦-гл/PW.png";
 import imgPWE from "./pumpman¦-гл/PW-E.png";
 import imgPWF from "./pumpman¦-гл/PW.png"; 
-import imgQDX from "./pumpman¦-гл/QDX.png";
-import imgTCM from "./pumpman¦-гл/TCM.png";
-import imgTCH from "./pumpman¦-гл/THF.png";
-import imgJET from "./pumpman¦-гл/JET.png";
+// import imgQDX from "./pumpman¦-гл/QDX.png";
+// import imgTCM from "./pumpman¦-гл/TCM.png";
+// import imgTCH from "./pumpman¦-гл/THF.png";
+// import imgJET from "./pumpman¦-гл/JET.png";
 
 // === Leaflet marker ikonkalarini endi sozlaymiz (importlardan keyin) ===
 let DefaultIcon = L.icon({

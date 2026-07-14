@@ -527,13 +527,13 @@ export default function UserDash() {
                 <FaChevronRight className="d-chevron" />
               </button>
 
-              <button className="drawer-item">
+              {/* <button className="drawer-item">
                 <div className="d-item-left">
                   <div className="d-icon-box"><FaQuestionCircle /></div>
                   <span>F.A.Q</span>
                 </div>
                 <FaChevronRight className="d-chevron" />
-              </button>
+              </button> */}
 
               <button className="drawer-item d-logout-style" onClick={() => { setIsDrawerOpen(false); setShowLogoutModal(true); }}>
                 <div className="d-item-left">

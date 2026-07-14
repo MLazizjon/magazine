@@ -139,17 +139,51 @@
 //   );
 // }
 
-
 import React, { useState } from "react";
-import { FiArrowLeft, FiGrid, FiPackage, FiImage } from "react-icons/fi";
+import { FiArrowLeft, FiGrid, FiPackage, FiImage, FiMapPin, FiPhone } from "react-icons/fi";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import L from "leaflet";
 import "./katalog.css";
 
-// 1. KATALOGLAR RO'YXATI
+// Leaflet marker ikonkalarini to'g'rilash
+import "leaflet/dist/leaflet.css";
+import icon from "leaflet/dist/images/marker-icon.png";
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
+
+let DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
+// === 1. DO'KONLAR VA ULARNING KOORDINATALARI ===
+const MOCK_SHOPS = [
+  { 
+    id: 1, 
+    name: "IT Tat o'quv markazi (Bosh Ofis)", 
+    address: "Samarqand sh., Mirzo Ulug'bek ko'chasi, 47-uy", 
+    lat: 39.677544, 
+    lng: 66.926537, 
+    phone: "+998 90 123-45-67" 
+  },
+  { 
+    id: 2, 
+    name: "Nasoslar ombori (Samarqand filiali)", 
+    address: "Samarqand sh., Gagarin ko'chasi", 
+    lat: 39.661245, 
+    lng: 66.912384, 
+    phone: "+998 93 987-65-43" 
+  }
+];
+
+// === 2. KATALOGLAR TOIFALARI ===
 const MOCK_CATEGORIES = [
   { id: 1, name_uz: "Nasoslar", image_url: "https://via.placeholder.com/250x180?text=Nasoslar" }
 ];
 
-// 2. JADVALDAGI REYTINGI BO'YICHA ROSTMANA 24 TA NASOS ARRAYI
+// === 3. MAHSULOTLAR RO'YXATI (NARXSIZ) ===
 const MOCK_PRODUCTS = [
   // === QB (Вихревой) - 4 ta ===
   { id: 1, category_id: 1, title_uz: "Pumpman QB60 ECO (Вихревой)", price: 280000, image_url: "https://via.placeholder.com/250x180?text=QB60+ECO",
@@ -218,7 +252,7 @@ export default function KatalogTab() {
     (prod) => selectedCategory && prod.category_id === selectedCategory.id
   );
 
-  // --- REJIM 3: MAHSULOT XUSUSIYATLARI JADVALI EKRANI ---
+  // --- REJIM 3: MAHSULOT DETALI (XUSUSIYATLARI) ---
   if (selectedProduct) {
     return (
       <div className="katalog-light-wrapper">
@@ -236,9 +270,7 @@ export default function KatalogTab() {
             </div>
             <div className="product-detail-info">
               <h3 className="product-detail-title">{selectedProduct.title_uz}</h3>
-              <p className="product-detail-price">
-                Narxi: <span>{selectedProduct.price.toLocaleString()} UZS</span>
-              </p>
+              {/* NARX OLIB TASHLANDI */}
             </div>
           </div>
 
@@ -261,7 +293,7 @@ export default function KatalogTab() {
     );
   }
 
-  // --- REJIM 2: MAHSULOTLAR RO'YXATI (CARD REJIM) ---
+  // --- REJIM 2: MAHSULOTLAR RO'YXATI (KATEGORIYA ICHIDA) ---
   if (selectedCategory) {
     return (
       <div className="katalog-light-wrapper">
@@ -294,7 +326,7 @@ export default function KatalogTab() {
                 </div>
                 <div className="product-details">
                   <h4 className="product-title">{prod.title_uz}</h4>
-                  <p className="product-price">{prod.price.toLocaleString()} UZS</p>
+                  {/* NARX OLIB TASHLANDI */}
                 </div>
               </div>
             ))}
@@ -304,9 +336,10 @@ export default function KatalogTab() {
     );
   }
 
-  // --- REJIM 1: ASOSIY KATALOGLAR REJIMI ---
+  // --- REJIM 1: ASOSIY KATALOGLAR REJIMI (Siz ko'rsatgan rasm) ---
   return (
     <div className="katalog-light-wrapper">
+      {/* 1. Sarlavha Banner qismi */}
       <div className="katalog-light-banner">
         <div className="banner-left-info">
           <div className="banner-icon-title">
@@ -317,11 +350,49 @@ export default function KatalogTab() {
         </div>
       </div>
 
+      {/* 🗺️ 2. INTERAKTIV KARTA (Mavjud kataloglardan tepaga joylashtirildi) */}
+      <div className="katalog-map-section" style={{ margin: "20px 0 30px 0", borderRadius: "12px", overflow: "hidden", border: "1px solid #e2e8f0" }}>
+        <div style={{ padding: "12px 16px", background: "#f8fafc", borderBottom: "1px solid #e2e8f0", display: "flex", alignItems: "center", gap: "8px" }}>
+          <FiMapPin style={{ color: "#3b82f6" }} />
+          <strong style={{ fontSize: "14px", color: "#1e293b" }}>Bizning do'konlarimiz xaritasi</strong>
+        </div>
+        
+        <div style={{ height: "320px", width: "100%" }}>
+          <MapContainer 
+            center={[39.677544, 66.926537]} // IT Tat (Samarqand) koordinatasi
+            zoom={13} 
+            style={{ width: "100%", height: "100%" }}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            {MOCK_SHOPS.map((shop) => (
+              <Marker key={shop.id} position={[shop.lat, shop.lng]}>
+                <Popup>
+                  <div style={{ fontFamily: "sans-serif", padding: "5px" }}>
+                    <h4 style={{ margin: "0 0 5px 0", color: "#1e293b", fontSize: "14px", fontWeight: "bold" }}>{shop.name}</h4>
+                    <p style={{ margin: "0 0 8px 0", fontSize: "12px", color: "#64748b" }}>{shop.address}</p>
+                    {shop.phone && (
+                      <p style={{ margin: "0", fontSize: "12px", color: "#2563eb", display: "flex", alignItems: "center", gap: "4px", fontWeight: "600" }}>
+                        <FiPhone size={12} /> {shop.phone}
+                      </p>
+                    )}
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+          </MapContainer>
+        </div>
+      </div>
+
+      {/* 3. Bo'lim ajratuvchi sarlavha */}
       <div className="section-divider">
         <h3>Mavjud Kataloglar</h3>
         <span className="badge-count">{MOCK_CATEGORIES.length} toifa</span>
       </div>
 
+      {/* 4. Kategoriyalar ro'yxati (Nasoslar va boshqalar) */}
       <div className="categories-light-grid">
         {MOCK_CATEGORIES.map((cat) => (
           <div key={cat.id} className="category-light-card" onClick={() => setSelectedCategory(cat)}>

@@ -4,12 +4,11 @@ import {
   FiTool, 
   FiCode, 
   FiCalendar, 
-  FiUser,
   FiFileText,
   FiCamera,
   FiGift,
   FiShoppingBag,
-  FiLayers, // 📂 Katalog uchun yangi ikonka
+  FiLayers, 
   FiX 
 } from "react-icons/fi"; 
 import "./sidebar.css"; 
@@ -43,7 +42,7 @@ export default function Sidebar({
       dashboard: "Dashboard / Asosiy",
       masters: `Ustalar Bazasi (${mastersCount})`,
       generator: `Kod Generator (${codesCount})`,
-      katalog: "Mahsulotlar Katalogi", // 🇺🇿 O'zbekcha tarjima
+      katalog: "Mahsulotlar Katalogi", 
       magazin: "Sovg'alar Do'koni", 
       aksiya: "Aksiya Muddatlari",
       news: "Yangiliklar va Maslahatlar",
@@ -55,7 +54,7 @@ export default function Sidebar({
       dashboard: "Главная / Панель",
       masters: `База Мастеров (${mastersCount})`,
       generator: `Генератор Кодов (${codesCount})`,
-      katalog: "Каталог Товаров", // 🇷🇺 Ruscha tarjima
+      katalog: "Каталог Товаров", 
       magazin: "Магазин Подарков", 
       aksiya: "Сроки Акций",
       news: "Новости и Советы",
@@ -70,17 +69,20 @@ export default function Sidebar({
     { id: "dashboard", label: t.dashboard, icon: <FiSliders /> },
     { id: "ustalar", label: t.masters, icon: <FiTool /> },
     { id: "random", label: t.generator, icon: <FiCode /> },
-    { id: "katalog", label: t.katalog, icon: <FiLayers /> }, // 📂 YANGI QO'SHILGAN KATALOG TUGMASI
+    { id: "katalog", label: t.katalog, icon: <FiLayers /> }, 
     { id: "magazin", label: t.magazin, icon: <FiGift /> }, 
     { id: "aksiya", label: t.aksiya, icon: <FiCalendar /> },
     { id: "maslahatlar", label: t.news, icon: <FiFileText /> }, 
     { id: "history", label: t.history, icon: <FiCamera /> }, 
   ];
 
+  // Admin ismining birinchi harfini avatar uchun olish (masalan, "Sayyidbek" -> "S")
+  const firstLetter = adminName ? adminName.charAt(0).toUpperCase() : "A";
+
   return (
     <aside className={`custom-sidebar ${isMobileMenuOpen ? "mobile-open" : ""}`}>
       
-      {/* Yuqori qism: Brend va uning ichiga chiroyli moslashtirilgan X tugmasi */}
+      {/* Yuqori qism: Brend */}
       <div className="sidebar-brand">
         <div className="brand-icon">
           <FiShoppingBag size={20} style={{ strokeWidth: "2.5px" }} />
@@ -90,7 +92,6 @@ export default function Sidebar({
           <span>{t.brandSub}</span>
         </div>
 
-        {/* 🛠️ X tugmasi endi aynan "ADMIN PANEL" qatorining o'ng chetida chiqadi */}
         {isMobileMenuOpen && (
           <button className="sidebar-close-inner" onClick={() => setIsMobileMenuOpen(false)}>
             <FiX size={18} />
@@ -101,6 +102,7 @@ export default function Sidebar({
       {/* Navigatsiya menyusi */}
       <nav className="sidebar-menu">
         <ul>
+          {/* Asosiy menyu elementlari */}
           {menuItems.map((item) => (
             <li 
               key={item.id} 
@@ -115,27 +117,27 @@ export default function Sidebar({
               {activeTab === item.id && <span className="active-indicator"></span>}
             </li>
           ))}
+
+          {/* 👥 Chiziq (Ajratuvchi) */}
+          <li className="menu-divider"></li>
+
+          {/* 👤 Menyu tugmasi shaklidagi yangi profil elementi */}
+          <li 
+            className={`profile-menu-item ${activeTab === "profil" ? "active" : ""}`}
+            onClick={() => {
+              setActiveTab("profil");
+              setIsMobileMenuOpen(false);
+            }}
+          >
+            <div className="menu-avatar">
+              {firstLetter}
+            </div>
+            <span className="menu-label">{adminName} ({t.role})</span>
+            {activeTab === "profil" && <span className="active-indicator"></span>}
+          </li>
         </ul>
       </nav>
 
-      {/* Pastki qism: Yo'qolib qolmaydigan mukammal Profil bloki */}
-      <div className="sidebar-footer">
-        <div 
-          className={`sidebar-profile-btn ${activeTab === "profil" ? "active-profile" : ""}`}
-          onClick={() => {
-            setActiveTab("profil");
-            setIsMobileMenuOpen(false);
-          }}
-        >
-          <div className="avatar-box">
-            <FiUser />
-          </div>
-          <div className="profile-info">
-            <span className="profile-name">{adminName}</span>
-            <span className="profile-role">{t.role}</span>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 }

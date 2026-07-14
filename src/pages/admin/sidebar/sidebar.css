@@ -20,10 +20,9 @@
      background-color: #ffffff;
      border-right: 1px solid #e2e8f0;
      
-     /* Flexbox orqali hamma narsani ekran ichiga qulflaymiz */
      display: flex !important;
      flex-direction: column !important;
-     justify-content: space-between !important; 
+     justify-content: flex-start !important;
      align-items: stretch !important;
      
      position: fixed;
@@ -33,13 +32,11 @@
      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-     
-     /* Elementlar tashqariga chiqib ketmasligi shart! */
      overflow: hidden !important; 
    }
    
    /* ==========================================================================
-      🔝 LOGOTIP QISMI (Tepada qulflangan)
+      🔝 LOGOTIP QISMI
       ========================================================================== */
    .sidebar-brand {
      padding: 20px 16px;
@@ -47,8 +44,8 @@
      align-items: center;
      gap: 12px;
      border-bottom: 1px solid #e2e8f0;
-     flex-shrink: 0 !important; /* Hech qachon siqilmaydi */
-     height: 80px !important; /* Qat'iy balandlik */
+     flex-shrink: 0 !important;
+     height: 80px !important; 
    }
    
    .brand-icon {
@@ -84,17 +81,35 @@
      margin-top: 2px;
    }
    
+   .sidebar-close-inner {
+     background: none;
+     border: none;
+     color: #64748b;
+     cursor: pointer;
+     padding: 6px;
+     border-radius: 6px;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     transition: all 0.2s ease;
+   }
+   
+   .sidebar-close-inner:hover {
+     background-color: #fee2e2;
+     color: #ef4444;
+   }
+   
    /* ==========================================================================
       📜 NAVIGATSIYA MENYULARI (FAQAT SHU QISM SKROLL BO'LADI)
       ========================================================================== */
    .sidebar-menu {
-     flex: 1 1 auto !important; /* Qolgan bo'sh joyni egallaydi va siqila oladi */
+     flex: 1 1 0% !important; 
      padding: 16px;
-     overflow-y: auto !important; /* Agar menyu ko'paysa, faqat shu yerda skroll chiqadi */
-     min-height: 0 !important; /* Flexbox ichida skroll ishlashi uchun shart */
+     overflow-y: auto !important; 
+     min-height: 0 !important; 
    }
    
-   /* Skrollbar dizayni */
+   /* Skrollbar */
    .sidebar-menu::-webkit-scrollbar {
      width: 5px;
    }
@@ -113,7 +128,7 @@
    .sidebar-menu li {
      display: flex;
      align-items: center;
-     padding: 12px 14px;
+     padding: 10px 14px;
      color: #475569;
      font-size: 13.5px;
      font-weight: 600;
@@ -149,71 +164,47 @@
      text-overflow: ellipsis;
    }
    
+   /* 👥 Menyu orasidagi chiroyli ajratuvchi chiziq */
+   .menu-divider {
+     height: 1px;
+     background-color: #e2e8f0;
+     margin: 10px 4px !important;
+     padding: 0 !important;
+     pointer-events: none; /* Bosib bo'lmaydi */
+   }
+   
    /* ==========================================================================
-      🔥 PASTKI QISM: PROFIL BLOKI (MUTLAQ REJIMDA EKRAAN TUBIGA QULFLANGAN)
+      👤 YANTAK MENU PROFIL TUGMASI (AVATAR USLUBIDA)
       ========================================================================== */
-   .sidebar-footer {
-     position: relative !important; 
-     flex-shrink: 0 !important; /* Ekran har qancha kichrayganda ham profil qismi MUTLAQ SIQILMAYDI */
-     width: 100% !important;
-     padding: 16px !important;
-     border-top: 1px solid #e2e8f0;
-     background-color: #ffffff;
-     z-index: 50 !important;
-     margin-top: auto !important; /* Menyu tugagach, avtomatik eng pastga tushadi */
+   .profile-menu-item {
+     margin-top: 4px;
    }
    
-   .sidebar-profile-btn {
-     display: flex;
-     align-items: center;
-     gap: 12px;
-     width: 100%;
-     padding: 10px;
-     background-color: #f8fafc;
-     border: 1px solid #e2e8f0;
-     border-radius: 12px;
-     cursor: pointer;
-     transition: all 0.2s ease;
-   }
-   
-   .sidebar-profile-btn:hover {
-     background-color: #f1f5f9;
-     border-color: #cbd5e1;
-   }
-   
-   .avatar-box {
-     width: 36px;
-     height: 36px;
+   /* Profil ichidagi kichik chiroyli avatar aylana */
+   .menu-avatar {
+     width: 22px;
+     height: 22px;
      background-color: #2563eb;
-     color: white;
+     color: #ffffff;
      border-radius: 50%;
      display: flex;
      align-items: center;
      justify-content: center;
-     font-size: 16px;
-     flex-shrink: 0 !important;
-   }
-   
-   .profile-info {
-     display: flex;
-     flex-direction: column;
-     overflow: hidden;
-     text-align: left;
-   }
-   
-   .profile-name {
-     font-size: 13px;
-     font-weight: 600;
-     color: #1e293b;
-     white-space: nowrap;
-     text-overflow: ellipsis;
-     overflow: hidden;
-   }
-   
-   .profile-role {
      font-size: 11px;
-     color: #64748b;
-     font-weight: 500;
+     font-weight: 700;
+     margin-right: 12px;
+     flex-shrink: 0;
+     transition: all 0.2s ease;
+   }
+   
+   /* Profil faol bo'lganda avatar oq ranga va fon rangiga moslashadi */
+   .profile-menu-item.active .menu-avatar {
+     background-color: #ffffff;
+     color: #2563eb;
+   }
+   
+   .profile-menu-item:hover .menu-avatar {
+     transform: scale(1.05);
    }
    
    /* ==========================================================================
@@ -226,5 +217,6 @@
      
      .custom-sidebar.mobile-open {
        transform: translateX(0);
+       box-shadow: 10px 0 30px rgba(15, 23, 42, 0.15);
      }
    }

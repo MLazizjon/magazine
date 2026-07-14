@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🏠 HOME TAB ASOSIY STRUKTURASI
+   🏠 HOME TAB ASOSIY STRUKTURASI (MOBIL MENYU FIX)
    ========================================================================== */
    .tab-section {
     width: 100%;
@@ -7,12 +7,34 @@
     flex-direction: column;
     box-sizing: border-box;
     padding: 16px;
-    /* 🚨 ENGL MUHIM FIX: Elementlar mobil menyu (Bottom Nav) ostida qolib ketmasligi, 
-       oxirigacha to'liq skrol bo'lishi uchun pastki qismdan dinamik zaxira joy */
-    padding-bottom: clamp(95px, 15vh, 140px) !important;
-    min-height: 100vh;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch; /* iOS qurilmalarda skrolni silliq qilish uchun */
+    
+    /* 🚨 BALANDLIK VA SKROL SOZLAMALARI */
+    height: auto !important;
+    min-height: calc(100dvh - 60px) !important;
+    
+    /* 🚨 ENG ASOSIY TUZATISH (BOTTOM NAV OSTIDA QOLMASLIGI UCHUN):
+       Pastki navigatsiya menyusi kontentni to'sib qo'ymasligi uchun pastdan 
+       katta xavfsiz masofa (padding) qoldiramiz. Bu kontentni menyudan tepaga ko'taradi. */
+    padding-bottom: 160px !important; 
+    
+    overflow: visible !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* ✨ Sahifa silliq kirib kelishi uchun animatsiya */
+  .fade-in {
+    animation: tabFadeIn 0.35s ease-out forwards;
+  }
+  
+  @keyframes tabFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   
   /* ==========================================================================
@@ -64,7 +86,7 @@
   .stat-text-wrapper {
     display: flex;
     flex-direction: column;
-    min-width: 0; /* Ekran juda kichrayganda matn sig'sa qisqaradi */
+    min-width: 0;
   }
   
   .stat-val-text {
@@ -146,7 +168,8 @@
     font-size: clamp(9px, 2.5vw, 11px);
     font-weight: bold;
     letter-spacing: 0.5px;
-    background: rgba(15, 23, 42, 0.45); /* Suratlar ustida yozuv oson o'qilishi uchun */
+    background: rgba(15, 23, 42, 0.55);
+    -webkit-backdrop-filter: blur(2px);
     backdrop-filter: blur(2px);
   }
   
@@ -390,30 +413,48 @@
   }
   
   /* ==========================================================================
-     📱 MOBIL MEDIA SO'ROVLAR (MOSLASHUVCHANLIK REJIMLARI)
+     📱 MOBIL MEDIA SO'ROVLAR (EKRAN 400PX VA UNDAN PASTDA MAXIMUM FIX)
      ========================================================================== */
   
-  /* 800px dan past bo'lgan kichik ekranlar va planshetlar uchun */
+  /* 800px dan past bo'lgan planshet va ekranlar */
   @media (max-width: 800px) {
     .promo-banners-container {
-      grid-template-columns: 1fr; /* Aksiyalar gridi bitta ustunga aylanadi */
+      grid-template-columns: 1fr;
     }
   }
   
-  /* 480px dan past bo'lgan smartfonlar uchun */
+  /* 🚨 480px dan past bo'lgan smartfonlar (400px va 360px ekranlarni to'liq qutqaradi) */
   @media (max-width: 480px) {
     .tab-section {
-      padding: 12px 10px !important;
+      padding: px 8px !important;
+      
+      /* 🚀 MUHIM FIX: Ekran juda torayganda, pastki menyu (Bottom Sidebar) 
+         kontentni mutlaqo to'sib qo'ymasligi uchun paddingni yanada ko'paytiramiz */
+      padding-bottom: 170px !important; 
+      
+      height: auto !important;
+      min-height: calc(100dvh - 60px) !important;
+    }
+  
+    .stats-card-container {
+      padding: 12px !important;
+    }
+  
+    /* Yil va Oy filterlari tor ekranda siqilmasdan chiroyli turishi uchun ustma-ust qilamiz */
+    .filter-section {
+      flex-direction: column;
+      gap: 8px;
     }
   }
   
-  /* 🚨 350px dan 300px gacha bo'lgan o'ta kichik ekranlar */
+  /* 🚨 350px dan past bo'lgan o'ta kichik mobil qurilmalar uchun */
   @media (max-width: 350px) {
     .tab-section {
-      padding: 8px !important;
+      padding: 8px 6px !important;
+      /* Eng kichik ekranda maksimal xavfsiz pastki bo'shliq */
+      padding-bottom: 180px !important; 
     }
   
-    /* 4 ta yuqori ko'rsatkich qutilari sig'may qolmasligi uchun vertikal joylashadi */
     .stats-row {
       flex-direction: column;
       align-items: flex-start;
@@ -421,11 +462,13 @@
     }
   
     .vertical-divider {
-      display: none; /* Vertikal chiziq vertikal dizaynda o'chiriladi */
+      display: none;
     }
   
     .horizontal-divider {
+      display: block !important;
       margin: 8px 0;
+      width: 100%;
     }
   
     .inner-stat-box {
@@ -433,7 +476,8 @@
     }
   
     .visual-chart-bars {
-      padding: 10px 0px 20px 0px;
+      height: 100px !important;
+      padding: 5px 0px 15px 0px;
     }
   }
   
@@ -445,6 +489,7 @@
     top: 0; left: 0;
     width: 100%; height: 100%;
     background: rgba(15, 23, 42, 0.6);
+    -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
@@ -459,8 +504,9 @@
     background: #ffffff;
     width: 100%;
     max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
     border-radius: 24px;
-    overflow: hidden;
     position: relative;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     animation: modalSlideUp 0.25s ease-out;

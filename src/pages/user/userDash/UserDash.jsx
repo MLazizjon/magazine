@@ -18,7 +18,7 @@ import HomeTab from "../home/Home";
 import CodeTab from "../kodkirish/KodKiritish";
 import SettingsTab from "../setting/Setting";
 import UserMagazin from "../magazine/Magazine"; 
-import UserKatalog from "../katalog/Katalog"; 
+import UserKatalog from "../../admin/katalog/Katalog"; 
 
 import "./userDash.css";
 

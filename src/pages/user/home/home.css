@@ -1,21 +1,18 @@
 /* ==========================================================================
-   🏠 HOME TAB ASOSIY STRUKTURASI (MOBIL MENYU MASOFASI OPTIMALLASHTIRILDI)
+   🏠 HOME TAB ASOSIY STRUKTURASI (OPTIMALLASHTIRILGAN MASOFALAR)
    ========================================================================== */
    .tab-section {
     width: 100%;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    padding: 12px; /* Tepadan va yonlardan joy biroz qisqartirildi */
+    
+    /* 🚨 SIZ SO'RAGAN MASOFALAR: Tepadan 20px, Ikki yondan 5px, Pastdan 90px (menyu uchun) */
+    padding: 20px 5px 90px 5px !important; 
     
     /* 🚨 BALANDLIK VA SKROL SOZLAMALARI */
     height: auto !important;
     min-height: calc(100dvh - 60px) !important;
-    
-    /* 🚨 OPTIMALLASHTIRILGAN MASOFA:
-        Avvalgi 160px juda katta bo'shliq yaratgan edi. Uni xavfsiz,
-        lekin ixchamroq bo'lgan 90px ga tushirdik. */
-    padding-bottom: 90px !important; 
     
     overflow: visible !important;
     -webkit-overflow-scrolling: touch;
@@ -42,9 +39,9 @@
      ========================================================================== */
   .stats-card-container {
     background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%) !important;
-    border-radius: clamp(12px, 3.5vw, 20px); /* Burchaklar biroz ixchamlashtirildi */
-    padding: clamp(10px, 3vw, 16px); /* Ichki joylashuv siqildi */
-    margin-bottom: clamp(12px, 3vw, 18px); /* Pastki bo'shliq kamaytirildi */
+    border-radius: clamp(12px, 3.5vw, 20px); 
+    padding: clamp(10px, 3vw, 16px); 
+    margin-bottom: clamp(12px, 3vw, 18px); 
     box-shadow: 0 10px 25px rgba(30, 58, 138, 0.15);
     width: 100% !important;
     box-sizing: border-box;
@@ -67,7 +64,7 @@
   }
   
   .stat-icon-wrapper {
-    width: clamp(30px, 7vw, 36px); /* Belgilar o'lchami kichraytirildi */
+    width: clamp(30px, 7vw, 36px); 
     height: clamp(30px, 7vw, 36px);
     border-radius: 50%;
     display: flex;
@@ -126,7 +123,7 @@
     width: 100% !important;
     display: flex;
     flex-direction: column;
-    gap: clamp(12px, 3vw, 16px); /* Elementlar orasidagi masofa qisqardi */
+    gap: clamp(12px, 3vw, 16px); 
     box-sizing: border-box;
   }
   
@@ -140,7 +137,7 @@
   
   .promo-banner-card {
     position: relative;
-    height: clamp(80px, 14vw, 120px); /* Banner balandligi biroz ixchamlashtirildi */
+    height: clamp(80px, 14vw, 120px); 
     border-radius: clamp(10px, 3vw, 16px);
     overflow: hidden;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
@@ -308,7 +305,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    height: clamp(100px, 18vw, 140px); /* Balandlik biroz qisqartirildi */
+    height: clamp(100px, 18vw, 140px); 
     padding: 8px 4px 16px 4px;
     border-bottom: 1px solid #f1f5f9;
     margin-bottom: 12px;
@@ -412,7 +409,7 @@
   }
   
   /* ==========================================================================
-     📱 MOBIL MEDIA SO'ROVLAR (EKRANGA MOSLASHTIRISH)
+     📱 MOBIL MEDIA SO'ROVLAR (EKRAN MOSLIGI VA QAT'IY CHEGARALAR)
      ========================================================================== */
   
   @media (max-width: 800px) {
@@ -421,11 +418,10 @@
     }
   }
   
-  /* 🚨 480px dan past bo'lgan smartfonlar */
+  /* 🚨 480px gacha bo'lgan mobil telefonlar */
   @media (max-width: 480px) {
     .tab-section {
-      padding: 10px 8px !important; /* Ustki va yon masofalar mobil uchun ideal qisqardi */
-      padding-bottom: 100px !important; /* Pastdagi bo'shliq pastki menyuga xalaqit bermaydigan darajada qisqardi */
+      padding: 20px 5px 100px 5px !important; /* Tepadan 20px, yondan qat'iy 5px */
     }
   
     .stats-card-container {
@@ -438,11 +434,10 @@
     }
   }
   
-  /* 🚨 350px dan past bo'lgan o'ta kichik mobil qurilmalar */
+  /* 🚨 350px dan kichik o'ta tor ekranlar */
   @media (max-width: 350px) {
     .tab-section {
-      padding: 6px 4px !important;
-      padding-bottom: 110px !important; 
+      padding: 20px 5px 110px 5px !important; /* Bu yerda ham o'ng-chap 5px va tepa 20px buzilmaydi */
     }
   
     .stats-row {

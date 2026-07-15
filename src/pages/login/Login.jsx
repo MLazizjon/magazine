@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../../supabase/client";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -7,8 +7,54 @@ import "./login.css";
 export default function Login() {
   const [phone, setPhone] = useState("+998 ");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Sahifa yuklanganda tekshiruv tugaguncha true bo'ladi
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const autoLoginWithTelegram = async () => {
+      // 1. Telegram Web App obyekti va foydalanuvchi ma'lumotlarini olamiz
+      const tg = window.Telegram?.WebApp;
+      const tgUser = tg?.initDataUnsafe?.user;
+
+      // Agar foydalanuvchi haqiqatdan ham Telegram orqali kirgan bo'lsa
+      if (tgUser && tgUser.id) {
+        try {
+          // 2. Supabase-dan Telegram ID bo'yicha foydalanuvchini qidiramiz
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("telegram_id", tgUser.id) // Bot orqali saqlangan telegram_id ustuni bilan solishtiradi
+            .maybeSingle();
+
+          if (error) {
+            console.error("Supabase xatoligi:", error);
+            setIsLoading(false);
+            return;
+          }
+
+          // 3. Agar foydalanuvchi bazada bor bo'lsa, uni avtomatik kiritamiz
+          if (data) {
+            localStorage.setItem("user", JSON.stringify(data));
+            toast.success("Xush kelibsiz!");
+            
+            if (data.role === "admin") {
+              navigate("/admin-dashboard");
+            } else {
+              navigate("/user-dashboard");
+            }
+            return; // Kodni shu yerda to'xtatamiz, pastdagi isLoading(false) ishlamaydi
+          }
+        } catch (err) {
+          console.error("Avto-login xatoligi yuz berdi:", err);
+        }
+      }
+      
+      // Agar Telegram ID topilmasa yoki xatolik bo'lsa, yuklanishni o'chiramiz va login formasini ko'rsatamiz
+      setIsLoading(false);
+    };
+
+    autoLoginWithTelegram();
+  }, [navigate]);
 
   const handlePhoneChange = (e) => {
     let input = e.target.value;
@@ -21,18 +67,10 @@ export default function Login() {
     const limitedNumbers = rawNumbers.slice(0, 9);
 
     let formatted = "+998 ";
-    if (limitedNumbers.length > 0) {
-      formatted += limitedNumbers.slice(0, 2);
-    }
-    if (limitedNumbers.length > 2) {
-      formatted += " " + limitedNumbers.slice(2, 5);
-    }
-    if (limitedNumbers.length > 5) {
-      formatted += " " + limitedNumbers.slice(5, 7);
-    }
-    if (limitedNumbers.length > 7) {
-      formatted += " " + limitedNumbers.slice(7, 9);
-    }
+    if (limitedNumbers.length > 0) formatted += limitedNumbers.slice(0, 2);
+    if (limitedNumbers.length > 2) formatted += " " + limitedNumbers.slice(2, 5);
+    if (limitedNumbers.length > 5) formatted += " " + limitedNumbers.slice(5, 7);
+    if (limitedNumbers.length > 7) formatted += " " + limitedNumbers.slice(7, 9);
 
     setPhone(formatted);
   };
@@ -75,6 +113,17 @@ export default function Login() {
         return;
       }
 
+      // Agar birinchi marta login qilayotgan bo'lsa va Telegram ID hali bog'lanmagan bo'lsa:
+      const tg = window.Telegram?.WebApp;
+      const tgUser = tg?.initDataUnsafe?.user;
+      if (tgUser && tgUser.id && !data.telegram_id) {
+        await supabase
+          .from("profiles")
+          .update({ telegram_id: tgUser.id })
+          .eq("id", data.id);
+        data.telegram_id = tgUser.id;
+      }
+
       localStorage.setItem("user", JSON.stringify(data));
       toast.success("Xush kelibsiz!");
 
@@ -90,8 +139,20 @@ export default function Login() {
     }
   };
 
+  // Tekshiruv ketayotganda foydalanuvchiga login formasi ko'rinib turmaydi
+  if (isLoading) {
+    return (
+      <div className="auth-page-wrapper">
+        <div className="auth" style={{ textAlign: "center" }}>
+          <h2>Iltimos kuting...</h2>
+          <p>Tizimga kirish tekshirilmoqda...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="auth-page-wrapper"> {/* 🔥 SAHIFANI O'RTAGA TORTUVCHI ASOSIY ELEMENT */}
+    <div className="auth-page-wrapper">
       <div className="auth">
         <h2>Tizimga kirish</h2>
 
@@ -113,9 +174,7 @@ export default function Login() {
           />
         </div>
 
-        <button onClick={login} disabled={isLoading}>
-          {isLoading ? "Yuklanmoqda..." : "Kirish"}
-        </button>
+        <button onClick={login}>Kirish</button>
 
         <p className="register-link" onClick={() => navigate("/register")}>
           Ro‘yxatdan o‘tish

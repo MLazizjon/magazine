@@ -29,7 +29,7 @@ function App() {
       />
 
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
+        {/* <Route path="/" element={<Navigate to="/login" />} /> */}
 
         {/* Ochiq sahifalar */}
         <Route path="/login" element={<Login />} />

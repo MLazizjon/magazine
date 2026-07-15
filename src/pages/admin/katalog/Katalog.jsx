@@ -41,10 +41,10 @@ import imgNewStar from "./assets2/imagethree.png";
 import imgHorizontal from "./assets2/imagefoue.png";   
 
 // === Leaflet marker ikonkalarini sozlash ===
-// Ba'zida React loyihalarda mahalliy marker rasmi yuklanmasa, xato bermasligi uchun ochiq manba URL'ga yo'naltirildi
+// ESLint xatosini bartaraf etish uchun import qilingan mahalliy rasmlar shu yerda qo'llanildi
 let DefaultIcon = L.icon({
-  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+  iconUrl: icon,
+  shadowUrl: iconShadow,
   iconSize: [25, 41],
   iconAnchor: [12, 41],
 });

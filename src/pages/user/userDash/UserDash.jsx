@@ -2,15 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { supabase } from "../../../supabase/client";
-import { 
-  FaExclamationTriangle, 
-  FaChevronRight, 
-  FaGlobe, 
-  FaSignOutAlt, 
-  FaChevronLeft,
-  FaUserCircle,
-  FaGift 
-} from "react-icons/fa";
+import { FaExclamationTriangle } from "react-icons/fa";
 
 import Header from "../header/Header"; 
 import Sidebar from "../sidebar/Sidebar"; // 👈 Sidebar komponenti import qilindi
@@ -28,8 +20,6 @@ export default function UserDash() {
   const [currentUser, setCurrentUser] = useState(null);
   const [activeTab, setActiveTab] = useState("home");
   const [bonusCode, setBonusCode] = useState("");
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
 
   // 📅 FILTRLAR STATE'LARI
   const [year, setYear] = useState("2026");
@@ -59,6 +49,10 @@ export default function UserDash() {
   const handleTabChange = (tabName) => {
     setActiveTab(tabName);
     setSelectedCategory(null);
+  };
+
+  const setSelectedCategory = (val) => {
+    // Agar katalog ichida kategoriya tanlash kerak bo'lsa, xatolik bermasligi uchun qoldirildi
   };
 
   const checkActiveCampaign = useCallback(async () => {
@@ -417,7 +411,7 @@ export default function UserDash() {
 
           {activeTab === "katalog" && (
             <UserKatalog 
-              selectedCategory={selectedCategory} 
+              selectedCategory={null} 
               setSelectedCategory={setSelectedCategory} 
               lang={lang}
               onBack={() => setActiveTab("home")} 
@@ -451,14 +445,12 @@ export default function UserDash() {
               lang={lang}
               changeLanguage={changeLanguage}
               onBack={() => {
-                setIsDrawerOpen(true);
                 handleTabChange("home");
               }}
             />
           )}
         </section>
       </main>
-
 
       {/* LOGOUT CONFIRM MODAL */}
       {showLogoutModal && (

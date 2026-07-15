@@ -1,21 +1,21 @@
 /* ==========================================================================
-   🏠 HOME TAB ASOSIY STRUKTURASI (MOBIL MENYU FIX)
+   🏠 HOME TAB ASOSIY STRUKTURASI (MOBIL MENYU MASOFASI OPTIMALLASHTIRILDI)
    ========================================================================== */
    .tab-section {
     width: 100%;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    padding: 16px;
+    padding: 12px; /* Tepadan va yonlardan joy biroz qisqartirildi */
     
     /* 🚨 BALANDLIK VA SKROL SOZLAMALARI */
     height: auto !important;
     min-height: calc(100dvh - 60px) !important;
     
-    /* 🚨 ENG ASOSIY TUZATISH (BOTTOM NAV OSTIDA QOLMASLIGI UCHUN):
-       Pastki navigatsiya menyusi kontentni to'sib qo'ymasligi uchun pastdan 
-       katta xavfsiz masofa (padding) qoldiramiz. Bu kontentni menyudan tepaga ko'taradi. */
-    padding-bottom: 160px !important; 
+    /* 🚨 OPTIMALLASHTIRILGAN MASOFA:
+        Avvalgi 160px juda katta bo'shliq yaratgan edi. Uni xavfsiz,
+        lekin ixchamroq bo'lgan 90px ga tushirdik. */
+    padding-bottom: 90px !important; 
     
     overflow: visible !important;
     -webkit-overflow-scrolling: touch;
@@ -42,9 +42,9 @@
      ========================================================================== */
   .stats-card-container {
     background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%) !important;
-    border-radius: clamp(16px, 4vw, 24px);
-    padding: clamp(12px, 3.5vw, 20px);
-    margin-bottom: clamp(16px, 4vw, 24px);
+    border-radius: clamp(12px, 3.5vw, 20px); /* Burchaklar biroz ixchamlashtirildi */
+    padding: clamp(10px, 3vw, 16px); /* Ichki joylashuv siqildi */
+    margin-bottom: clamp(12px, 3vw, 18px); /* Pastki bo'shliq kamaytirildi */
     box-shadow: 0 10px 25px rgba(30, 58, 138, 0.15);
     width: 100% !important;
     box-sizing: border-box;
@@ -67,13 +67,13 @@
   }
   
   .stat-icon-wrapper {
-    width: clamp(32px, 8vw, 40px);
-    height: clamp(32px, 8vw, 40px);
+    width: clamp(30px, 7vw, 36px); /* Belgilar o'lchami kichraytirildi */
+    height: clamp(30px, 7vw, 36px);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(13px, 3.5vw, 16px);
+    font-size: clamp(12px, 3vw, 14px);
     background: rgba(255, 255, 255, 0.15);
     flex-shrink: 0;
   }
@@ -91,14 +91,14 @@
   
   .stat-val-text {
     font-weight: 700;
-    font-size: clamp(12px, 3.8vw, 15px);
+    font-size: clamp(11px, 3.5vw, 14px);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   
   .stat-lbl-text {
-    font-size: clamp(10px, 3vw, 12px);
+    font-size: clamp(9px, 2.8vw, 11px);
     opacity: 0.75;
     white-space: nowrap;
     overflow: hidden;
@@ -108,14 +108,14 @@
   .vertical-divider {
     width: 1px;
     background: rgba(255, 255, 255, 0.12);
-    margin: 0 clamp(6px, 2vw, 15px);
+    margin: 0 clamp(4px, 1.5vw, 10px);
     align-self: stretch;
   }
   
   .horizontal-divider {
     height: 1px;
     background: rgba(255, 255, 255, 0.12);
-    margin: clamp(10px, 3vw, 15px) 0;
+    margin: clamp(8px, 2.5vw, 12px) 0;
     width: 100%;
   }
   
@@ -126,7 +126,7 @@
     width: 100% !important;
     display: flex;
     flex-direction: column;
-    gap: clamp(14px, 4vw, 20px);
+    gap: clamp(12px, 3vw, 16px); /* Elementlar orasidagi masofa qisqardi */
     box-sizing: border-box;
   }
   
@@ -134,14 +134,14 @@
   .promo-banners-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: clamp(10px, 3vw, 14px);
+    gap: clamp(8px, 2.5vw, 12px);
     width: 100%;
   }
   
   .promo-banner-card {
     position: relative;
-    height: clamp(90px, 16vw, 140px);
-    border-radius: clamp(14px, 3.5vw, 20px);
+    height: clamp(80px, 14vw, 120px); /* Banner balandligi biroz ixchamlashtirildi */
+    border-radius: clamp(10px, 3vw, 16px);
     overflow: hidden;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -160,12 +160,12 @@
   
   .banner-badge {
     position: absolute;
-    bottom: clamp(8px, 2vw, 12px);
-    left: clamp(8px, 2vw, 12px);
+    bottom: clamp(6px, 1.5vw, 10px);
+    left: clamp(6px, 1.5vw, 10px);
     color: white;
-    padding: 4px clamp(8px, 2vw, 12px);
+    padding: 3px clamp(6px, 1.5vw, 10px);
     border-radius: 20px;
-    font-size: clamp(9px, 2.5vw, 11px);
+    font-size: clamp(8px, 2.2vw, 10px);
     font-weight: bold;
     letter-spacing: 0.5px;
     background: rgba(15, 23, 42, 0.55);
@@ -176,7 +176,7 @@
   /* 📅 Filter Selects (Yil / Oy) */
   .filter-section {
     display: flex;
-    gap: clamp(10px, 3vw, 16px);
+    gap: clamp(8px, 2.5vw, 12px);
     width: 100%;
     box-sizing: border-box;
   }
@@ -185,23 +185,23 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
   }
   
   .filter-label {
-    font-size: clamp(12px, 3.5vw, 14px);
+    font-size: clamp(11px, 3vw, 13px);
     font-weight: 600;
     color: #475569;
-    padding-left: 4px;
+    padding-left: 2px;
   }
   
   .filter-select {
     width: 100%;
-    padding: clamp(10px, 3vw, 14px);
-    border-radius: clamp(10px, 3vw, 16px);
+    padding: clamp(8px, 2.5vw, 12px);
+    border-radius: clamp(8px, 2.5vw, 12px);
     border: 1px solid #e2e8f0;
     background-color: #f1f5f9;
-    font-size: clamp(12px, 3.8vw, 15px);
+    font-size: clamp(11px, 3.5vw, 14px);
     font-weight: 600;
     color: #1e293b;
     outline: none;
@@ -214,14 +214,14 @@
     align-items: center;
     background-color: #f8fafc;
     border: 1px solid #e2e8f0;
-    padding: clamp(12px, 3.5vw, 18px) clamp(14px, 4vw, 20px);
-    border-radius: clamp(14px, 3.5vw, 20px);
+    padding: clamp(10px, 3vw, 14px) clamp(12px, 3.5vw, 16px);
+    border-radius: clamp(12px, 3vw, 16px);
     width: 100%;
     box-sizing: border-box;
   }
   
   .score-title {
-    font-size: clamp(12px, 3.5vw, 16px);
+    font-size: clamp(11px, 3vw, 14px);
     font-weight: 600;
     color: #334155;
     white-space: nowrap;
@@ -230,25 +230,25 @@
   .score-divider {
     flex: 1;
     border-bottom: 2px dashed #cbd5e1;
-    margin: 0 clamp(8px, 2.5vw, 16px);
+    margin: 0 clamp(6px, 2vw, 12px);
   }
   
   .score-number {
-    font-size: clamp(14px, 4vw, 18px);
+    font-size: clamp(13px, 3.8vw, 16px);
     font-weight: 800;
     color: #2563eb;
     white-space: nowrap;
   }
   
   /* ==========================================================================
-     📊 ENG PASTDAGI DIAGRAMMA STATISTIKA BLOKI
+     📊 DIAGRAMMA STATISTIKA BLOKI
      ========================================================================== */
   .home-bottom-statistics {
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: clamp(16px, 4vw, 24px);
-    padding: clamp(14px, 4vw, 20px);
-    margin-top: 10px;
+    border-radius: clamp(14px, 3.5vw, 20px);
+    padding: clamp(12px, 3.5vw, 16px);
+    margin-top: 6px;
     width: 100%;
     box-sizing: border-box;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
@@ -258,60 +258,60 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: clamp(16px, 4vw, 24px);
+    margin-bottom: clamp(12px, 3.5vw, 18px);
     width: 100%;
   }
   
   .stats-header-title {
     display: flex;
     align-items: center;
-    gap: clamp(8px, 2.5vw, 12px);
+    gap: clamp(6px, 2vw, 10px);
   }
   
   .chart-icon-lead {
-    font-size: clamp(18px, 5vw, 22px);
+    font-size: clamp(16px, 4.5vw, 20px);
     color: #2563eb;
     flex-shrink: 0;
   }
   
   .stats-header-title h3 {
     margin: 0;
-    font-size: clamp(13px, 4vw, 16px);
+    font-size: clamp(12px, 3.5vw, 14px);
     font-weight: 700;
     color: #0f172a;
   }
   
   .stats-header-title p {
-    margin: 2px 0 0 0;
-    font-size: clamp(10px, 3vw, 12px);
+    margin: 1px 0 0 0;
+    font-size: clamp(9px, 2.5vw, 11px);
     color: #64748b;
   }
   
   .stats-header-badge {
     background: #f1f5f9;
-    padding: 4px 8px;
-    border-radius: 10px;
+    padding: 3px 6px;
+    border-radius: 8px;
   }
   
   .stats-header-badge select {
     border: none;
     background: none;
-    font-size: clamp(11px, 3vw, 12px);
+    font-size: clamp(10px, 2.8vw, 11px);
     font-weight: 600;
     color: #475569;
     outline: none;
     cursor: pointer;
   }
   
-  /* Diagramma ustunlari (Bars) konteyneri */
+  /* Ustunlar */
   .visual-chart-bars {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    height: clamp(120px, 20vw, 160px);
-    padding: 10px 4px 20px 4px;
+    height: clamp(100px, 18vw, 140px); /* Balandlik biroz qisqartirildi */
+    padding: 8px 4px 16px 4px;
     border-bottom: 1px solid #f1f5f9;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     width: 100%;
     box-sizing: border-box;
   }
@@ -326,10 +326,10 @@
   }
   
   .bar-track {
-    width: clamp(7px, 2.5vw, 14px);
+    width: clamp(6px, 2vw, 12px);
     height: 100%;
     background: #f1f5f9;
-    border-radius: 10px;
+    border-radius: 8px;
     position: relative;
     display: flex;
     align-items: flex-end;
@@ -338,7 +338,7 @@
   .bar-fill {
     width: 100%;
     background: #93c5fd;
-    border-radius: 10px;
+    border-radius: 8px;
     position: relative;
     transition: height 0.4s ease;
     cursor: pointer;
@@ -350,14 +350,14 @@
   
   .bar-tooltip-val {
     position: absolute;
-    top: -26px;
+    top: -24px;
     left: 50%;
     transform: translateX(-50%);
     background: #0f172a;
     color: white;
-    font-size: 9px;
-    padding: 2px 6px;
-    border-radius: 6px;
+    font-size: 8px;
+    padding: 2px 4px;
+    border-radius: 4px;
     opacity: 0;
     transition: opacity 0.2s ease;
     white-space: nowrap;
@@ -370,20 +370,19 @@
   }
   
   .bar-label-day {
-    font-size: clamp(9px, 2.8vw, 12px);
+    font-size: clamp(8px, 2.5vw, 11px);
     font-weight: 600;
     color: #64748b;
-    margin-top: 8px;
+    margin-top: 6px;
     text-align: center;
     white-space: nowrap;
   }
   
-  /* Statistika summary qismi */
   .stats-summary-footer {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding-top: 4px;
+    padding-top: 2px;
     width: 100%;
   }
   
@@ -391,74 +390,65 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: 1px;
   }
   
   .sum-lbl {
-    font-size: clamp(10px, 3vw, 12px);
+    font-size: clamp(9px, 2.5vw, 11px);
     color: #64748b;
     text-align: center;
   }
   
   .summary-item .sum-val {
-    font-size: clamp(11px, 3.5vw, 15px);
+    font-size: clamp(10px, 3vw, 13px);
     font-weight: 700;
     color: #0f172a;
   }
   
   .summary-divider {
     width: 1px;
-    height: 24px;
+    height: 20px;
     background: #e2e8f0;
   }
   
   /* ==========================================================================
-     📱 MOBIL MEDIA SO'ROVLAR (EKRAN 400PX VA UNDAN PASTDA MAXIMUM FIX)
+     📱 MOBIL MEDIA SO'ROVLAR (EKRANGA MOSLASHTIRISH)
      ========================================================================== */
   
-  /* 800px dan past bo'lgan planshet va ekranlar */
   @media (max-width: 800px) {
     .promo-banners-container {
       grid-template-columns: 1fr;
     }
   }
   
-  /* 🚨 480px dan past bo'lgan smartfonlar (400px va 360px ekranlarni to'liq qutqaradi) */
+  /* 🚨 480px dan past bo'lgan smartfonlar */
   @media (max-width: 480px) {
     .tab-section {
-      padding: px 8px !important;
-      
-      /* 🚀 MUHIM FIX: Ekran juda torayganda, pastki menyu (Bottom Sidebar) 
-         kontentni mutlaqo to'sib qo'ymasligi uchun paddingni yanada ko'paytiramiz */
-      padding-bottom: 170px !important; 
-      
-      height: auto !important;
-      min-height: calc(100dvh - 60px) !important;
+      padding: 10px 8px !important; /* Ustki va yon masofalar mobil uchun ideal qisqardi */
+      padding-bottom: 100px !important; /* Pastdagi bo'shliq pastki menyuga xalaqit bermaydigan darajada qisqardi */
     }
   
     .stats-card-container {
-      padding: 12px !important;
+      padding: 10px !important;
     }
   
-    /* Yil va Oy filterlari tor ekranda siqilmasdan chiroyli turishi uchun ustma-ust qilamiz */
     .filter-section {
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
   }
   
-  /* 🚨 350px dan past bo'lgan o'ta kichik mobil qurilmalar uchun */
+  /* 🚨 350px dan past bo'lgan o'ta kichik mobil qurilmalar */
   @media (max-width: 350px) {
     .tab-section {
-      padding: 8px 6px !important;
-      /* Eng kichik ekranda maksimal xavfsiz pastki bo'shliq */
-      padding-bottom: 180px !important; 
+      padding: 6px 4px !important;
+      padding-bottom: 110px !important; 
     }
   
     .stats-row {
       flex-direction: column;
       align-items: flex-start;
-      gap: 12px;
+      gap: 8px;
     }
   
     .vertical-divider {
@@ -467,7 +457,7 @@
   
     .horizontal-divider {
       display: block !important;
-      margin: 8px 0;
+      margin: 6px 0;
       width: 100%;
     }
   
@@ -476,8 +466,8 @@
     }
   
     .visual-chart-bars {
-      height: 100px !important;
-      padding: 5px 0px 15px 0px;
+      height: 90px !important;
+      padding: 4px 0px 12px 0px;
     }
   }
   
@@ -495,7 +485,7 @@
     align-items: center;
     justify-content: center;
     z-index: 9999;
-    padding: 16px;
+    padding: 12px;
     box-sizing: border-box;
     animation: modalFadeIn 0.2s ease-out;
   }
@@ -503,10 +493,10 @@
   .home-modal-content {
     background: #ffffff;
     width: 100%;
-    max-width: 500px;
-    max-height: 90vh;
+    max-width: 460px;
+    max-height: 85vh;
     overflow-y: auto;
-    border-radius: 24px;
+    border-radius: 20px;
     position: relative;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     animation: modalSlideUp 0.25s ease-out;
@@ -514,17 +504,17 @@
   
   .home-modal-close {
     position: absolute;
-    top: 14px; right: 14px;
+    top: 10px; right: 10px;
     background: rgba(255, 255, 255, 0.9);
     border: none;
-    width: 32px; height: 32px;
+    width: 28px; height: 28px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     color: #1e293b;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     transition: all 0.2s;
     z-index: 10;
   }
@@ -536,43 +526,43 @@
   
   .home-modal-img {
     width: 100%;
-    max-height: clamp(160px, 30vw, 250px);
+    max-height: clamp(140px, 25vw, 220px);
     object-fit: cover;
   }
   
   .home-modal-body {
-    padding: clamp(16px, 5vw, 24px);
+    padding: clamp(14px, 4vw, 20px);
   }
   
   .home-modal-body h3 {
-    margin: 0 0 12px 0;
-    font-size: clamp(15px, 4.5vw, 18px);
+    margin: 0 0 10px 0;
+    font-size: clamp(14px, 4vw, 16px);
     font-weight: 700;
     color: #0f172a;
   }
   
   .home-modal-text {
-    font-size: clamp(12px, 3.5vw, 14px);
+    font-size: clamp(11px, 3.2vw, 13px);
     color: #475569;
-    line-height: 1.6;
+    line-height: 1.5;
     white-space: pre-line;
   }
   
   .home-modal-dates {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    font-size: clamp(12px, 3.5vw, 14px);
+    gap: 6px;
+    font-size: clamp(11px, 3.2vw, 13px);
     color: #475569;
-    margin-top: 12px;
+    margin-top: 10px;
   }
   
   .home-modal-dates p {
     margin: 0;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
   
   @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes modalSlideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes modalSlideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

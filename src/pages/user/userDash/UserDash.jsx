@@ -3,27 +3,25 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { supabase } from "../../../supabase/client";
 import { 
-  FaBell, 
-  FaUserCircle, 
   FaExclamationTriangle, 
   FaChevronRight, 
   FaGlobe, 
-  // FaQuestionCircle, 
   FaSignOutAlt, 
   FaChevronLeft,
+  FaUserCircle,
   FaGift 
 } from "react-icons/fa";
 
-import Sidebar from "../sidebar/Sidebar";
+import Header from "../header/Header"; 
+import Sidebar from "../sidebar/Sidebar"; // 👈 Sidebar komponenti import qilindi
 import HomeTab from "../home/Home";
 import CodeTab from "../kodkirish/KodKiritish";
 import SettingsTab from "../setting/Setting";
 import UserMagazin from "../magazine/Magazine"; 
-// import UserKatalog from "../katalog/Katalog"; // 📂 Yangi qo'shilgan foydalanuvchi katalogi
+import UserKatalog from "../katalog/Katalog"; 
 
 import "./userDash.css";
 
-// Oylar massivini komponent tashqarisiga chiqaramiz (useCallback xatoligini oldini olish uchun)
 const monthsUz = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentyabr", "Oktyabr", "Noyabr", "Dekabr"];
 
 export default function UserDash() {
@@ -31,8 +29,6 @@ export default function UserDash() {
   const [activeTab, setActiveTab] = useState("home");
   const [bonusCode, setBonusCode] = useState("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  // 📂 KATALOG FILTRLARI UCHUN STATE (READ-ONLY)
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   // 📅 FILTRLAR STATE'LARI
@@ -57,18 +53,14 @@ export default function UserDash() {
   const [saveLoading, setSaveLoading] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  // 🌍 TIZIM TILI STATE'LARINI BOSHQARISH
   const [lang, setLang] = useState(localStorage.getItem("app_lang") || "uz");
-
   const navigate = useNavigate();
 
-  // 🔄 TAB ALMASHTIRISHNI NAZORAT QILUVCHI FUNKSIYA
   const handleTabChange = (tabName) => {
     setActiveTab(tabName);
-    setSelectedCategory(null); // Boshqa tabga o'tganda katalog ichki holatini boshlang'ich nuqtaga qaytaradi
+    setSelectedCategory(null);
   };
 
-  // ⚡ AMALDAGI AKSANING MUDDATINI TEKSHIRISH
   const checkActiveCampaign = useCallback(async () => {
     try {
       const nowISO = new Date().toISOString();
@@ -90,7 +82,6 @@ export default function UserDash() {
     }
   }, []);
 
-  // 🌍 TILNI INTERFEYSDA VA SUPABASE BAZASIDA YANGILASH FUNKSIYASI
   const changeLanguage = async (newLang) => {
     setLang(newLang);
     localStorage.setItem("app_lang", newLang);
@@ -114,7 +105,6 @@ export default function UserDash() {
     }
   };
 
-  // 🔄 MA'LUMOTLARNI DINAMIK FILTRLAB YUKLASH FUNKSIYASI
   const fetchUserData = useCallback(async (user, currentYear = year, currentMonth = month, currentStatType = statType) => {
     try {
       if (!user?.id) return;
@@ -253,7 +243,6 @@ export default function UserDash() {
     }
   }, [year, month, statType, navigate]);
 
-  // 🗓️ FILTRLAR O'ZGARGANIDA TRIGGER BO'LUVCHI EFFECT
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -262,7 +251,6 @@ export default function UserDash() {
     }
   }, [year, month, statType, fetchUserData]);
 
-  // 🔔 BIRINCHI SAHIFA YUKLANGANDA VA REAL-TIME SUBSCRIPTION
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
@@ -335,7 +323,7 @@ export default function UserDash() {
 
       await supabase.from("promo_codes").update({ is_active: false }).eq("id", promoCode.id);
 
-      toast.info("Kod muvaffaqiyatli yuborildi! Admin tasdiqlashini kuting. ⏳");
+      toast.success("Kod muvaffaqiyatli yuborildi! Admin tasdiqlashini kuting. ⏳");
       setBonusCode("");
       handleTabChange("home");
       fetchUserData(currentUser, year, month, statType);
@@ -375,32 +363,23 @@ export default function UserDash() {
 
   return (
     <div className="dash-container">
-      
-      {/* MOBIL TOP HEADER */}
-      <header className="mobile-top-header">
-        <button className="mobile-profile-btn" onClick={() => setIsDrawerOpen(true)} title="Profil paneli">
-          <FaUserCircle size={28} />
-        </button>
-        <div className="mobile-header-center" onClick={() => handleTabChange("home")}>
-          <span className="mobile-header-label">Mening joriy ballim</span>
-          <span className="mobile-header-value">
-            {currentUser?.bonus || 0} <span className="arrow-detail">›</span>
-          </span>
-        </div>
-        <button className="mobile-notif-btn" title="Bildirishnomalar">
-          <FaBell size={22} />
-        </button>
-      </header>
+      {/* 🚀 HEADER PROFIL TUGMASI */}
+      <Header 
+        lang={lang} 
+        setLang={changeLanguage} 
+        currentBonus={currentUser?.bonus || 0} 
+        onProfileClick={() => handleTabChange("settings")} 
+      />
 
-      {/* SIDEBAR & BOTTOM NAVIGATION BAR */}
+      {/* 🧭 SIDEBAR KOMPONENTI INTEGRATSIYA QILINDI */}
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={handleTabChange} 
         setShowLogoutModal={setShowLogoutModal} 
         currentUser={currentUser}
+        lang={lang}
       />
 
-      {/* DINAMIK TAB ALMAShUVI */}
       <main className="dash-main">
         <section className="dash-content">
           {activeTab === "home" && (
@@ -432,24 +411,25 @@ export default function UserDash() {
               handleSendCode={handleSendCode} 
               loading={loading} 
               lang={lang}
+              onBack={() => handleTabChange("home")} 
             />
           )}
 
-          {/* 📂 READ-ONLY MAHSULOTLAR KATALOGI */}
           {activeTab === "katalog" && (
             <UserKatalog 
               selectedCategory={selectedCategory} 
               setSelectedCategory={setSelectedCategory} 
               lang={lang}
+              onBack={() => setActiveTab("home")} 
             />
           )}
 
-          {/* 🎁 MAGAZIN (SOVG'ALAR DO'KONI) TABI */}
           {activeTab === "magazin" && (
             <UserMagazin 
               currentUser={currentUser} 
               fetchUserData={() => fetchUserData(currentUser, year, month, statType)} 
               lang={lang}
+              onBack={() => setActiveTab("home")} 
             />
           )}
 
@@ -479,75 +459,8 @@ export default function UserDash() {
         </section>
       </main>
 
-      {/* MOBIL PROFILE DRAWER MENU */}
-      {isDrawerOpen && (
-        <div className="mobile-profile-drawer-backdrop" onClick={() => setIsDrawerOpen(false)}>
-          <div className="mobile-profile-drawer" onClick={(e) => e.stopPropagation()}>
-            <div className="profile-drawer-header">
-              <button className="drawer-back-btn" onClick={() => setIsDrawerOpen(false)}>
-                <FaChevronLeft size={16} />
-              </button>
-              <h2>{lang === "uz" ? "Profil" : "Профиль"}</h2>
-              <div style={{ width: 36 }}></div>
-            </div>
 
-            <div className="drawer-menu-list">
-              <button className="drawer-item" onClick={() => { handleTabChange("settings"); setIsDrawerOpen(false); }}>
-                <div className="d-item-left">
-                  <div className="d-icon-box"><FaUserCircle /></div>
-                  <span>{lang === "uz" ? "Sozlamalar" : "Настройки"}</span>
-                </div>
-                <FaChevronRight className="d-chevron" />
-              </button>
-
-              {/* 🌐 TIL TUGMASI - ENDI BOSILGANDA TILLARNI ALMAShTIRADI */}
-              <button 
-                className="drawer-item" 
-                onClick={() => {
-                  const nextLang = lang === "uz" ? "ru" : "uz";
-                  changeLanguage(nextLang);
-                }}
-              >
-                <div className="d-item-left">
-                  <div className="d-icon-box"><FaGlobe /></div>
-                  <span>{lang === "uz" ? "Til" : "Язык"}</span>
-                </div>
-                <div className="d-item-right">
-                  <span className="d-lang-val">{lang === "uz" ? "Uz" : "Ru"}</span>
-                  <FaChevronRight className="d-chevron" />
-                </div>
-              </button>
-
-              {/* 🎁 MAGAZIN TUGMASI */}
-              <button className="drawer-item" onClick={() => { handleTabChange("magazin"); setIsDrawerOpen(false); }}>
-                <div className="d-item-left">
-                  <div className="d-icon-box"><FaGift /></div>
-                  <span>{lang === "uz" ? "Sovg'alar do'koni" : "Магазин подарков"}</span>
-                </div>
-                <FaChevronRight className="d-chevron" />
-              </button>
-
-              {/* <button className="drawer-item">
-                <div className="d-item-left">
-                  <div className="d-icon-box"><FaQuestionCircle /></div>
-                  <span>F.A.Q</span>
-                </div>
-                <FaChevronRight className="d-chevron" />
-              </button> */}
-
-              <button className="drawer-item d-logout-style" onClick={() => { setIsDrawerOpen(false); setShowLogoutModal(true); }}>
-                <div className="d-item-left">
-                  <div className="d-icon-box"><FaSignOutAlt /></div>
-                  <span>{lang === "uz" ? "Chiqish" : "Выйти"}</span>
-                </div>
-                <FaChevronRight className="d-chevron" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* LOGOUT MODAL BOX */}
+      {/* LOGOUT CONFIRM MODAL */}
       {showLogoutModal && (
         <div className="logout-modal-backdrop" onClick={() => setShowLogoutModal(false)}>
           <div className="logout-modal-box" onClick={(e) => e.stopPropagation()}>

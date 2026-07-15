@@ -1,0 +1,140 @@
+/* ==========================================================================
+   📱 MOBILE APP HEADER CSS (Aynan siz yuborgan yorqin ko'k rangda #2b66f5)
+   ========================================================================== */
+
+   :root {
+    /* Siz yuborgan rasmdagi aniq va yorqin ko'k rang */
+    --header-exact-blue: #2b66f5; 
+    --header-bg-white: #ffffff;
+    --header-border-gray: #f1f5f9;
+  }
+  
+  .mobile-app-header {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 62px; /* Juda qulay va ixcham mobil balandlik */
+    background-color: var(--header-bg-white);
+    border-bottom: 2.5px solid var(--header-border-gray);
+    box-shadow: 0 3px 10px rgba(43, 102, 245, 0.04);
+    z-index: 100;
+    box-sizing: border-box;
+    display: block; /* Mobil qurilmalarda ko'rinishi kafolatlanadi */
+  }
+  
+  .header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: 0 16px;
+    box-sizing: border-box;
+  }
+  
+  /* --- LOGO / SAYT NOMI --- */
+  .header-left {
+    display: flex;
+    align-items: center;
+  }
+  
+  .header-logo-title {
+    font-size: 17px; /* Ortiqcha katta bo'lmagan chiroyli hajm */
+    font-weight: 900; /* Qalin va rasmga mos */
+    color: var(--header-exact-blue); /* Aynan siz yozgan ko'k rang */
+    margin: 0;
+    letter-spacing: -0.4px;
+    text-transform: uppercase;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  
+  /* --- O'NG TARAF MENYU ELEMENTLARI --- */
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Elementlar orasidagi masofa */
+  }
+  
+  /* --- BONUS BALLAR CHIP --- */
+  .header-bonus-chip {
+    display: flex;
+    align-items: center;
+    background-color: #f0fdf4; /* Och yashil shaffof fon */
+    border: 1px solid #bbf7d0; 
+    padding: 4px 10px 4px 4px;
+    border-radius: 50px;
+    gap: 5px;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 1px 6px rgba(34, 197, 94, 0.05);
+    transition: transform 0.15s ease;
+  }
+  
+  .header-bonus-chip:active {
+    transform: scale(0.95);
+  }
+  
+  .bonus-icon-wrapper {
+    background: linear-gradient(135deg, #22c55e, #16a34a); /* To'yingan yashil dumaloq */
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .bonus-star-icon {
+    color: #ffffff;
+    font-size: 11px;
+  }
+  
+  .bonus-amount-text {
+    font-size: 12.5px;
+    font-weight: 750;
+    color: #15803d;
+    line-height: 1;
+  }
+  
+  .bonus-unit-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #166534;
+  }
+  
+  /* --- PROFIL AVATAR TUGMASI --- */
+  .header-profile-trigger-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .header-profile-trigger-btn:hover {
+    transform: scale(1.06);
+  }
+  
+  .header-profile-trigger-btn:active {
+    transform: scale(0.92);
+  }
+  
+  .header-user-avatar-icon {
+    font-size: 32px; /* Ideal o'lchamga keltirildi */
+    color: var(--header-exact-blue); /* Aynan siz yuborgan ko'k rang */
+  }
+  
+  /* ==========================================================================
+     💻 RESPONSIVE DESIGN (Desktop/Kompyuter ekranlarda headerni yashirish)
+     ========================================================================== */
+  @media (min-width: 769px) {
+    .mobile-app-header {
+      display: none; /* Kompyuter ekranida faqat sidebar ko'rinishi saqlanadi */
+    }
+  }

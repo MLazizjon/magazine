@@ -4,49 +4,62 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "./katalog.css";
 
-// === Barcha importlarni eng tepaga joylashtiramiz ===
+// === Leaflet standart CSS va Marker sozlamalari ===
 import "leaflet/dist/leaflet.css";
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 
-// === PUMPMAN-ГЛ PAPKASIDAN RASMLAR IMPORTI ===
-import imgQB from "./pumpman¦-гл/QB.png";
-import imgCPm from "./pumpman¦-гл/4TMS.png";
-import imgPW from "./pumpman¦-гл/PW.png";
-import imgPWE from "./pumpman¦-гл/PW-E.png";
-import imgPWF from "./pumpman¦-гл/PW.png"; 
-// import imgQDX from "./pumpman¦-гл/QDX.png";
-// import imgTCM from "./pumpman¦-гл/TCM.png";
-// import imgTCH from "./pumpman¦-гл/THF.png";
-// import imgJET from "./pumpman¦-гл/JET.png";
+// === PUMPMAN RASMLARI IMPORTI (assets2 papkasidan) ===
+import imgQB from "./assets2/QB.png";
+import imgCPm from "./assets2/CPm.png";
+import imgPW from "./assets2/PW.png";
+import imgPWE from "./assets2/PW-E.png";
+import imgPWF from "./assets2/PW.png";
+import imgQDX from "./assets2/QDX.png";
+import imgTCM from "./assets2/TCM.png";
+import imgTCH from "./assets2/TCM.png";
+import imgJET from "./assets2/JET.png";
+import imgTHF from "./assets2/THF.png";
+import img2TCP from "./assets2/2TCP25-160A.png";
+import img50WFD from "./assets2/WFD.png"; 
+import imgQFD from "./assets2/QFD.png";
+import imgATJSW from "./assets2/ATJSW.png";
+import imgSTAR_F from "./assets2/STSR40-10F.png"; 
+import imgSGJ from "./assets2/2STM-2.png";
+import imgGS from "./assets2/2STM-2.png";
+import imgCHLFT from "./assets2/CHLF(T)гиpng.png";
+import imgCHM from "./assets2/CHMгиpng.png";
+import imgTW from "./assets2/TW-T.png";
+import imgGRD from "./assets2/GP.png";
+import imgSTAR_C from "./assets2/STAR-6A.png"; 
+import imgPM01 from "./assets2/PW.png";
 
-// === Leaflet marker ikonkalarini endi sozlaymiz (importlardan keyin) ===
+// === YANGI QO'SHILGAN RASMLAR IMPORTI ===
+import imgIntelligent from "./assets2/imageone.png"; 
+import imgGRD15 from "./assets2/imagetwo.png";         
+import imgNewStar from "./assets2/imagethree.png";         
+import imgHorizontal from "./assets2/imagefoue.png";   
+
+// === Leaflet marker ikonkalarini sozlash ===
+// Ba'zida React loyihalarda mahalliy marker rasmi yuklanmasa, xato bermasligi uchun ochiq manba URL'ga yo'naltirildi
 let DefaultIcon = L.icon({
-  iconUrl: icon,
-  shadowUrl: iconShadow,
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-// === 1. DO'KONLAR COORDINATALARI ===
+// === 1. DO'KONLAR COORDINATALARI (Rasmga qarab to'g'rilandi) ===
 const MOCK_SHOPS = [
-  { 
-    id: 1, 
-    name: "IT Tat o'quv markazi (Bosh Ofis)", 
-    address: "Samarqand sh., Mirzo Ulug'bek ko'chasi, 47-uy", 
-    lat: 39.677544, 
-    lng: 66.926537, 
-    phone: "+998 90 123-45-67" 
-  },
-  { 
-    id: 2, 
-    name: "Nasoslar ombori (Samarqand filiali)", 
-    address: "Samarqand sh., Gagarin ko'chasi", 
-    lat: 39.661245, 
-    lng: 66.912384, 
-    phone: "+998 93 987-65-43" 
-  }
+  {
+    id: 1,
+    name: "Nasoslar ombori (Samarqand filiali)",
+    address: "Samarqand sh., Gagarin ko'chasi",
+    lat: 39.6542, // Rasmda ko'rsatilgan Gagarin ko'chasiga mos keluvchi haqiqiy koordinata
+    lng: 66.9287, 
+    phone: "+998 93 987-55-43" // Rasmda ko'rsatilgan telefon raqami
+  } 
 ];
 
 // === 2. BARCHA TOIFALAR ===
@@ -56,63 +69,409 @@ const MOCK_CATEGORIES = [
 
 // === 3. MAHSULOTLAR RO'YXATI ===
 const MOCK_PRODUCTS = [
-  // === QB (Вихревой) - 4 ta ===
-  { id: 1, category_id: 1, title_uz: "Pumpman QB60 ECO (Вихревой)", price: 280000, image_url: imgQB,
-    specs: [ { key: "Turi", value: "Вихревой" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.37" }, { key: "Suv sarfi (л/м)", value: "35" }, { key: "Balandligi (Подъём, m)", value: "32" } ] },
-  { id: 2, category_id: 1, title_uz: "Pumpman QB60 (Вихревой)", price: 320000, image_url: imgQB,
-    specs: [ { key: "Turi", value: "Вихревой" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.37" }, { key: "Suv sarfi (л/м)", value: "35" }, { key: "Balandligi (Подъём, m)", value: "35" } ] },
-  { id: 3, category_id: 1, title_uz: "Pumpman QB70 (Вихревой)", price: 520000, image_url: imgQB,
-    specs: [ { key: "Turi", value: "Вихревой" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.55" }, { key: "Suv sarfi (л/м)", value: "45" }, { key: "Balandligi (Подъём, m)", value: "45" } ] },
-  { id: 4, category_id: 1, title_uz: "Pumpman QB80 (Вихревой)", price: 570000, image_url: imgQB,
-    specs: [ { key: "Turi", value: "Вихревой" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.75" }, { key: "Suv sarfi (л/м)", value: "45" }, { key: "Balandligi (Подъём, m)", value: "53" } ] },
-
-  // === CPm (Центробежный) - 5 ta ===
-  { id: 5, category_id: 1, title_uz: "Pumpman CPm130 (Центробежный)", price: 510000, image_url: imgCPm,
-    specs: [ { key: "Turi", value: "Центробежный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.37" }, { key: "Suv sarfi (л/м)", value: "105" }, { key: "Balandligi (Подъём, m)", value: "22" } ] },
-  { id: 6, category_id: 1, title_uz: "Pumpman CPm146 (Центробежный)", price: 620000, image_url: imgCPm,
-    specs: [ { key: "Turi", value: "Центробежный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.55" }, { key: "Suv sarfi (л/м)", value: "125" }, { key: "Balandligi (Подъём, m)", value: "27" } ] },
-  { id: 7, category_id: 1, title_uz: "Pumpman CPm158 (Центробежный)", price: 690000, image_url: imgCPm,
-    specs: [ { key: "Turi", value: "Центробежный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.75" }, { key: "Suv sarfi (л/м)", value: "125" }, { key: "Balandligi (Подъём, m)", value: "32" } ] },
-  { id: 8, category_id: 1, title_uz: "Pumpman CPm170 (Центробежный)", price: 1120000, image_url: imgCPm,
-    specs: [ { key: "Turi", value: "Центробежный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "1.1" }, { key: "Suv sarfi (л/м)", value: "133" }, { key: "Balandligi (Подъём, m)", value: "41" } ] },
-  { id: 9, category_id: 1, title_uz: "Pumpman CPm200 (Центробежный)", price: 1250000, image_url: imgCPm,
-    specs: [ { key: "Turi", value: "Центробежный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "1.5" }, { key: "Suv sarfi (л/м)", value: "133" }, { key: "Balandligi (Подъём, m)", value: "43" } ] },
-
-  // === PW (Периферийный) - 6 ta ===
-  { id: 10, category_id: 1, title_uz: "Pumpman PW125 (Периферийный)", price: 550000, image_url: imgPW,
-    specs: [ { key: "Turi", value: "Периферийный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.125" }, { key: "Suv sarfi (л/м)", value: "33" }, { key: "Balandligi (Подъём, m)", value: "24" } ] },
-  { id: 11, category_id: 1, title_uz: "Pumpman PW250 (Периферийный)", price: 570000, image_url: imgPW,
-    specs: [ { key: "Turi", value: "Периферийный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.25" }, { key: "Suv sarfi (л/м)", value: "36" }, { key: "Balandligi (Подъём, m)", value: "30" } ] },
-  { id: 12, category_id: 1, title_uz: "Pumpman PW370 (Периферийный)", price: 580000, image_url: imgPW,
-    specs: [ { key: "Turi", value: "Периферийный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.37" }, { key: "Suv sarfi (л/м)", value: "40" }, { key: "Balandligi (Подъём, m)", value: "36" } ] },
-  { id: 13, category_id: 1, title_uz: "Pumpman PW550 (Периферийный)", price: 700000, image_url: imgPW,
-    specs: [ { key: "Turi", value: "Периферийный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.55" }, { key: "Suv sarfi (л/м)", value: "50" }, { key: "Balandligi (Подъём, m)", value: "42" } ] },
-  { id: 14, category_id: 1, title_uz: "Pumpman PW750 (Периферийный)", price: 780000, image_url: imgPW,
-    specs: [ { key: "Turi", value: "Периферийный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" }, { key: "Quvvati (кВт)", value: "0.75" }, { key: "Suv sarfi (л/м)", value: "56" }, { key: "Balandligi (Подъём, m)", value: "50" } ] },
-  { id: 15, category_id: 1, title_uz: "Pumpman PW1100 (Периферийный)", price: 1070000, image_url: imgPW,
-    specs: [ { key: "Turi", value: "Периферийный" }, { key: "Kirish/Chiqish (Вх/Вых)", value: "40*40" }, { key: "Quvvati (кВт)", value: "1.1" }, { key: "Suv sarfi (л/м)", value: "100" }, { key: "Balandligi (Подъём, m)", value: "55" } ] },
-
-  // === PWE (Периферийный с сухой защитой) - 5 ta ===
-  { id: 16, category_id: 1, title_uz: "Pumpman PWE 125", price: 620000, image_url: imgPWE,
-    specs: [ { key: "Turi", value: "Периферийный с сухой защитой" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.125 кВт" }, { key: "Suv sarfi", value: "33 л/м" }, { key: "Balandligi", value: "24 m" } ] },
-  { id: 17, category_id: 1, title_uz: "Pumpman PWE 250", price: 670000, image_url: imgPWE,
-    specs: [ { key: "Turi", value: "Периферийный с сухой защитой" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.25 кВт" }, { key: "Suv sarfi", value: "36 л/м" }, { key: "Balandligi", value: "30 m" } ] },
-  { id: 18, category_id: 1, title_uz: "Pumpman PWE 370", price: 690000, image_url: imgPWE,
-    specs: [ { key: "Turi", value: "Периферийный с сухой защитой" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.37 кВт" }, { key: "Suv sarfi", value: "40 л/м" }, { key: "Balandligi", value: "36 m" } ] },
-  { id: 19, category_id: 1, title_uz: "Pumpman PWE 550", price: 840000, image_url: imgPWE,
-    specs: [ { key: "Turi", value: "Периферийный с сухой защитой" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.55 кВт" }, { key: "Suv sarfi", value: "50 л/м" }, { key: "Balandligi", value: "42 m" } ] },
-  { id: 20, category_id: 1, title_uz: "Pumpman PWE 750", price: 920000, image_url: imgPWE,
-    specs: [ { key: "Turi", value: "Периферийный с сухой защитой" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.75 кВт" }, { key: "Suv sarfi", value: "56 л/м" }, { key: "Balandligi", value: "50 m" } ] },
-
-  // === PWF (Периферийный с защитой Адаптивный) - 4 ta ===
-  { id: 21, category_id: 1, title_uz: "Pumpman PWF 125", price: 670000, image_url: imgPWF,
-    specs: [ { key: "Turi", value: "Адаптивный" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.125 кВт" }, { key: "Suv sarfi", value: "33 л/м" }, { key: "Balandligi", value: "24 m" } ] },
-  { id: 22, category_id: 1, title_uz: "Pumpman PWF 250", price: 710000, image_url: imgPWF,
-    specs: [ { key: "Turi", value: "Адаптивный" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.25 кВт" }, { key: "Suv sarfi", value: "36 л/м" }, { key: "Balandligi", value: "30 m" } ] },
-  { id: 23, category_id: 1, title_uz: "Pumpman PWF 370", price: 750000, image_url: imgPWF,
-    specs: [ { key: "Turi", value: "Адаптивный" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.37 кВт" }, { key: "Suv sarfi", value: "40 л/м" }, { key: "Balandligi", value: "36 m" } ] },
-  { id: 24, category_id: 1, title_uz: "Pumpman PWF 550", price: 900000, image_url: imgPWF,
-    specs: [ { key: "Turi", value: "Адаптивный" }, { key: "Kirish/Chiqish", value: "25*25" }, { key: "Quvvati", value: "0.55 кВт" }, { key: "Suv sarfi", value: "50 л/м" }, { key: "Balandligi", value: "42 m" } ] }
+  // 1. QB (Вихревой)
+  {
+    id: 1,
+    category_id: 1,
+    title_uz: "Pumpman QB60 ECO (Вихревой)",
+    price: 280000,
+    image_url: imgQB,
+    specs: [
+      { key: "Turi", value: "Вихревой" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "0.37" },
+      { key: "Suv sarfi (л/м)", value: "35" },
+      { key: "Balandligi (Подъём, m)", value: "32" }
+    ]
+  },
+  // 2. CPm (Центробежный)
+  {
+    id: 2,
+    category_id: 1,
+    title_uz: "Pumpman CPm130 (Центробежный)",
+    price: 510000,
+    image_url: imgCPm,
+    specs: [
+      { key: "Turi", value: "Центробежный" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "0.37" },
+      { key: "Suv sarfi (л/м)", value: "105" },
+      { key: "Balandligi (Подъём, m)", value: "22" }
+    ]
+  },
+  // 3. PW (Периферийный)
+  {
+    id: 3,
+    category_id: 1,
+    title_uz: "Pumpman PW125 (Периферийный)",
+    price: 550000,
+    image_url: imgPW,
+    specs: [
+      { key: "Turi", value: "Периферийный" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "0.125" },
+      { key: "Suv sarfi (л/м)", value: "33" },
+      { key: "Balandligi (Подъём, m)", value: "24" }
+    ]
+  },
+  // 4. PWE (Периферийный с сухой защитой)
+  {
+    id: 4,
+    category_id: 1,
+    title_uz: "Pumpman PWE 125 (Сухой защита)",
+    price: 620000,
+    image_url: imgPWE,
+    specs: [
+      { key: "Turi", value: "Периферийный с сухой защитой" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "0.125" },
+      { key: "Suv sarfi (л/м)", value: "33" },
+      { key: "Balandligi (Подъём, m)", value: "24" }
+    ]
+  },
+  // 5. PWF (Периферийный с suhoyi datchik - Adaptiv)
+  {
+    id: 5,
+    category_id: 1,
+    title_uz: "Pumpman PWF 125 (Адаптивный)",
+    price: 670000,
+    image_url: imgPWF,
+    specs: [
+      { key: "Turi", value: "Периферийный адаптивный" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "0.125" },
+      { key: "Suv sarfi (л/м)", value: "33" },
+      { key: "Balandligi (Подъём, m)", value: "24" }
+    ]
+  },
+  // 6. QDX (Погружной)
+  {
+    id: 6,
+    category_id: 1,
+    title_uz: "Pumpman QDX1.5-12-0.25L(A) (Погружной)",
+    price: 470000,
+    image_url: imgQDX,
+    specs: [
+      { key: "Turi", value: "Погружной дренажный" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "0.25" },
+      { key: "Suv sarfi (л/м)", value: "91" },
+      { key: "Balandligi (Подъём, m)", value: "13" }
+    ]
+  },
+  // 7. TCM5 (Поверхностный)
+  {
+    id: 7,
+    category_id: 1,
+    title_uz: "Pumpman TCM 5.4-31/4-0.55",
+    price: 900000,
+    image_url: imgTCM,
+    specs: [
+      { key: "Turi", value: "Поверхностный многоступенчатый" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "0.55" },
+      { key: "Suv sarfi (л/м)", value: "33" },
+      { key: "Balandligi (Подъём, m)", value: "31" }
+    ]
+  },
+  // 8. TCH(m) (Поверхностный)
+  {
+    id: 8,
+    category_id: 1,
+    title_uz: "Pumpman TCH(m) 3-2BR 0.37",
+    price: 800000,
+    image_url: imgTCH,
+    specs: [
+      { key: "Turi", value: "Поверхностный" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "0.37" },
+      { key: "Suv sarfi (л/м)", value: "80" },
+      { key: "Balandligi (Подъём, m)", value: "20" }
+    ]
+  },
+  // 9. JET (Самовсасывающий)
+  {
+    id: 9,
+    category_id: 1,
+    title_uz: "Pumpman JET 80",
+    price: 710000,
+    image_url: imgJET,
+    specs: [
+      { key: "Turi", value: "Самовсасывающий JET" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "0.55" },
+      { key: "Suv sarfi (л/м)", value: "53" },
+      { key: "Balandligi (Подъём, m)", value: "38" }
+    ]
+  },
+  // 10. THF (Центробежный)
+  {
+    id: 10,
+    category_id: 1,
+    title_uz: "Pumpman TGA1A (THF)",
+    price: 750000,
+    image_url: imgTHF,
+    specs: [
+      { key: "Turi", value: "Центробежный высокопроизводительный" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "40*40" },
+      { key: "Quvvati (кВт)", value: "0.75" },
+      { key: "Suv sarfi (л/м)", value: "300" },
+      { key: "Balandligi (Подъём, m)", value: "20" }
+    ]
+  },
+  // 11. 2TCP25 (Центробежный двухколесный)
+  {
+    id: 11,
+    category_id: 1,
+    title_uz: "Pumpman 2TCP25/140M",
+    price: 1300000,
+    image_url: img2TCP,
+    specs: [
+      { key: "Turi", value: "Центробежный двухколесный" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "40*25" },
+      { key: "Quvvati (кВт)", value: "1.1" },
+      { key: "Suv sarfi (л/м)", value: "125" },
+      { key: "Balandligi (Подъём, m)", value: "47" }
+    ]
+  },
+  // 12. 50WFD11 (Канализационный)
+  {
+    id: 12,
+    category_id: 1,
+    title_uz: "Pumpman 50WFD11-10-1.1GA",
+    price: 1450000,
+    image_url: img50WFD,
+    specs: [
+      { key: "Turi", value: "Канализационный погружной" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "50*50" },
+      { key: "Quvvati (кВт)", value: "1.1" },
+      { key: "Suv sarfi (л/м)", value: "280" },
+      { key: "Balandligi (Подъём, m)", value: "15" }
+    ]
+  },
+  // 13. QFD (Погружной)
+  {
+    id: 13,
+    category_id: 1,
+    title_uz: "Pumpman QFD15-15-1.1(A)",
+    price: 1300000,
+    image_url: imgQFD,
+    specs: [
+      { key: "Turi", value: "Погружной центробежный" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "63*63" },
+      { key: "Quvvati (кВт)", value: "1.1" },
+      { key: "Suv sarfi (л/м)", value: "580" },
+      { key: "Balandligi (Подъём, m)", value: "18" }
+    ]
+  },
+  // 14. ATJSW (Насосная станция)
+  {
+    id: 14,
+    category_id: 1,
+    title_uz: "Pumpman ATJSW/15M-1",
+    price: 1110000,
+    image_url: imgATJSW,
+    specs: [
+      { key: "Turi", value: "Автоматическая насосная станция" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "1.1" },
+      { key: "Suv sarfi (л/м)", value: "50" },
+      { key: "Balandligi (Подъём, m)", value: "58" }
+    ]
+  },
+  // 15. STAR (Частотный с фланцем)
+  {
+    id: 15,
+    category_id: 1,
+    title_uz: "Pumpman STAR50/12F",
+    price: 6000000,
+    image_url: imgSTAR_F,
+    specs: [
+      { key: "Turi", value: "Циркуляционный частотный фланцевый" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "50*50" },
+      { key: "Quvvati (кВт)", value: "0.56" },
+      { key: "Suv sarfi (л/м)", value: "380" },
+      { key: "Balandligi (Подъём, m)", value: "12" }
+    ]
+  },
+  // 16. SGJ (Самовсасывающий нерж.)
+  {
+    id: 16,
+    category_id: 1,
+    title_uz: "Pumpman SGJ600",
+    price: 750000,
+    image_url: imgSGJ,
+    specs: [
+      { key: "Turi", value: "Самовсасывающий нержавеющий" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "0.6" },
+      { key: "Suv sarfi (л/м)", value: "55" },
+      { key: "Balandligi (Подъём, m)", value: "43" }
+    ]
+  },
+  // 17. GS (Дренажный)
+  {
+    id: 17,
+    category_id: 1,
+    title_uz: "Pumpman GS400",
+    price: 480000,
+    image_url: imgGS,
+    specs: [
+      { key: "Turi", value: "Дренажный пластиковый" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "40*40" },
+      { key: "Quvvati (кВт)", value: "0.4" },
+      { key: "Suv sarfi (л/м)", value: "146" },
+      { key: "Balandligi (Подъём, m)", value: "5.5" }
+    ]
+  },
+  // 18. CHLFT(T) (Для горячей воды)
+  {
+    id: 18,
+    category_id: 1,
+    title_uz: "Pumpman CHLFT(T) 2-60R",
+    price: 1650000,
+    image_url: imgCHLFT,
+    specs: [
+      { key: "Turi", value: "Горизонтальный многоступенчатый (горячая вода)" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "0.75" },
+      { key: "Suv sarfi (л/м)", value: "580" },
+      { key: "Balandligi (Подъём, m)", value: "53" }
+    ]
+  },
+  // 19. CHM (Для горячей воды)
+  {
+    id: 19,
+    category_id: 1,
+    title_uz: "Pumpman CHM4-4R",
+    price: 1600000,
+    image_url: imgCHM,
+    specs: [
+      { key: "Turi", value: "Центробежный (горячая вода)" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "32*25" },
+      { key: "Quvvati (кВт)", value: "0.75" },
+      { key: "Suv sarfi (л/м)", value: "116" },
+      { key: "Balandligi (Подъём, m)", value: "38" }
+    ]
+  },
+  // 20. TW (Периферийный)
+  {
+    id: 20,
+    category_id: 1,
+    title_uz: "Pumpman TW-550T",
+    price: 620000,
+    image_url: imgTW,
+    specs: [
+      { key: "Turi", value: "Периферийный вихревой" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "0.55" },
+      { key: "Suv sarfi (л/м)", value: "50" },
+      { key: "Balandligi (Подъём, m)", value: "42" }
+    ]
+  },
+  // 21. GRD (Рециркуляция Латунь)
+  {
+    id: 21,
+    category_id: 1,
+    title_uz: "Pumpman GRD 15/15 (Латунь)",
+    price: 550000,
+    image_url: imgGRD,
+    specs: [
+      { key: "Turi", value: "Рециркуляционный латунный" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "15*15" },
+      { key: "Quvvati (кВт)", value: "0.03" },
+      { key: "Suv sarfi (л/м)", value: "10" },
+      { key: "Balandligi (Подъём, m)", value: "1.5" }
+    ]
+  },
+  // 22. STAR (Циркуляционный частотный)
+  {
+    id: 22,
+    category_id: 1,
+    title_uz: "Pumpman NEW STAR 25/6-180",
+    price: 650000,
+    image_url: imgSTAR_C,
+    specs: [
+      { key: "Turi", value: "Циркуляционный частотный" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "0.3" },
+      { key: "Suv sarfi (л/м)", value: "58" },
+      { key: "Balandligi (Подъём, m)", value: "6" }
+    ]
+  },
+  // 23. Пресс-контроль PM-01
+  {
+    id: 23,
+    category_id: 1,
+    title_uz: "Pumpman PM-01 (Пресс-контроль)",
+    price: 160000,
+    image_url: imgPM01,
+    specs: [
+      { key: "Turi", value: "Блок автоматики (Пресс-контроль)" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "1.1" },
+      { key: "Suv sarfi", value: "Avtomat boshqaruv" },
+      { key: "Balandligi", value: "Datchik" }
+    ]
+  },
+  
+  // === TO'RTTA YANGI MAHSULOT ===
+  {
+    id: 24,
+    category_id: 1,
+    title_uz: "Pumpman Intelligent (Avtomatik)",
+    price: 950000, 
+    image_url: imgIntelligent,
+    specs: [
+      { key: "Turi", value: "Aqlli o'z-o'zidan so'radigan (Умный самовсасывающий)" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "0.55" },
+      { key: "Suv sarfi (л/м)", value: "45" },
+      { key: "Balandligi (Подъём, m)", value: "35" }
+    ]
+  },
+  {
+    id: 25,
+    category_id: 1,
+    title_uz: "Pumpman GRD 15/15",
+    price: 450000,
+    image_url: imgGRD15,
+    specs: [
+      { key: "Turi", value: "Resirkulyatsion (Рециркуляционный)" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "15*15" },
+      { key: "Quvvati (кВт)", value: "0.008" },
+      { key: "Suv sarfi (л/м)", value: "10" },
+      { key: "Balandligi (Подъём, m)", value: "1.5" }
+    ]
+  },
+  {
+    id: 26,
+    category_id: 1,
+    title_uz: "Pumpman NEW STAR 25/6",
+    price: 850000,
+    image_url: imgNewStar,
+    specs: [
+      { key: "Turi", value: "Tsirkulyatsion elektron (Циркуляционный электронный)" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "0.045" },
+      { key: "Suv sarfi (л/м)", value: "50" },
+      { key: "Balandligi (Подъём, m)", value: "6" }
+    ]
+  },
+  {
+    id: 27,
+    category_id: 1,
+    title_uz: "Pumpman Gorizontal ko'p bosqichli",
+    price: 1600000,
+    image_url: imgHorizontal,
+    specs: [
+      { key: "Turi", value: "Ko'p bosqichli markazdan qochma (Многоступенчатый центробежный)" },
+      { key: "Kirish/Chiqish (Вх/Вых)", value: "25*25" },
+      { key: "Quvvati (кВт)", value: "0.75" },
+      { key: "Suv sarfi (л/м)", value: "70" },
+      { key: "Balandligi (Подъём, m)", value: "45" }
+    ]
+  }
 ];
 
 export default function KatalogTab() {
@@ -232,8 +591,8 @@ export default function KatalogTab() {
         
         <div style={{ height: "320px", width: "100%" }}>
           <MapContainer 
-            center={[39.677544, 66.926537]} 
-            zoom={13} 
+            center={[39.6542, 66.9287]} // Xarita ochilishi bilan to'g'ri nuqtani ko'rsatadi
+            zoom={14} 
             style={{ width: "100%", height: "100%" }}
           >
             <TileLayer

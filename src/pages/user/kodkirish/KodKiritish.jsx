@@ -1,22 +1,25 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { FaCloudUploadAlt, FaCheckCircle, FaHourglassHalf, FaTimesCircle, FaTrashAlt, FaHashtag } from "react-icons/fa";
+import { 
+  FaCheckCircle, 
+  FaHourglassHalf, 
+  FaTimesCircle, 
+  FaHashtag,
+  FaArrowLeft 
+} from "react-icons/fa";
 import { supabase } from "../../../supabase/client"; 
 import "./kodkiritish.css";
 
-export default function CodeTab({ lang = "uz", userId = "" }) {
+export default function CodeTab({ lang = "uz", userId = "", onBack }) {
   const [bonusCode, setBonusCode] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [historyData, setHistoryData] = useState([]);
 
   const translations = {
     uz: {
+      backBtn: "Asosiy sahifaga qaytish",
       title: "Kodni faollashtirish",
-      hint: "Mahsulot ichidagi maxfiy kodni kiriting va qadoq rasmini yuklang",
+      hint: "Mahsulot ichidagi maxfiy kodni kiriting",
       placeholder: "KODNI KIRITING (Masalan: AKFA77)",
-      uploadText: "Mahsulot qadog'i rasmini yuklash",
-      uploadHint: "Formatlar: JPG, PNG (Maksimal 5MB)",
       btnConfirm: "Kodni jo'natish",
       checking: "Yuborilmoqda...",
       historyTitle: "Oxirgi kiritilgan kodlaringiz",
@@ -28,15 +31,14 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
       statusRejected: "Rad etildi",
       noData: "Siz hali kod kiritmadingiz",
       alertSuccess: "Kod muvaffaqiyatli tekshirishga yuborildi!",
-      alertWarning: "Iltimos, kodni kiriting va rasmini yuklang!",
+      alertWarning: "Iltimos, faollashtirish uchun kodni kiriting!",
       alertError: "Xatolik yuz berdi: "
     },
     ru: {
+      backBtn: "Назад",
       title: "Активация кода",
-      hint: "Введите секретный код товара и загрузите фото упаковки",
+      hint: "Введите секретный код товара",
       placeholder: "ВВЕДИТЕ КОД (Например: AKFA77)",
-      uploadText: "Загрузить фото упаковки",
-      uploadHint: "Форматы: JPG, PNG (Макс. 5МБ)",
       btnConfirm: "Отправить код",
       checking: "Отправка...",
       historyTitle: "История ваших кодов",
@@ -48,7 +50,7 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
       statusRejected: "Отклонен",
       noData: "Вы еще не вводили коды",
       alertSuccess: "Код успешно отправлен на проверку!",
-      alertWarning: "Пожалуйста, введите код и загрузите фото!",
+      alertWarning: "Пожалуйста, введите код для активации!",
       alertError: "Произошла ошибка: "
     }
   };
@@ -100,27 +102,9 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
     fetchHistory();
   }, [fetchHistory]);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const removeSelectedFile = (e) => {
-    e.preventDefault();
-    setSelectedFile(null);
-    setImagePreview(null);
-  };
-
-  // 🚀 3. To'g'rilangan handleSendCodeSubmit (barcha kerakli dependencies qo'shildi)
+  // 🚀 3. handleSendCodeSubmit (Faqat kodni yuborish)
   const handleSendCodeSubmit = useCallback(async () => {
-    if (!bonusCode.trim() || !selectedFile) {
+    if (!bonusCode.trim()) {
       alert(t.alertWarning);
       return;
     }
@@ -134,6 +118,7 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
 
       const cleanCode = bonusCode.trim().toUpperCase();
 
+      // 1. promo_codes jadvalidan kodni tekshirish
       const { data: promoData, error: promoError } = await supabase
         .from("promo_codes")
         .select("id")
@@ -144,6 +129,7 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
         throw new Error("Kiritilgan kod xato yoki bazada mavjud emas!");
       }
 
+      // 2. Ushbu kod foydalanuvchi tomonidan avval ishlatilganini tekshirish
       const { data: alreadyUsed, error: checkError } = await supabase
         .from("used_codes")
         .select("id")
@@ -157,30 +143,14 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
         throw new Error("Siz bu kodni allaqachon tekshirishga yuborgansiz! ❌");
       }
 
-      const fileExt = selectedFile.name.split('.').pop();
-      const cleanFileName = `${Date.now()}.${fileExt}`;
-      const filePath = `${activeId}/${cleanFileName}`;
-
-      const { error: storageError } = await supabase.storage
-        .from("product_images")
-        .upload(filePath, selectedFile, {
-          cacheControl: '3600',
-          upsert: true 
-        });
-
-      if (storageError) throw new Error(`Rasm yuklanmadi: ${storageError.message}`);
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("product_images")
-        .getPublicUrl(filePath);
-
+      // 3. used_codes jadvaliga yozish (Rasm maydoni butunlay olib tashlandi yoki null yuboriladi)
       const { error: dbError } = await supabase
         .from("used_codes")
         .insert([
           {
             user_id: activeId,
             code_id: promoData.id, 
-            image_url: publicUrl,
+            image_url: null, // rasm ixtiyoriyligi sababli doim null ketadi
             status: "pending",
             created_at: new Date().toISOString()
           }
@@ -189,8 +159,6 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
       if (dbError) throw dbError;
 
       setBonusCode("");
-      setSelectedFile(null);
-      setImagePreview(null);
       fetchHistory();
       alert(t.alertSuccess);
 
@@ -200,7 +168,7 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
     } finally {
       setLoading(false);
     }
-  }, [bonusCode, selectedFile, getActiveUserId, fetchHistory, t.alertSuccess, t.alertWarning]);
+  }, [bonusCode, getActiveUserId, fetchHistory, t.alertSuccess, t.alertWarning]);
 
   const renderStatusBadge = (status) => {
     if (status === "approved" || status === "confirmed") {
@@ -213,6 +181,14 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
 
   return (
     <div className="code-tab-container fade-in">
+      
+      {/* ⬅️ NAVIGATSIYA ORQAGA QAYTISH TUGMASI */}
+      <div className="code-top-nav">
+        <button className="code-back-btn" onClick={onBack}>
+          <FaArrowLeft /> {t.backBtn}
+        </button>
+      </div>
+
       <div className="code-card-header">
         <div className="header-icon-box"><FaHashtag /></div>
         <div>
@@ -234,37 +210,12 @@ export default function CodeTab({ lang = "uz", userId = "" }) {
             />
           </div>
 
-          {!imagePreview ? (
-            <div className="upload-dropzone">
-              <label htmlFor="image-input-file" className="dropzone-label">
-                <FaCloudUploadAlt className="dropzone-icon" />
-                <span className="dropzone-text">{t.uploadText}</span>
-                <span className="dropzone-hint">{t.uploadHint}</span>
-              </label>
-              <input 
-                type="file" 
-                id="image-input-file" 
-                accept="image/*" 
-                onChange={handleFileChange}
-                disabled={loading}
-                className="real-file-input"
-              />
-            </div>
-          ) : (
-            <div className="image-preview-box">
-              <img src={imagePreview} alt="Preview" className="preview-img" />
-              <button className="remove-preview-btn" onClick={removeSelectedFile}>
-                <FaTrashAlt /> O'chirish
-              </button>
-            </div>
-          )}
-
           <button 
             className="modern-submit-btn" 
             onClick={handleSendCodeSubmit} 
-            disabled={loading || !bonusCode.trim() || !selectedFile}
+            disabled={loading || !bonusCode.trim()}
           >
-            {loading ? "Yuborilmoqda..." : t.btnConfirm}
+            {loading ? t.checking : t.btnConfirm}
           </button>
         </div>
 

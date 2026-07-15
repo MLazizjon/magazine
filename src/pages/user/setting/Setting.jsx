@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   FaUser, 
   FaMapMarkerAlt, 
@@ -106,17 +107,23 @@ export default function SettingsTab({
   onBack
 }) {
   const [districtsList, setDistrictsList] = useState([]);
-  
-  // Custom dropdownlarning ochiq/yopiqligini boshqarish
+  const navigate = useNavigate();
+
+  // Custom dropdownlarning ochiq/yopiqligini boshqarish shtatlari
+  const [isLangOpen, setIsLangOpen] = useState(false); // 🌐 Til dropdowni uchun yangi state
   const [isRegionOpen, setIsRegionOpen] = useState(false);
   const [isDistrictOpen, setIsDistrictOpen] = useState(false);
 
+  const langRef = useRef(null); // 🌐 Til dropdowni uchun ref
   const regionRef = useRef(null);
   const districtRef = useRef(null);
 
   // Dropdown ochilganda boshqa joyga bossa avtomatik yopilish mexanizmi
   useEffect(() => {
     function handleClickOutside(event) {
+      if (langRef.current && !langRef.current.contains(event.target)) {
+        setIsLangOpen(false);
+      }
       if (regionRef.current && !regionRef.current.contains(event.target)) {
         setIsRegionOpen(false);
       }
@@ -172,12 +179,20 @@ export default function SettingsTab({
 
   const t = translations[lang] || translations["uz"];
 
+  const handleBackClick = () => {
+    if (typeof onBack === "function") {
+      onBack();
+    } else {
+      navigate("/");
+    }
+  };
+
   return (
     <div className="settings-tab-wrapper">
       
       {/* 1. HEADER */}
       <div className="settings-tab-header">
-        <button className="settings-back-arrow" onClick={onBack}>
+        <button className="settings-back-arrow" onClick={handleBackClick}>
           <FaChevronLeft size={18} />
         </button>
         <h2>{t.headerTitle}</h2>
@@ -187,7 +202,7 @@ export default function SettingsTab({
       {/* 2. ASOSIY KARTA (MAIN CARD) */}
       <div className="settings-main-card">
         
-        {/* AVATAR QISMI (Kamera belgisi butunlay olib tashlandi) */}
+        {/* AVATAR QISMI */}
         <div className="settings-user-profile-summary">
           <div className="settings-large-avatar">
             <FaUser size={40} />
@@ -196,17 +211,39 @@ export default function SettingsTab({
           <p className="settings-user-phone">{currentUser?.phone || "+998 -- --- -- --"}</p>
         </div>
 
-        {/* 🌐 TIZIM TILI SEKSIYASI */}
-        <div className="settings-input-block">
+        {/* 🌐 TIZIM TILI SHAXSIY DROPDOWN (CUSTOM SELECT) */}
+        <div className="settings-input-block" ref={langRef}>
           <label><FaGlobe className="form-icon-accent" /> {t.langLabel}</label>
-          <select
-            value={lang}
-            onChange={(e) => changeLanguage(e.target.value)}
-            style={{ fontWeight: "600", cursor: "pointer" }}
+          <div 
+            className={`custom-select-trigger ${isLangOpen ? "open" : ""}`}
+            onClick={() => setIsLangOpen(!isLangOpen)}
           >
-            <option value="uz">O'zbekcha (UZ)</option>
-            <option value="ru">Русский (RU)</option>
-          </select>
+            <span>{lang === "uz" ? "O'zbekcha (UZ)" : "Русский (RU)"}</span>
+            {isLangOpen ? <FaChevronUp size={14} /> : <FaChevronDown size={14} />}
+          </div>
+          
+          {isLangOpen && (
+            <div className="custom-select-options">
+              <div 
+                className={`custom-option ${lang === "uz" ? "selected" : ""}`}
+                onClick={() => {
+                  changeLanguage("uz");
+                  setIsLangOpen(false);
+                }}
+              >
+                O'zbekcha (UZ)
+              </div>
+              <div 
+                className={`custom-option ${lang === "ru" ? "selected" : ""}`}
+                onClick={() => {
+                  changeLanguage("ru");
+                  setIsLangOpen(false);
+                }}
+              >
+                Русский (RU)
+              </div>
+            </div>
+          )}
         </div>
 
         {/* INPUT: TO'LIQ ISM */}
@@ -240,7 +277,7 @@ export default function SettingsTab({
                   onClick={() => {
                     setEditRegion(regionName);
                     if (typeof setEditDistrict === "function") {
-                      setEditDistrict(""); // Viloyat o'zgarsa tuman qiymatini tozalaydi
+                      setEditDistrict(""); 
                     }
                     setIsRegionOpen(false);
                   }}
@@ -299,7 +336,7 @@ export default function SettingsTab({
         </div>
       </div>
 
-      {/* 3. SUPPORT (QO'LLAB-QUVVATLASH) BLOKI - Yangilangan raqam va telegram bot */}
+      {/* 3. SUPPORT (QO'LLAB-QUVVATLASH) BLOKI */}
       <div className="settings-support-container-card">
         <div className="settings-support-heading">
           <FaHeadset className="support-blue-icon" />

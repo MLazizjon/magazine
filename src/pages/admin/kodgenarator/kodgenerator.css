@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&display=swap');
 
 .generator-wrapper {
   font-family: 'Inter', sans-serif;
@@ -207,6 +207,27 @@
   background-color: #f1f5f9;
 }
 
+/* 🌟 YANGI: Pauza / Play Tugmalari Stillari */
+.btn-action-pause {
+  background-color: #fef3c7; /* Sariq rang */
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.btn-action-pause:hover {
+  background-color: #fde68a;
+}
+
+.btn-active-play {
+  background-color: #dcfce7; /* Play holatida yashil rang */
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.btn-active-play:hover {
+  background-color: #bbf7d0;
+}
+
 /* Scroll va Ro'yxat */
 .batch-codes-scroll {
   max-height: 160px;
@@ -280,6 +301,36 @@
   border-top: 1px solid #f1f5f9;
   padding-top: 12px;
   font-weight: 500;
+}
+
+/* 🌟 YANGI: Pauza holatidagi partiya va kod stillari */
+.paused-batch-card {
+  background-color: #fafaf9; /* Kulrang tus */
+  border-color: #e7e5e4;
+  opacity: 0.95;
+}
+
+.paused-badge {
+  background-color: #f5f5f4 !important;
+  color: #78716c !important;
+}
+
+.paused-code-li {
+  background-color: #f5f5f4 !important;
+  border-color: #e7e5e4 !important;
+}
+
+.paused-barcode-icon {
+  color: #a8a29e !important;
+}
+
+.paused-code-text {
+  color: #78716c !important;
+}
+
+.paused-pill {
+  background-color: #f5f5f4;
+  color: #78716c;
 }
 
 /* 🌟 YANGI LIGHT MODE: Ishlatilgan kodlar maxsus kartasi */
@@ -441,4 +492,51 @@
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* --- 📱 MOBIL MOSLASHUVCHANLIK (RESPONSIVE DESIGN) QISMI --- */
+@media (max-width: 576px) {
+  /* Katta bosh kartani ustun shakliga keltiramiz */
+  .generator-header-card {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .header-info {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  /* Kichik ekranda sarlavha matnining hajmi */
+  .header-info h3 {
+    font-size: 16px;
+  }
+
+  /* Tugma va input guruhini to'liq kenglikda qilish */
+  .generator-controls {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+  }
+
+  /* Input blokini tekislash */
+  .custom-input-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .custom-input-group input {
+    width: 100% !important;
+    text-align: right;
+  }
+
+  /* "Создать Код" tugmasini ham chiroyli to'liq kenglikda qilish */
+  .main-generate-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }

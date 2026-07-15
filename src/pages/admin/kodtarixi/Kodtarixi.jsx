@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../../../supabase/client";
-import { FaSpinner, FaRegClock, FaUser, FaBarcode, FaImage, FaSearch } from "react-icons/fa";
+import { FaSpinner, FaRegClock, FaUser, FaBarcode, FaSearch } from "react-icons/fa";
 
 export default function HistoryTab({ lang = "uz" }) {
   const [historyData, setHistoryData] = useState([]);
@@ -9,28 +9,24 @@ export default function HistoryTab({ lang = "uz" }) {
 
   const translations = {
     uz: {
-      title: "📷 Kiritilgan Kodlar va Rasmlar Tarixi",
-      noData: "Hozircha rasmli kodlar kiritilmagan 🔍",
+      title: "📷 Kiritilgan Kodlar Tarixi",
+      noData: "Hozircha kodlar kiritilmagan 🔍",
       noResults: "Qidiruv bo'yicha hech qanday ma'lumot topilmadi ❌",
       loadingText: "Yuklanmoqda...",
       searchPlaceholder: "Ism, telefon, viloyat yoki tuman bo'yicha qidirish...",
       user: "Usta",
       code: "Kod",
       time: "Sana / Vaqt",
-      photo: "Yuborilgan Rasm",
-      noPhoto: "Rasm yuklanmagan"
     },
     ru: {
-      title: "📷 История Введенных Кодов и Фото",
-      noData: "История кодов с фото пока пуста 🔍",
+      title: "📷 История Введенных Кодов",
+      noData: "История кодов пока пуста 🔍",
       noResults: "По вашему запросу ничего не найдено ❌",
       loadingText: "Загрузка...",
       searchPlaceholder: "Поиск по имени, телефону, региону или району...",
       user: "Мастер",
       code: "Код",
       time: "Дата / Время",
-      photo: "Отправленное Фото",
-      noPhoto: "Фото отсутствует"
     }
   };
 
@@ -44,7 +40,6 @@ export default function HistoryTab({ lang = "uz" }) {
         .select(`
           id,
           created_at,
-          image_url,
           status,
           profiles ( full_name, phone, region, district ),
           promo_codes ( code )
@@ -131,49 +126,34 @@ export default function HistoryTab({ lang = "uz" }) {
           ) : filteredHistory.length > 0 ? (
             /* Qidiruvga mos kelgan ma'lumotlar */
             filteredHistory.map((item) => (
-              <div key={item.id} style={{ background: "#fff", borderRadius: "12px", border: "1px solid #e2e8f0", overflow: "hidden", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column" }}>
+              <div key={item.id} style={{ background: "#fff", borderRadius: "12px", border: "1px solid #e2e8f0", overflow: "hidden", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", position: "relative" }}>
                 
-                {/* Rasm qismi */}
-                <div style={{ height: "200px", background: "#f1f5f9", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {item.image_url ? (
-                    <img 
-                      src={item.image_url} 
-                      alt="Promo Code Proof" 
-                      style={{ width: "100%", height: "100%", objectFit: "cover", cursor: "pointer" }} 
-                      onClick={() => window.open(item.image_url, "_blank")}
-                    />
-                  ) : (
-                    <div style={{ color: "#94a3b8", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-                      <FaImage size={32} />
-                      <span style={{ fontSize: "13px" }}>{t.noPhoto}</span>
-                    </div>
-                  )}
-                  <span style={{ position: "absolute", top: "10px", right: "10px", background: item.status === "approved" ? "#22c55e" : "#f59e0b", color: "#fff", padding: "4px 10px", borderRadius: "20px", fontSize: "11px", fontWeight: "600", textTransform: "uppercase" }}>
-                    {item.status}
-                  </span>
-                </div>
+                {/* Holat badge'ini yuqori burchakka chiroyli joylashtiramiz */}
+                <span style={{ position: "absolute", top: "16px", right: "16px", background: item.status === "approved" ? "#22c55e" : "#f59e0b", color: "#fff", padding: "4px 10px", borderRadius: "20px", fontSize: "11px", fontWeight: "600", textTransform: "uppercase" }}>
+                  {item.status}
+                </span>
 
                 {/* Ma'lumotlar qismi */}
-                <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "12px", flexGrow: 1 }}>
+                <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "16px", flexGrow: 1 }}>
                   
-                  {/* Usta haqida (Viloyat va Tuman birgalikda chiqarildi) */}
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                    <FaUser style={{ color: "#64748b", marginTop: "3px" }} size={14} />
+                  {/* Usta haqida ma'lumot */}
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", paddingRight: "80px" }}>
+                    <FaUser style={{ color: "#64748b", marginTop: "3px" }} size={16} />
                     <div>
                       <strong style={{ display: "block", color: "#1e293b", fontSize: "15px" }}>
                         {item.profiles?.full_name || "Noma'lum Usta"}
                       </strong>
-                      <span style={{ fontSize: "12px", color: "#64748b", display: "block", marginTop: "2px" }}>
+                      <span style={{ fontSize: "12px", color: "#64748b", display: "block", marginTop: "4px" }}>
                         {item.profiles?.region ? `${item.profiles.region}${item.profiles.district ? `, ${item.profiles.district}` : ""}` : "-"}
                       </span>
-                      <span style={{ fontSize: "12px", color: "#64748b" }}>
+                      <span style={{ fontSize: "12px", color: "#64748b", display: "block", marginTop: "2px" }}>
                         {item.profiles?.phone || "-"}
                       </span>
                     </div>
                   </div>
 
-                  {/* Kod va Vaqt */}
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#f8fafc", padding: "10px", borderRadius: "8px", marginTop: "auto" }}>
+                  {/* Kod va Vaqt bloki */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#f8fafc", padding: "12px", borderRadius: "8px", marginTop: "auto" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                       <FaBarcode style={{ color: "#0284c7" }} size={14} />
                       <span style={{ fontWeight: "700", color: "#0369a1", fontSize: "14px" }}>

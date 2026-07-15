@@ -1,9 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { FaTrophy, FaCheckCircle, FaHourglassHalf, FaListOl, FaChartBar, FaCalendarAlt, FaTimes, FaLightbulb } from "react-icons/fa";
+import { 
+  FaTrophy, 
+  FaCheckCircle, 
+  FaHourglassHalf, 
+  FaListOl, 
+  FaChartBar, 
+  FaCalendarAlt, 
+  FaTimes, 
+  FaLightbulb,
+  FaHome,
+  FaKey,
+  FaBookOpen,
+  FaGift
+} from "react-icons/fa";
 import { supabase } from "../../../supabase/client"; 
 import "./home.css"; 
 
-// 📝 Ko'p tilli tarjimalar lug'ati (Komponentdan tashqariga chiqarildi)
+// 📝 Ko'p tilli tarjimalar lug'ati
 const translations = {
   uz: {
     place: "-o'rin",
@@ -11,7 +24,7 @@ const translations = {
     pending: "Kutilmoqda",
     totalEntered: "Kiritilgan jami",
     activeCampaigns: "Faol Aksiyalar",
-    noCampaigns: "Hozircha faol aksiyalar mavjud emas.",
+    noCampaigns: "Hozircha faol aksiyalar muddatida mavjud emas.",
     adminTips: "Admin Maslahatlari",
     noTips: "Maslahatlar mavjud emas.",
     yearLabel: "Yil",
@@ -31,7 +44,11 @@ const translations = {
     endDate: "Tugashi",
     ta: "ta",
     weekLabels: ["Du", "Se", "Ch", "Pa", "Ju", "Sha", "Ya"],
-    monthLabels: ["1-Hafta", "2-Hafta", "3-Hafta", "4-Hafta"]
+    monthLabels: ["1-Hafta", "2-Hafta", "3-Hafta", "4-Hafta"],
+    navHome: "Asosiy",
+    navCode: "Kod kiritish",
+    navCatalog: "Katalog",
+    navShop: "Do'kon"
   },
   ru: {
     place: "-е место",
@@ -59,7 +76,11 @@ const translations = {
     endDate: "Конец",
     ta: "шт",
     weekLabels: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
-    monthLabels: ["1-Неделя", "2-Неделя", "3-Неделя", "4-Неделя"]
+    monthLabels: ["1-Неделя", "2-Неделя", "3-Неделя", "4-Неделя"],
+    navHome: "Главная",
+    navCode: "Ввод кода",
+    navCatalog: "Каталог",
+    navShop: "Магазин"
   }
 };
 
@@ -81,7 +102,8 @@ export default function HomeTab({
   statType,
   setStatType,
   lang = "uz", 
-  monthsUz = monthsUzDefault
+  monthsUz = monthsUzDefault,
+  setActiveTab // 👈 Navigatsiya almashishi uchun prop
 }) {
   const [campaigns, setCampaigns] = useState([]);
   const [news, setNews] = useState([]); 
@@ -294,7 +316,71 @@ export default function HomeTab({
       </div>
 
       <div className="white-content-body">
-        {/* FAOL AKSIYALAR */}
+        {/* ==========================================================================
+           🚀 4 TALIK SIDEBAR NAVIGATSIYA BLOKI (REKLAMA BANNERLARI TEPASIDA)
+           ========================================================================== */}
+        <div className="home-embedded-sidebar" style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: "10px",
+          marginTop: "4px",
+          marginBottom: "20px",
+          background: "#ffffff",
+          padding: "12px",
+          borderRadius: "16px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+          border: "1px solid #e2e8f0"
+        }}>
+          <button 
+            onClick={() => setActiveTab && setActiveTab("home")} 
+            style={{
+              display: "flex", flexDirection: "column", alignItems: "center", gap: "6px",
+              background: "linear-gradient(135deg, #2563eb, #1d4ed8)", color: "#fff",
+              border: "none", padding: "12px 8px", borderRadius: "12px", cursor: "pointer", fontWeight: "600"
+            }}
+          >
+            <FaHome size={18} />
+            <span style={{ fontSize: "11px" }}>{t.navHome}</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab && setActiveTab("code")} 
+            style={{
+              display: "flex", flexDirection: "column", alignItems: "center", gap: "6px",
+              background: "#f1f5f9", color: "#334155",
+              border: "none", padding: "12px 8px", borderRadius: "12px", cursor: "pointer", fontWeight: "600"
+            }}
+          >
+            <FaKey size={18} style={{ color: "#2563eb" }} />
+            <span style={{ fontSize: "11px" }}>{t.navCode}</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab && setActiveTab("katalog")} 
+            style={{
+              display: "flex", flexDirection: "column", alignItems: "center", gap: "6px",
+              background: "#f1f5f9", color: "#334155",
+              border: "none", padding: "12px 8px", borderRadius: "12px", cursor: "pointer", fontWeight: "600"
+            }}
+          >
+            <FaBookOpen size={18} style={{ color: "#059669" }} />
+            <span style={{ fontSize: "11px" }}>{t.navCatalog}</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab && setActiveTab("magazin")} 
+            style={{
+              display: "flex", flexDirection: "column", alignItems: "center", gap: "6px",
+              background: "#f1f5f9", color: "#334155",
+              border: "none", padding: "12px 8px", borderRadius: "12px", cursor: "pointer", fontWeight: "600"
+            }}
+          >
+            <FaGift size={18} style={{ color: "#d97706" }} />
+            <span style={{ fontSize: "11px" }}>{t.navShop}</span>
+          </button>
+        </div>
+
+        {/* FAOL AKSIYALAR (BANNERLAR) */}
         <h3 className="section-title">{t.activeCampaigns}</h3>
         <div className="promo-banners-container">
           {campaigns.length > 0 ? (

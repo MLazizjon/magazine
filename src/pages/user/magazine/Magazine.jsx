@@ -1,18 +1,19 @@
-import React, { useState, useEffect, useCallback } from "react"; // 💡 useCallback qo'shildi
+import React, { useState, useEffect, useCallback } from "react"; 
 import { supabase } from "../../../supabase/client";
 import { toast } from "react-toastify";
 import { FaCoins, FaGift, FaShoppingBag, FaClock, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FiArrowLeft } from "react-icons/fi"; // 💡 Orqaga ikonka import qilindi
 import "../magazine/magazine.css";
 
-export default function UserMagazin({ currentUser, lang = "uz" }) {
+export default function UserMagazin({ currentUser, lang = "uz", onBack }) { // 💡 onBack prop sifatida qabul qilindi
   const [prizes, setPrizes] = useState([]);
   const [myOrders, setMyOrders] = useState([]);
   const [userBonus, setUserBonus] = useState(0);
   const [loadingOrderId, setLoadingOrderId] = useState(null);
 
-  // 📝 Magazin qismi uchun tillar tarjimasi lug'ati
   const translations = {
     uz: {
+      backBtn: "Asosiy sahifaga qaytish", // 💡 Yangi tarjima qo'shildi
       storeTitle: "🎁 Sovg'alar do'koni",
       storeSub: "Yig'gan ballaringizni ajoyib sovg'alarga almashtiring!",
       yourBalance: "Sizning balansingiz:",
@@ -20,7 +21,7 @@ export default function UserMagazin({ currentUser, lang = "uz" }) {
       availablePrizes: "Mavjud sovg'alar",
       noPrizes: "Hozircha do'konda sovg'alar yo'q.",
       orderHistory: "Buyurtmalaringiz tarixi",
-      noOrders: "Sizda hali buyurtmalar mavjud emas.",
+      noOrders: "Sizda hali buyurtmalar magjud emas.",
       thName: "Sovg'a nomi",
       thPoints: "Sarflangan ball",
       thDate: "Sana",
@@ -42,6 +43,7 @@ export default function UserMagazin({ currentUser, lang = "uz" }) {
       confirmSuffix: '" sovg\'asini '
     },
     ru: {
+      backBtn: "Вернуться на главную", // 💡 Yangi tarjima qo'shildi
       storeTitle: "🎁 Магазин подарков",
       storeSub: "Обменивайте накопленные баллы на отличные подарки!",
       yourBalance: "Ваш баланс:",
@@ -74,11 +76,9 @@ export default function UserMagazin({ currentUser, lang = "uz" }) {
 
   const t = translations[lang] || translations["uz"];
 
-  // 💡 Ma'lumotlarni yuklash funksiyasi useCallback ichiga olindi
   const fetchData = useCallback(async () => {
     if (!currentUser?.id) return;
     try {
-      // Barcha sovg'alarni narxi bo'yicha tartiblab olish
       const { data: pData, error: pErr } = await supabase
         .from("prizes")
         .select("*")
@@ -86,7 +86,6 @@ export default function UserMagazin({ currentUser, lang = "uz" }) {
       if (pErr) throw pErr;
       setPrizes(pData || []);
 
-      // Foydalanuvchining joriy balansini (bonus) olish
       const { data: profData, error: profErr } = await supabase
         .from("profiles")
         .select("bonus")
@@ -95,7 +94,6 @@ export default function UserMagazin({ currentUser, lang = "uz" }) {
       if (profErr) throw profErr;
       setUserBonus(profData?.bonus || 0);
 
-      // Foydalanuvchining buyurtmalar tarixini yuklash
       const { data: oData, error: oErr } = await supabase
         .from("orders")
         .select("id, status, created_at, prizes(name, price)")
@@ -107,14 +105,12 @@ export default function UserMagazin({ currentUser, lang = "uz" }) {
     } catch (err) {
       toast.error(t.toastFetchError + err.message);
     }
-  }, [currentUser?.id, t.toastFetchError]); // Bog'liqliklar (dependencies)
+  }, [currentUser?.id, t.toastFetchError]);
 
-  // 💡 useEffect ichiga fetchData to'g'ri bog'liqlik sifatida qo'shildi
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  // Sotib olish funksiyasi
   const handleBuyPrize = async (prize) => {
     if (prize.stock <= 0) {
       return toast.error(t.toastStockOut);
@@ -164,13 +160,38 @@ export default function UserMagazin({ currentUser, lang = "uz" }) {
     } catch (err) {
       toast.error(t.toastError + err.message);
     } finally {
-      setLoadingOrderId(null);
+      loadingOrderId(null);
     }
   };
 
   return (
     <div className="user-magazin-container">
       
+      {/* ⬅️ ENGER TEPADAGI HOME PAGE'GA QAYTISH TUGMASI */}
+      {onBack && (
+        <div style={{ marginBottom: "15px", display: "flex", justifyContent: "flex-start" }}>
+          <button 
+            className="katalog-back-btn main-home-back-btn" 
+            onClick={onBack}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "10px 16px",
+              background: "#ffffff",
+              border: "1px solid #cbd5e1",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontWeight: "600",
+              color: "#334155",
+              transition: "all 0.2s ease"
+            }}
+          >
+            <FiArrowLeft size={18} /> {t.backBtn}
+          </button>
+        </div>
+      )}
+
       {/* 💳 Header va Balans qismi */}
       <div className="magazin-header-card">
         <div className="header-info">
@@ -198,7 +219,6 @@ export default function UserMagazin({ currentUser, lang = "uz" }) {
 
             return (
               <div className={`prize-card ${!isAffordable || !isAvailable ? "locked" : ""}`} key={prize.id}>
-                
                 <div className="prize-icon-wrapper" style={{ overflow: "hidden", height: "150px", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8fafc" }}>
                   {prize.image_url ? (
                     <img 

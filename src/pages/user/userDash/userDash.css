@@ -1,74 +1,116 @@
 /* ==========================================================================
-    🌐 GENERAL & LAYOUT STYLES (Asosiy Oyna va Maket)
+   📦 ASOSIY DASHBOARD KONTEYNERI (Layout & Variables)
    ========================================================================== */
-   .dash-container {
+   :root {
+    /* Siz taqdim etgan yorqin va aniq ko'k rang */
+    --primary-blue: #2b66f5; 
+    --primary-blue-dark: #1d4ed8;
+    --bg-light: #f8fafc;
+    --text-dark: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --sidebar-width: 280px;
+  }
+  
+  .dash-container {
     display: flex;
+    flex-direction: column; /* Mobil qurilmalarda ustma-ust tartib */
     min-height: 100vh;
-    background-color: #f8fafc;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  }
-  
-  .dash-main {
-    flex: 1;
-    margin-left: 280px; /* Kompyuterda sidebar kengligi uchun joy */
-    padding: 32px;
-    box-sizing: border-box;
-    transition: all 0.3s ease;
-  }
-  
-  .dash-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-  }
-  
-  /* 💻 Standart holatda (kompyuterda) mobil header butkul yashirin bo'ladi */
-  .mobile-top-header {
-    display: none;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
   
   /* ==========================================================================
-      🟦 MOBILE PROFILE DRAWER (To'liq Ekran - Yangi Ko'k Brend Rangda)
+     💻 DESKTOP LAYOUT (Sidebar va Asosiy Content Yonma-Yon)
+     ========================================================================== */
+  .dash-main {
+    flex: 1;
+    width: 100%;
+    box-sizing: border-box;
+    padding-bottom: 80px; /* Mobil bottom navigation uchun joy */
+  }
+  
+  .dash-content {
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+  
+  /* Desktop ekranda sidebar chap tomonda mustahkam turganda */
+  @media (min-width: 769px) {
+    .dash-container {
+      flex-direction: row; /* Sidebar chapda, kontent o'ngda joylashadi */
+    }
+  
+    .dash-main {
+      margin-left: var(--sidebar-width); /* Sidebar kengligicha chapdan joy qoldiradi */
+      padding-bottom: 24px; /* Desktopda bottom nav bo'lmaydi */
+      padding-top: 20px;
+    }
+    
+    .dash-content {
+      padding: 32px;
+    }
+  
+    /* Kompyuter ekranida sidebar chap tomonda qotib turishi uchun */
+    .dash-sidebar {
+      width: var(--sidebar-width);
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      z-index: 99;
+    }
+  }
+  
+  /* Mobil va planshetlarda sidebar pastga tushib ketmasligi uchun uni yashirish yoki yordamchi tartib berish */
+  @media (max-width: 768px) {
+    .dash-sidebar {
+      display: none; /* Agar mobilda drawer ishlatsangiz, asosiy sidebarni yashirgan ma'qul */
+    }
+  }
+  
+  /* ==========================================================================
+     📱 TO'LIQ EKRANLI MOBILE PROFILE DRAWER (Full Screen Mobil Menyu)
      ========================================================================== */
   .mobile-profile-drawer-backdrop {
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(3px);
-    z-index: 100000;
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff; /* To'liq oq fon (Full screen qoplash uchun) */
+    z-index: 1000;
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    justify-content: flex-start;
+    animation: fadeIn 0.25s ease-out;
   }
   
   .mobile-profile-drawer {
-    width: 100% !important;     /* To'liq ekranni qoplaydi */
-    max-width: 100% !important; /* Cheklovlar yo'q */
-    height: 100vh;
+    width: 100%; /* Mobil qurilma ekranini to'liq egallaydi */
+    height: 100%;
     background-color: #ffffff;
     display: flex;
     flex-direction: column;
-    box-sizing: border-box;
-    /* Mobil ilovalardek pastdan tepaga chiroyli siljib chiqish animatsiyasi */
-    animation: drawerSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: slideLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   
-  /* 🟦 Profil sarlavhasi (Saytingiz dizayniga mos modern to'q ko'k gradient) */
+  /* Drawer Sarlavhasi (Header qismi) */
   .profile-drawer-header {
-    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); /* Premium To'q Ko'k */
-    padding: 16px;
+    padding: 16px 20px;
+    background: var(--primary-blue); /* Saytingiz ko'k rang foni */
+    color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: #ffffff;
   }
   
   .profile-drawer-header h2 {
-    font-size: 20px;
-    font-weight: 500;
+    font-size: 18px;
+    font-weight: 600;
     margin: 0;
   }
   
@@ -76,42 +118,76 @@
     background: rgba(255, 255, 255, 0.15);
     border: none;
     color: #ffffff;
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: var(--transition-smooth);
   }
   
   .drawer-back-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.3);
   }
   
-  /* 📋 Menyular chiziqli ro'yxati */
-  .drawer-menu-list {
+  /* --- FOYDALANUVCHI PROFIL KARTASI --- */
+  .drawer-user-info-section {
+    padding: 32px 24px;
+    text-align: center;
+    border-bottom: 1px solid #f1f5f9;
+    background: linear-gradient(180deg, rgba(43, 102, 245, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
+  }
+  
+  .drawer-avatar-circle {
+    width: 80px;
+    height: 80px;
+    background-color: rgba(43, 102, 245, 0.1); /* Ko'k rangli shaffof aylana */
+    color: var(--primary-blue); /* Ko'k rangli harf */
+    border-radius: 50%;
     display: flex;
-    flex-direction: column;
-    padding-top: 8px;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: bold;
+    margin: 0 auto 16px auto;
+    border: 2px solid rgba(43, 102, 245, 0.2);
+  }
+  
+  .drawer-user-name {
+    margin: 0 0 6px 0;
+    font-size: 20px;
+    color: var(--text-dark);
+    font-weight: 700;
+  }
+  
+  .drawer-user-phone {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  
+  /* --- DRAWER ICHIDAGI MENYULAR RO'YXATI --- */
+  .drawer-menu-list {
+    flex: 1;
+    padding: 16px 0;
+    overflow-y: auto;
   }
   
   .drawer-item {
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 18px 24px;
     background: none;
     border: none;
-    padding: 20px 24px; /* Mobil bosishga qulay masofa */
-    width: 100%;
     cursor: pointer;
-    border-bottom: 1px solid #ededed; /* Toza ingichka chiziq */
-    box-sizing: border-box;
-    text-align: left;
+    border-bottom: 1px solid #f8fafc;
+    transition: var(--transition-smooth);
   }
   
-  .drawer-item:hover {
+  .drawer-item:hover, .drawer-item:active {
     background-color: #f8fafc;
   }
   
@@ -122,112 +198,126 @@
   }
   
   .d-icon-box {
-    font-size: 20px;
-    color: #3b82f6; /* Belgilarga brendingizning yorqin ko'k rangi berildi */
+    font-size: 22px;
+    color: var(--primary-blue); /* Barcha ikonkalarga ko'k rang berildi */
     display: flex;
     align-items: center;
     justify-content: center;
   }
   
-  .d-item-left span {
+  .drawer-item span {
     font-size: 16px;
-    font-weight: 400;
-    color: #2d3748;
+    font-weight: 500;
+    color: var(--text-dark);
   }
   
   .d-item-right {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
   }
   
   .d-lang-val {
-    font-size: 15px;
-    font-weight: 500;
-    color: #10b981; /* Yashil rangli til yozuvi */
+    font-size: 14px;
+    color: var(--primary-blue);
+    font-weight: 700;
   }
   
   .d-chevron {
-    color: #a0aec0;
+    color: #cbd5e1;
     font-size: 14px;
   }
   
-  /* Chiqish (Выйти) tugmasi uchun effekt */
-  .d-logout-style:hover span,
-  .d-logout-style:hover .d-icon-box {
+  /* Drawer - Chiqish tugmasi maxsus stili */
+  .drawer-item.d-logout-style {
+    border-bottom: none;
+    margin-top: 40px;
+  }
+  
+  .drawer-item.d-logout-style span {
+    color: #ef4444 !important;
+  }
+  
+  .drawer-item.d-logout-style .d-icon-box {
     color: #ef4444;
   }
   
   /* ==========================================================================
-      🚪 CHIQISHNI TASDIQLASH MODALI (LOGOUT CONFIRM MODAL)
+     🚪 TIZIMDAN CHIQISH MODAL OYNASI (Logout Confirm Modal)
      ========================================================================== */
   .logout-modal-backdrop {
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(4px);
-    z-index: 200000;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(5px);
+    z-index: 1100;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 16px;
+    padding: 20px;
+    animation: fadeIn 0.2s ease-out;
   }
   
   .logout-modal-box {
     background-color: #ffffff;
     border-radius: 20px;
-    padding: 24px;
-    max-width: 400px;
+    padding: 32px 24px;
     width: 100%;
+    max-width: 400px;
     text-align: center;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    animation: modalScaleUp 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   
   .logout-modal-icon {
-    width: 56px;
-    height: 56px;
+    width: 64px;
+    height: 64px;
     background-color: #fee2e2;
     color: #ef4444;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 16px auto;
+    margin: 0 auto 20px auto;
   }
   
   .logout-modal-box h3 {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
-    color: #1e293b;
-    margin: 0 0 8px 0;
+    color: var(--text-dark);
+    margin: 0 0 10px 0;
   }
   
   .logout-modal-box p {
     font-size: 14px;
-    color: #64748b;
-    margin: 0 0 24px 0;
+    color: var(--text-muted);
     line-height: 1.5;
+    margin: 0 0 24px 0;
   }
   
+  /* Modal tugmalari paneli */
   .logout-modal-actions {
     display: flex;
     gap: 12px;
   }
   
-  .modal-confirm-btn {
+  .logout-modal-actions button {
     flex: 1;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+  }
+  
+  .modal-confirm-btn {
     background-color: #ef4444;
     color: #ffffff;
-    border: none;
-    padding: 12px;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
   }
   
   .modal-confirm-btn:hover {
@@ -235,23 +325,29 @@
   }
   
   .modal-cancel-btn {
-    flex: 1;
     background-color: #f1f5f9;
-    color: #475569;
-    border: none;
-    padding: 12px;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
+    color: var(--text-dark);
+  }
+  
+  .modal-cancel-btn:hover {
+    background-color: #e2e8f0;
   }
   
   /* ==========================================================================
-      🎬 ANIMATSIYALAR
+     🌀 EFFEKTLAR VA ANIMATSIYALAR (Animations)
      ========================================================================== */
-  @keyframes drawerSlideUp {
+  @keyframes fadeIn {
     from {
-      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideLeft {
+    from {
+      transform: translateY(24px); /* Mobil ilovalar kabi pastdan yuqoriga chiroyli ko'tarilish */
       opacity: 0;
     }
     to {
@@ -260,81 +356,13 @@
     }
   }
   
-  @keyframes modalScaleUp {
-    from { transform: scale(0.95); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-  
-  /* ==========================================================================
-      📱 MOBIL SMARTFONLAR MOSLASHUVCHANLIGI (RESPONSIVE)
-     ========================================================================== */
-  @media (max-width: 800px) {
-    .dash-container {
-      flex-direction: column;
+  @keyframes scaleUp {
+    from {
+      transform: scale(0.9);
+      opacity: 0;
     }
-  
-    .dash-main {
-      margin-left: 0 !important;
-      padding: 16px 16px 90px 16px !important;
-    }
-  
-    /* 📱 MOBIL HEADER (Tuzatilgan va ranglari ko'kka moslangan qism) */
-    .mobile-top-header {
-      display: flex !important;
-      align-items: center;
-      justify-content: space-between;
-      background-color: #ffffff;
-      padding: 14px 20px;
-      border-bottom: 1px solid #e2e8f0;
-      position: sticky;
-      top: 0;
-      z-index: 999;
-      box-sizing: border-box;
-      width: 100%;
-    }
-  
-    .mobile-profile-btn, .mobile-notif-btn {
-      background: none;
-      border: none;
-      color: #475569;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2px;
-    }
-  
-    /* 🔵 Tepadagi chap avatar tugmasi endi mukammal ko'k rangda */
-    .mobile-profile-btn {
-      color: #2563eb; 
-    }
-  
-    .mobile-header-center {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      cursor: pointer;
-    }
-  
-    .mobile-header-label {
-      font-size: 11px;
-      color: #94a3b8;
-      text-transform: uppercase;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-  
-    .mobile-header-value {
-      font-size: 17px;
-      font-weight: 700;
-      color: #1e293b;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-  
-    .arrow-detail {
-      color: #2563eb; /* O'ngga ko'rsatkich belgisi ham ko'k rangda */
-      font-size: 18px;
+    to {
+      transform: scale(1);
+      opacity: 1;
     }
   }

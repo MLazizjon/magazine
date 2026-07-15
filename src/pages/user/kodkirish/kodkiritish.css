@@ -1,5 +1,5 @@
 /* ==========================================================================
-   ASOSIY KONTEYNER VA UMUMIY SOZLAMALAR
+   1. ASOSIY KONTEYNER VA UMUMIY SOZLAMALAR
    ========================================================================== */
    .code-tab-container {
     padding: 12px;
@@ -12,7 +12,44 @@
     overflow-y: visible; /* Kontent pastga bemalol cho'zilishi uchun */
   }
   
-  /* HEADER DIZAYNI */
+  /* ==========================================================================
+     2. ORQAGA QAYTISH TUGMASI (YANGI QO'SHILGAN)
+     ========================================================================== */
+  .code-top-nav {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 12px;
+  }
+  
+  .code-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px; /* Ikonka va matn orasidagi masofa */
+    background: #f1f5f9; /* Och kulrang fon */
+    color: #334155; /* To'q kulrang matn */
+    border: 1px solid #cbd5e1;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: clamp(12px, 3.5vw, 14px);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .code-back-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+    transform: translateX(-2px); /* Orqaga qaytish ishorasi sifatida chapga biroz siljiydi */
+  }
+  
+  .code-back-btn svg {
+    font-size: 14px;
+  }
+  
+  /* ==========================================================================
+     3. HEADER DIZAYNI
+     ========================================================================== */
   .code-card-header {
     display: flex;
     align-items: center;
@@ -52,7 +89,9 @@
     color: #64748b;
   }
   
-  /* GRID LAYOUT */
+  /* ==========================================================================
+     4. GRID LAYOUT
+     ========================================================================== */
   .code-grid-layout {
     display: grid;
     grid-template-columns: 1fr 1.2fr;
@@ -71,7 +110,9 @@
     box-sizing: border-box;
   }
   
-  /* MODERN INPUT */
+  /* ==========================================================================
+     5. MODERN INPUT
+     ========================================================================== */
   .code-modern-input {
     width: 100%;
     padding: 14px 12px; 
@@ -100,7 +141,9 @@
     box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
   }
   
-  /* RASM DROPZONE (YUKLASH MAYDONI) */
+  /* ==========================================================================
+     6. RASM DROPZONE (YUKLASH MAYDONI)
+     ========================================================================== */
   .upload-dropzone {
     border: 2px dashed #cbd5e1;
     background: #f8fafc;
@@ -150,7 +193,9 @@
     cursor: pointer;
   }
   
-  /* RASM PREVIEW */
+  /* ==========================================================================
+     7. RASM PREVIEW
+     ========================================================================== */
   .image-preview-box {
     margin-top: 16px;
     border: 1px solid #e2e8f0;
@@ -183,7 +228,9 @@
     transition: 0.2s;
   }
   
-  /* SUBMIT BUTTON */
+  /* ==========================================================================
+     8. SUBMIT BUTTON
+     ========================================================================== */
   .modern-submit-btn {
     width: 100%;
     background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
@@ -209,7 +256,9 @@
     box-shadow: none;
   }
   
-  /* O'NG TOMON JADVAL */
+  /* ==========================================================================
+     9. O'NG TOMON JADVAL
+     ========================================================================== */
   .history-block-title {
     margin: 0 0 16px 0;
     font-size: clamp(15px, 4.5vw, 18px);
@@ -248,7 +297,9 @@
   .text-muted { color: #64748b; font-size: 12px; }
   .time-lbl { font-size: 11px; color: #94a3b8; }
   
-  /* STATUS BADGES */
+  /* ==========================================================================
+     10. STATUS BADGES
+     ========================================================================== */
   .badge {
     display: inline-flex;
     align-items: center;
@@ -263,12 +314,11 @@
   .badge-warning { background: #fef9c3; color: #a16207; }
   .badge-danger { background: #fee2e2; color: #b91c1c; }
   
-  
   /* ==========================================================================
-     RESPONSIVE MOD (MEDIA QUERIES)
+     11. RESPONSIVE MOD (MEDIA QUERIES)
      ========================================================================== */
   
-  /* 1. Planshetlar va o'rta ekranlar uchun */
+  /* Planshetlar va o'rta ekranlar uchun */
   @media (max-width: 900px) {
     .code-grid-layout {
       grid-template-columns: 1fr;
@@ -276,12 +326,21 @@
     }
   }
   
-  /* 2. Smartfonlar (Mobil format) */
+  /* Smartfonlar (Mobil format) */
   @media (max-width: 480px) {
     .code-tab-container {
       padding: 8px;
-      /* BU YERDA: Mobil menyu tagidagi eng oxirgi elementlar (ZW8...) ko'rinishi uchun joy ochildi */
+      /* Mobil menyu tagidagi eng oxirgi elementlar ko'rinishi uchun joy ochildi */
       padding-bottom: 130px !important; 
+    }
+  
+    .code-top-nav {
+      margin-bottom: 8px; /* Orqaga tugmasini mobil ekranda moslashuvi */
+    }
+  
+    .code-back-btn {
+      padding: 8px 12px;
+      border-radius: 10px;
     }
   
     .code-card-header {
@@ -312,7 +371,7 @@
     }
   }
   
-  /* 3. O'ta kichik mobil ekranlar (300px gacha) */
+  /* O'ta kichik mobil ekranlar (300px gacha) */
   @media (max-width: 360px) {
     .code-modern-input {
       letter-spacing: 0px;
